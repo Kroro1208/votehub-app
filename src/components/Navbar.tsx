@@ -3,10 +3,13 @@ import { Link } from "react-router";
 import { CgMenuGridO } from "react-icons/cg";
 import { RiCloseLargeFill } from "react-icons/ri";
 import { useAuth } from "../hooks/useAuth";
+import { VscSignOut } from "react-icons/vsc";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { signInWithGoogle, signOut, user } = useAuth();
+
+  const displayName = user?.user_metadata.user_name || user?.email;
 
   return (
     <nav className="fixed top-0 w-full z-40 bg-[rgba(10,10,10,0.8)] backdrop-blur-lg border-b border-white/10 shadow-lg">
@@ -46,13 +49,29 @@ export default function Navbar() {
 
           {/* 認証セクション */}
           <div>
-            <button
-              type="button"
-              onClick={signInWithGoogle}
-              className="cursor-pointer"
-            >
-              サインアップ
-            </button>
+            {user ? (
+              <div className="flex gap-3 items-center justify-center">
+                <span className="text-blue-300">{displayName}</span>
+                <div className="">
+                  <button
+                    type="button"
+                    onClick={signOut}
+                    className="cursor-pointer flex gap-3 items-center justify-center"
+                  >
+                    <span>SignOut</span>
+                    <VscSignOut size={30} />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={signInWithGoogle}
+                className="cursor-pointer"
+              >
+                SignUp
+              </button>
+            )}
           </div>
 
           {/* モバイルメニューボタン */}
