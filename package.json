@@ -15,6 +15,8 @@
     "@tanstack/react-query": "^5.74.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-icon": "^1.0.0",
+    "react-icons": "^5.5.0",
     "react-router": "^7.5.1",
     "tailwindcss": "^4.1.4"
   },
