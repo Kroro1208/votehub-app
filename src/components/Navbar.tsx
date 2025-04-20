@@ -2,9 +2,12 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { CgMenuGridO } from "react-icons/cg";
 import { RiCloseLargeFill } from "react-icons/ri";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { signInWithGoogle, signOut, user } = useAuth();
+
   return (
     <nav className="fixed top-0 w-full z-40 bg-[rgba(10,10,10,0.8)] backdrop-blur-lg border-b border-white/10 shadow-lg">
       <div className="max-w-5xl mx-auto px-4">
@@ -43,7 +46,13 @@ export default function Navbar() {
 
           {/* 認証セクション */}
           <div>
-            <button type="button">サインアップ</button>
+            <button
+              type="button"
+              onClick={signInWithGoogle}
+              className="cursor-pointer"
+            >
+              サインアップ
+            </button>
           </div>
 
           {/* モバイルメニューボタン */}

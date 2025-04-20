@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App.tsx";
 import { BrowserRouter as Router } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "./context/AuthProvider";
 
 const client = new QueryClient();
 
@@ -12,9 +13,11 @@ if (rootElement) {
   createRoot(rootElement).render(
     <StrictMode>
       <QueryClientProvider client={client}>
-        <Router>
-          <App />
-        </Router>
+        <AuthProvider>
+          <Router>
+            <App />
+          </Router>
+        </AuthProvider>
       </QueryClientProvider>
     </StrictMode>
   );
