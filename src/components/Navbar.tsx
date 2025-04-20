@@ -14,7 +14,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex items-center space-x-8 sm:p-8">
+          <div className="hidden md:flex items-center space-x-8">
             <Link
               to="/"
               className="text-gray-300 hover:text-white transition-colors"
@@ -49,7 +49,7 @@ export default function Navbar() {
               className="text-gray-300 focus:outline-none p-2"
               aria-label="Toggle menu"
             >
-              <div className="relative transform transition-all duration-300 ease-in-out sm:p-8">
+              <div className="relative transform transition-all duration-300 ease-in-out">
                 {menuOpen ? (
                   <RiCloseLargeFill className="text-2xl transition-transform duration-300 ease-in-out" />
                 ) : (
