@@ -75,7 +75,7 @@ export default function Navbar() {
                   <FaRegUser />
                 )}
                 <span className="text-blue-300">{displayName}</span>
-                <div className="">
+                <div>
                   <button
                     type="button"
                     onClick={signOut}
@@ -90,9 +90,9 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={signInWithGoogle}
-                className="cursor-pointer"
+                className="cursor-pointer bg-blue-500 px-3 py-1 rounded"
               >
-                SignUp
+                <span className="text-gray-300">SignUp</span>
               </button>
             )}
           </div>
