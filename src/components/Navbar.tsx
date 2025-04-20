@@ -10,7 +10,7 @@ export default function Navbar() {
       <div className="max-w-5xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="font-mono text-xl font-bold text-white">
-            forum<span className="text-purple-500">.app</span>
+            Vote Post<span className="text-green-500">.app</span>
           </Link>
 
           {/* Desktop Links */}
@@ -39,6 +39,11 @@ export default function Navbar() {
             >
               Create Community
             </Link>
+          </div>
+
+          {/* 認証セクション */}
+          <div>
+            <button type="button">サインアップ</button>
           </div>
 
           {/* モバイルメニューボタン */}
