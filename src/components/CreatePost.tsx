@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { type ChangeEvent, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
 import { supabase } from "../supabase-client";
 
 interface PostInput {
@@ -36,6 +36,16 @@ const CreatePost = () => {
   const [content, setContent] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedFile) {
+      setImagePreview(null);
+      return;
+    }
+    const objUrl = URL.createObjectURL(selectedFile);
+    setImagePreview(objUrl);
+  }, [selectedFile]);
 
   const { mutate } = useMutation({
     mutationFn: (data: { post: PostInput; imageFile: File }) => {
@@ -65,6 +75,11 @@ const CreatePost = () => {
     if (e.target.files?.[0]) {
       setSelectedFile(e.target.files[0]);
     }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedFile(null);
+    setImagePreview(null);
   };
 
   return (
@@ -117,6 +132,41 @@ const CreatePost = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
             placeholder="画像をアップロードしてください"
           />
+
+          {imagePreview && (
+            <div className="mt-4 relative">
+              <div className="relative group">
+                <img
+                  src={imagePreview}
+                  alt="プレビュー"
+                  className="w-full h-auto rounded-md border border-gray-600 object-contain max-h-64"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <title>削除</title>
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-sm text-gray-400 mt-1">
+                {selectedFile?.name} (
+                {selectedFile ? Math.round(selectedFile?.size / 1024) : ""}KB)
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="pt-2">
