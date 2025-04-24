@@ -1,14 +1,18 @@
 import { useMutation } from "@tanstack/react-query";
 import { type ChangeEvent, useEffect, useState } from "react";
 import { supabase } from "../supabase-client";
+import { useNavigate } from "react-router";
+import { useAuth } from "../hooks/useAuth";
 
 interface PostInput {
   title: string;
   content: string;
+  avatar_url: string | null;
 }
 
 const createPost = async (post: PostInput, imageFile: File) => {
-  const filePath = `${post.title}-${Date.now()}-${imageFile.name}`;
+  const fileExt = imageFile.name.split(".").pop() || "";
+  const filePath = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
   const { error: uploadError } = await supabase.storage
     .from("post-images")
     .upload(filePath, imageFile);
@@ -37,6 +41,8 @@ const CreatePost = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!selectedFile) {
@@ -59,15 +65,24 @@ const CreatePost = () => {
       setContent("");
       setSelectedFile(null);
       setIsSubmitting(false);
+      navigate("/");
     },
-    onError: () => {
+    onError: (error) => {
       setIsSubmitting(false);
+      console.error(error.message);
     },
   });
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFile) return;
-    mutate({ post: { title, content }, imageFile: selectedFile });
+    mutate({
+      post: {
+        title,
+        content,
+        avatar_url: user?.user_metadata.atatar_url || null,
+      },
+      imageFile: selectedFile,
+    });
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
