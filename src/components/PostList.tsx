@@ -30,8 +30,6 @@ const PostList = () => {
   if (isPending) return <div>Loading...</div>;
   if (error) return <div>{error.message}</div>;
 
-  console.log("取得データ", data);
-
   return (
     <div className="flex flex-wrap gap-6 justify-center">
       {data.map((item) => (
