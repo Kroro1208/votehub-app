@@ -16,7 +16,7 @@ const PostItem = ({ post }: PostItemType) => {
             {post?.avatar_url ? (
               <img
                 src={post.avatar_url}
-                alt="User Avatar"
+                alt="UserAvatar"
                 className="w-[35px] h-[35px] rounded-full object-cover"
               />
             ) : (

@@ -11,6 +11,7 @@ interface PostInput {
 }
 
 const createPost = async (post: PostInput, imageFile: File) => {
+  // ファイルパスに日本語、カタカナ入れたらエラーになるので注意
   const fileExt = imageFile.name.split(".").pop() || "";
   const filePath = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
   const { error: uploadError } = await supabase.storage
@@ -27,7 +28,8 @@ const createPost = async (post: PostInput, imageFile: File) => {
 
   const { data, error } = await supabase
     .from("posts")
-    .insert({ ...post, image_url: publicUrlData.publicUrl });
+    .insert({ ...post, image_url: publicUrlData.publicUrl })
+    .select();
 
   if (error) {
     throw new Error(error.message);
@@ -60,7 +62,8 @@ const CreatePost = () => {
     onMutate: () => {
       setIsSubmitting(true);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("結果", data);
       setTitle("");
       setContent("");
       setSelectedFile(null);
@@ -72,6 +75,7 @@ const CreatePost = () => {
       console.error(error.message);
     },
   });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFile) return;
@@ -79,7 +83,7 @@ const CreatePost = () => {
       post: {
         title,
         content,
-        avatar_url: user?.user_metadata.atatar_url || null,
+        avatar_url: user?.user_metadata.avatar_url || null,
       },
       imageFile: selectedFile,
     });
