@@ -1,8 +1,9 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { TbArrowBigUpLine } from "react-icons/tb";
 import { TbArrowBigDownLine } from "react-icons/tb";
 import { supabase } from "../supabase-client";
 import { useAuth } from "../hooks/useAuth";
+import { useState } from "react";
 
 interface PostProps {
   postId: number;
@@ -14,6 +15,12 @@ interface Vote {
   vote: number;
 }
 
+interface VoteResult {
+  action: "deleted" | "updated" | "inserted";
+  data: Vote | Vote[] | null;
+}
+
+// vote関数を最適化: 処理結果を返す
 const vote = async (voteValue: number, postId: number, userId: string) => {
   const { data: existingVote } = await supabase
     .from("votes")
@@ -22,30 +29,41 @@ const vote = async (voteValue: number, postId: number, userId: string) => {
     .eq("user_id", userId)
     .maybeSingle();
 
+  // 処理結果を保持する変数
+  let result: VoteResult;
+
   // すでに投票していた場合
   if (existingVote) {
     // 同じ投票(upかdownか)については取り消し
     if (existingVote.vote === voteValue) {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("votes")
         .delete()
-        .eq("id", existingVote.id);
+        .eq("id", existingVote.id)
+        .select();
 
       if (error) throw new Error(error.message);
+      result = { action: "deleted", data };
     } else {
       // 異なる投票(upかdownか)については更新
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("votes")
         .update({ vote: voteValue })
-        .eq("id", existingVote.id);
+        .eq("id", existingVote.id)
+        .select();
       if (error) throw new Error(error.message);
+      result = { action: "updated", data };
     }
   } else {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("votes")
-      .insert({ post_id: postId, user_id: userId, vote: voteValue });
+      .insert({ post_id: postId, user_id: userId, vote: voteValue })
+      .select();
     if (error) throw new Error(error.message);
+    result = { action: "inserted", data };
   }
+
+  return result;
 };
 
 const getVotes = async (postId: number): Promise<Vote[]> => {
@@ -59,6 +77,8 @@ const getVotes = async (postId: number): Promise<Vote[]> => {
 
 const UpVoteButton = ({ postId }: PostProps) => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [isVoting, setIsVoting] = useState(false);
 
   const {
     data: votes,
@@ -67,28 +87,93 @@ const UpVoteButton = ({ postId }: PostProps) => {
   } = useQuery<Vote[], Error>({
     queryKey: ["votes", postId],
     queryFn: () => getVotes(postId),
-    refetchInterval: 5000,
+    // 不要な自動リフェッチを無効化（必要に応じて調整）
+    refetchInterval: false,
+    staleTime: 1000 * 60 * 5, // 5分間はデータを新鮮として扱う
   });
 
   const { mutate } = useMutation({
-    mutationFn: (voteValue: number) => {
+    mutationFn: async (voteValue: number) => {
       if (!user) throw new Error("ユーザーが存在しません");
-      return vote(voteValue, postId, user.id);
+      setIsVoting(true);
+      const result = await vote(voteValue, postId, user.id);
+      setIsVoting(false);
+      return result;
+    },
+    // 楽観的更新（APIを待たずにUIを先に更新）
+    onMutate: async (voteValue) => {
+      if (!user) return;
+
+      // 現在のクエリデータをキャンセル
+      await queryClient.cancelQueries({ queryKey: ["votes", postId] });
+
+      // 以前のデータをスナップショットに保持
+      const previousVotes = queryClient.getQueryData<Vote[]>(["votes", postId]);
+
+      // 楽観的に更新
+      if (previousVotes) {
+        const userVoteIndex = previousVotes.findIndex(
+          (v) => v.user_id === user.id
+        );
+        const newVotes = [...previousVotes];
+
+        if (userVoteIndex >= 0) {
+          // 既存の投票がある場合
+          const currentVote = newVotes[userVoteIndex].vote;
+          if (currentVote === voteValue) {
+            // 同じ値なら削除
+            newVotes.splice(userVoteIndex, 1);
+          } else {
+            // 異なる値なら更新
+            newVotes[userVoteIndex] = {
+              ...newVotes[userVoteIndex],
+              vote: voteValue,
+            };
+          }
+        } else {
+          // 新規投票
+          newVotes.push({
+            id: Date.now(), // 一時的なID
+            post_id: postId,
+            user_id: user.id,
+            vote: voteValue,
+          });
+        }
+
+        queryClient.setQueryData(["votes", postId], newVotes);
+      }
+
+      return { previousVotes };
+    },
+    onError: (err, _, context) => {
+      // エラー時に元のデータに戻す
+      if (context?.previousVotes) {
+        queryClient.setQueryData(["votes", postId], context.previousVotes);
+      }
+      console.error(err);
+    },
+    onSettled: () => {
+      // 処理完了後にデータを再検証（必要な場合のみ）
+      queryClient.invalidateQueries({ queryKey: ["votes", postId] });
     },
   });
 
   const upVotes = votes?.filter((item) => item.vote === 1).length || 0;
   const downVotes = votes?.filter((item) => item.vote === -1).length || 0;
+  const userVote = votes?.find((item) => item.user_id === user?.id)?.vote;
 
-  if (isPending) return <div>投票中</div>;
+  if (isPending) return <div>読み込み中...</div>;
   if (error) return <div>{error.message}</div>;
 
   return (
-    <div>
+    <div className="flex items-center space-x-4 my-4">
       <button
         type="button"
         onClick={() => mutate(1)}
-        className="cursor-pointer"
+        disabled={isVoting}
+        className={`cursor-pointer px-3 py-1 rounded transition-colors duration-150
+            ${isVoting ? "opacity-50" : ""}
+            ${userVote === 1 ? "bg-green-500 text-white" : "bg-gray-200 text-black"}`}
       >
         <TbArrowBigUpLine size={30} />
         {upVotes}
@@ -96,7 +181,10 @@ const UpVoteButton = ({ postId }: PostProps) => {
       <button
         type="button"
         onClick={() => mutate(-1)}
-        className="cursor-pointer"
+        disabled={isVoting}
+        className={`cursor-pointer px-3 py-1 rounded transition-colors duration-150
+            ${isVoting ? "opacity-50" : ""}
+            ${userVote === -1 ? "bg-red-500 text-white" : "bg-gray-200 text-black"}`}
       >
         <TbArrowBigDownLine size={30} />
         {downVotes}
