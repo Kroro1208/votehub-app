@@ -109,39 +109,38 @@ const UpVoteButton = ({ postId }: PostProps) => {
 
       // 以前のデータをスナップショットに保持
       const previousVotes = queryClient.getQueryData<Vote[]>(["votes", postId]);
+      if (!previousVotes) return { previousVotes: undefined };
+
+      // 新しい投票データを作成
+      const newVotes = [...previousVotes];
+      const userVoteIndex = previousVotes.findIndex(
+        (v) => v.user_id === user.id
+      );
+
+      // ケース1: 既存の投票がない場合、新規追加
+      if (userVoteIndex === -1) {
+        newVotes.push({
+          id: Date.now(), // 一時的なID
+          post_id: postId,
+          user_id: user.id,
+          vote: voteValue,
+        });
+      }
+      // ケース2: 同じ種類の投票がある場合、削除
+      else if (newVotes[userVoteIndex].vote === voteValue) {
+        newVotes.splice(userVoteIndex, 1);
+      }
+      // ケース3: 異なる種類の投票がある場合、更新
+      else {
+        newVotes[userVoteIndex] = {
+          ...newVotes[userVoteIndex],
+          vote: voteValue,
+        };
+      }
 
       // 楽観的に更新
-      if (previousVotes) {
-        const userVoteIndex = previousVotes.findIndex(
-          (v) => v.user_id === user.id
-        );
-        const newVotes = [...previousVotes];
-
-        if (userVoteIndex >= 0) {
-          // 既存の投票がある場合
-          const currentVote = newVotes[userVoteIndex].vote;
-          if (currentVote === voteValue) {
-            // 同じ値なら削除
-            newVotes.splice(userVoteIndex, 1);
-          } else {
-            // 異なる値なら更新
-            newVotes[userVoteIndex] = {
-              ...newVotes[userVoteIndex],
-              vote: voteValue,
-            };
-          }
-        } else {
-          // 新規投票
-          newVotes.push({
-            id: Date.now(), // 一時的なID
-            post_id: postId,
-            user_id: user.id,
-            vote: voteValue,
-          });
-        }
-
-        queryClient.setQueryData(["votes", postId], newVotes);
-      }
+      // ["votes", postId]というキーに対応するキャッシュにnewVotesという値がセットして内部で更新
+      queryClient.setQueryData(["votes", postId], newVotes);
 
       return { previousVotes };
     },
