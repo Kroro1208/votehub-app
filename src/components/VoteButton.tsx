@@ -20,52 +20,7 @@ interface VoteResult {
   data: Vote | Vote[] | null;
 }
 
-// vote関数を最適化: 処理結果を返す
-const vote = async (voteValue: number, postId: number, userId: string) => {
-  const { data: existingVote } = await supabase
-    .from("votes")
-    .select("*")
-    .eq("post_id", postId)
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  // 処理結果を保持する変数
-  let result: VoteResult;
-
-  // すでに投票していた場合
-  if (existingVote) {
-    // 同じ投票(upかdownか)については取り消し
-    if (existingVote.vote === voteValue) {
-      const { data, error } = await supabase
-        .from("votes")
-        .delete()
-        .eq("id", existingVote.id)
-        .select();
-
-      if (error) throw new Error(error.message);
-      result = { action: "deleted", data };
-    } else {
-      // 異なる投票(upかdownか)については更新
-      const { data, error } = await supabase
-        .from("votes")
-        .update({ vote: voteValue })
-        .eq("id", existingVote.id)
-        .select();
-      if (error) throw new Error(error.message);
-      result = { action: "updated", data };
-    }
-  } else {
-    const { data, error } = await supabase
-      .from("votes")
-      .insert({ post_id: postId, user_id: userId, vote: voteValue })
-      .select();
-    if (error) throw new Error(error.message);
-    result = { action: "inserted", data };
-  }
-
-  return result;
-};
-
+// useQuery用
 const getVotes = async (postId: number): Promise<Vote[]> => {
   const { data, error } = await supabase
     .from("votes")
@@ -75,7 +30,7 @@ const getVotes = async (postId: number): Promise<Vote[]> => {
   return data as Vote[];
 };
 
-const UpVoteButton = ({ postId }: PostProps) => {
+const VoteButton = ({ postId }: PostProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isVoting, setIsVoting] = useState(false);
@@ -91,6 +46,52 @@ const UpVoteButton = ({ postId }: PostProps) => {
     refetchInterval: false,
     staleTime: 1000 * 60 * 5, // 5分間はデータを新鮮として扱う
   });
+
+  // vote関数を最適化: 処理結果を返す(useMutation用)
+  const vote = async (voteValue: number, postId: number, userId: string) => {
+    const { data: existingVote } = await supabase
+      .from("votes")
+      .select("*")
+      .eq("post_id", postId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    // 処理結果を保持する変数
+    let result: VoteResult;
+
+    // すでに投票していた場合
+    if (existingVote) {
+      // 同じ投票(upかdownか)については取り消し
+      if (existingVote.vote === voteValue) {
+        const { data, error } = await supabase
+          .from("votes")
+          .delete()
+          .eq("id", existingVote.id)
+          .select();
+
+        if (error) throw new Error(error.message);
+        result = { action: "deleted", data };
+      } else {
+        // 異なる投票(upかdownか)については更新
+        const { data, error } = await supabase
+          .from("votes")
+          .update({ vote: voteValue })
+          .eq("id", existingVote.id)
+          .select();
+        if (error) throw new Error(error.message);
+        result = { action: "updated", data };
+      }
+    } else {
+      const { data, error } = await supabase
+        .from("votes")
+        .insert({ post_id: postId, user_id: userId, vote: voteValue })
+        .select();
+      if (error) throw new Error(error.message);
+      result = { action: "inserted", data };
+    }
+
+    return result;
+  };
 
   const { mutate } = useMutation({
     mutationFn: async (voteValue: number) => {
@@ -192,4 +193,4 @@ const UpVoteButton = ({ postId }: PostProps) => {
   );
 };
 
-export default UpVoteButton;
+export default VoteButton;

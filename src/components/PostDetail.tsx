@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../supabase-client";
 import type { PostType } from "./PostList";
-import UpVoteButton from "./UpVoteButton";
+import VoteButton from "./VoteButton";
+import CommentSection from "./CommentSection";
 
 interface Props {
   postId: number;
@@ -40,7 +41,8 @@ const PostDetail = ({ postId }: Props) => {
         {new Date(data?.created_at).toLocaleDateString()}
       </p>
 
-      <UpVoteButton postId={postId} />
+      <VoteButton postId={postId} />
+      <CommentSection postId={postId} />
     </div>
   );
 };
