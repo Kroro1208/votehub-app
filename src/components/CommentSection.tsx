@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../supabase-client";
+import CommentItem from "./CommentItem";
+import { MessageSquareText, Send, AlertCircle, Loader2 } from "lucide-react";
 
 interface PostProps {
   postId: number;
@@ -10,6 +12,16 @@ interface PostProps {
 interface NewComment {
   content: string;
   parent_comment_id: number | null;
+}
+
+export interface Comment {
+  id: number;
+  post_id: number;
+  parent_comment_id: number | null;
+  content: string;
+  user_id: string;
+  created_at: string;
+  author: string;
 }
 
 const createComment = async (
@@ -31,10 +43,33 @@ const createComment = async (
   if (error) throw new Error(error.message);
 };
 
+// useQuery用
+const getComment = async (postId: number): Promise<Comment[]> => {
+  const { data, error } = await supabase
+    .from("comments")
+    .select("*")
+    .eq("post_id", postId)
+    .order("created_at", { ascending: true });
+
+  if (error) throw new Error(error.message);
+  return data as Comment[];
+};
+
 const CommentSection = ({ postId }: PostProps) => {
   const [newCommentText, setNewCommentText] = useState<string>("");
   const { user } = useAuth();
   const [isFocused, setIsFocused] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const {
+    data: comments,
+    error,
+    isPending: commentIsPending,
+  } = useQuery<Comment[], Error>({
+    queryKey: ["comments", postId],
+    queryFn: () => getComment(postId),
+  });
 
   const { mutate, isError, isPending } = useMutation({
     mutationFn: (newComment: NewComment) => {
@@ -45,11 +80,9 @@ const CommentSection = ({ postId }: PostProps) => {
 
       return createComment(newComment, postId, user?.id, effectiveUserName);
     },
-    onError: (error) => {
-      console.log("ユーザー情報:", user);
-      console.log("ユーザーID:", user?.id);
-      console.log("ユーザー名:", user?.user_metadata?.user_name);
-      console.log(error.message);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+      setNewCommentText("");
     },
   });
 
@@ -57,93 +90,162 @@ const CommentSection = ({ postId }: PostProps) => {
     e.preventDefault();
     if (!newCommentText.trim()) return;
     mutate({ content: newCommentText, parent_comment_id: null });
-    setNewCommentText("");
   };
 
+  const createCommentTree = (
+    flatComments: Comment[]
+  ): (Comment & { children: Comment[] })[] => {
+    // まずすべてのコメントをマップに追加しておく
+    const map = new Map<number, Comment & { children: Comment[] }>();
+    const roots: (Comment & { children: Comment[] })[] = [];
+
+    // すべてのコメントをマップに格納し、childrenプロパティを初期化
+    for (const comment of flatComments) {
+      map.set(comment.id, { ...comment, children: [] });
+    }
+
+    // コメントを適切な場所（親のchildren配列か、rootsか）に振り分ける
+    for (const comment of flatComments) {
+      const commentWithChildren = map.get(comment.id);
+
+      // mapに存在するはずなので、念のためチェック
+      if (!commentWithChildren) continue;
+
+      if (comment.parent_comment_id === null) {
+        // 親コメントがない場合はルートに追加
+        roots.push(commentWithChildren);
+      } else {
+        // 親コメントがある場合
+        const parent = map.get(comment.parent_comment_id);
+        if (parent) {
+          // 親が見つかった場合、その子として追加
+          parent.children.push(commentWithChildren);
+        } else {
+          // 親が見つからない場合は孤立コメントとしてルートに追加
+          roots.push(commentWithChildren);
+        }
+      }
+    }
+
+    return roots;
+  };
+
+  const commentTree = comments ? createCommentTree(comments) : [];
+  const commentCount = comments?.length || 0;
+
   return (
-    <div className="mt-8 bg-gray-800 rounded-lg p-6 shadow-lg">
-      <h3 className="text-xl font-semibold mb-4 text-green-400">コメント</h3>
+    <div className="mt-10 bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-700">
+      <div className="flex items-center gap-2 mb-6">
+        <MessageSquareText className="text-green-400" size={24} />
+        <h3 className="text-xl font-semibold text-green-400">
+          コメント {commentCount > 0 && `(${commentCount})`}
+        </h3>
+      </div>
 
+      {/* コメント入力セクション */}
       {user ? (
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div
-            className={`relative border ${isFocused ? "border-green-500" : "border-gray-600"} rounded-lg transition-all duration-200`}
-          >
-            <textarea
-              value={newCommentText}
-              rows={3}
-              placeholder="投票した理由や感想を入力してください..."
-              onChange={(e) => setNewCommentText(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              className="w-full bg-gray-700 text-white p-4 rounded-lg resize-none outline-none placeholder-gray-400"
-            />
-
-            {/* 残り文字数カウンター (オプション) */}
-            <div className="absolute bottom-2 right-3 text-xs text-gray-400">
-              {newCommentText.length}/500
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={!newCommentText.trim() || isPending}
-              className={`px-5 py-2 rounded-md font-medium transition-all duration-200 flex items-center space-x-1
-                ${
-                  !newCommentText.trim() || isPending
-                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                    : "bg-green-600 hover:bg-green-700 text-white"
-                }`}
+        <div className="mb-8">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div
+              className={`relative border ${
+                isFocused ? "border-green-500" : "border-gray-600"
+              } rounded-lg transition-all duration-200 shadow-sm`}
             >
-              {isPending ? (
-                <>
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <title>loading</title>
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  <span>投稿中</span>
-                </>
-              ) : (
-                <span>コメントを投稿</span>
-              )}
-            </button>
-          </div>
+              <textarea
+                value={newCommentText}
+                rows={3}
+                placeholder="この投稿についてコメントを書く..."
+                onChange={(e) => setNewCommentText(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                className="w-full bg-gray-700 text-white p-4 rounded-lg resize-none outline-none placeholder-gray-400"
+              />
 
-          {isError && (
-            <div className="mt-2 p-3 bg-red-900/30 border border-red-700 rounded-md text-red-400 text-sm">
-              コメント登録中にエラーが発生しました。再度お試しください。
+              <div className="absolute bottom-2 right-3 text-xs text-gray-400">
+                {newCommentText.length}/500
+              </div>
             </div>
-          )}
-        </form>
+
+            <div className="flex justify-between items-center">
+              <div className="text-xs text-gray-400">
+                <span className="text-green-400 font-medium">
+                  {user.email?.split("@")[0] || "匿名ユーザー"}
+                </span>{" "}
+                として投稿します
+              </div>
+
+              <button
+                type="submit"
+                disabled={!newCommentText.trim() || isPending}
+                className={`px-5 py-2 rounded-md font-medium transition-all duration-200 flex items-center gap-2
+                  ${
+                    !newCommentText.trim() || isPending
+                      ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                      : "bg-green-600 hover:bg-green-700 text-white"
+                  }`}
+              >
+                {isPending ? (
+                  <>
+                    <Loader2 className="animate-spin" size={18} />
+                    <span>投稿中</span>
+                  </>
+                ) : (
+                  <>
+                    <Send size={18} />
+                    <span>コメントを投稿</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {isError && (
+              <div className="p-3 bg-red-900/30 border border-red-700 rounded-md text-red-400 text-sm flex items-center gap-2">
+                <AlertCircle size={16} />
+                <span>
+                  コメント登録中にエラーが発生しました。再度お試しください。
+                </span>
+              </div>
+            )}
+          </form>
+        </div>
       ) : (
-        <div className="py-6 px-4 bg-gray-700/50 rounded-lg border border-gray-600 text-center">
-          <p className="text-gray-300">コメントするにはログインしてください</p>
+        <div className="py-8 px-6 bg-gray-700/30 rounded-lg border border-gray-600 text-center mb-8">
+          <MessageSquareText size={32} className="mx-auto mb-3 text-gray-500" />
+          <p className="text-gray-300 mb-3">
+            コメントするにはログインしてください
+          </p>
           <button
             type="button"
-            className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white text-sm transition-colors"
+            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white text-sm transition-colors inline-flex items-center gap-2"
           >
-            ログイン
+            <span>ログイン</span>
           </button>
         </div>
       )}
+
+      {/* コメント表示部分 */}
+      <div className="space-y-2">
+        {commentIsPending ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="animate-spin text-green-400" size={32} />
+            <span className="ml-3 text-gray-400">コメントを読み込み中...</span>
+          </div>
+        ) : error ? (
+          <div className="p-4 bg-red-900/30 border border-red-700 rounded-md text-red-400 text-center">
+            <AlertCircle size={24} className="mx-auto mb-2" />
+            <p>{error.message}</p>
+          </div>
+        ) : commentTree.length === 0 ? (
+          <div className="text-center py-8 text-gray-400">
+            <MessageSquareText size={32} className="mx-auto mb-3 opacity-50" />
+            <p>まだコメントはありません。最初のコメントを投稿しましょう！</p>
+          </div>
+        ) : (
+          commentTree.map((comment) => (
+            <CommentItem key={comment.id} comment={comment} postId={postId} />
+          ))
+        )}
+      </div>
     </div>
   );
 };

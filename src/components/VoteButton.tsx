@@ -26,6 +26,7 @@ const getVotes = async (postId: number): Promise<Vote[]> => {
     .from("votes")
     .select("*")
     .eq("post_id", postId);
+
   if (error) throw new Error(error.message);
   return data as Vote[];
 };
