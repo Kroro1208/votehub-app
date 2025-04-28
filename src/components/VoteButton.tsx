@@ -161,35 +161,81 @@ const VoteButton = ({ postId }: PostProps) => {
 
   const upVotes = votes?.filter((item) => item.vote === 1).length || 0;
   const downVotes = votes?.filter((item) => item.vote === -1).length || 0;
+  const totalVotes = upVotes + downVotes;
   const userVote = votes?.find((item) => item.user_id === user?.id)?.vote;
+
+  // 投票の割合を計算（0票の場合は0%として表示）
+  const upVotePercentage = totalVotes > 0 ? (upVotes / totalVotes) * 100 : 0;
+  const downVotePercentage =
+    totalVotes > 0 ? (downVotes / totalVotes) * 100 : 0;
 
   if (isPending) return <div>読み込み中...</div>;
   if (error) return <div>{error.message}</div>;
 
   return (
-    <div className="flex items-center space-x-4 my-4">
-      <button
-        type="button"
-        onClick={() => mutate(1)}
-        disabled={isVoting}
-        className={`cursor-pointer px-3 py-1 rounded transition-colors duration-150
+    <div>
+      <div className="flex items-center space-x-4 my-4">
+        {/* 賛成 */}
+        <button
+          type="button"
+          onClick={() => mutate(1)}
+          disabled={isVoting}
+          className={`cursor-pointer px-3 py-1 rounded transition-colors duration-150
             ${isVoting ? "opacity-50" : ""}
             ${userVote === 1 ? "bg-green-500 text-white" : "bg-gray-200 text-black"}`}
-      >
-        <TbArrowBigUpLine size={30} />
-        {upVotes}
-      </button>
-      <button
-        type="button"
-        onClick={() => mutate(-1)}
-        disabled={isVoting}
-        className={`cursor-pointer px-3 py-1 rounded transition-colors duration-150
+        >
+          賛成
+          <TbArrowBigUpLine size={30} />
+          {upVotes}
+        </button>
+        {/* 反対 */}
+        <button
+          type="button"
+          onClick={() => mutate(-1)}
+          disabled={isVoting}
+          className={`cursor-pointer px-3 py-1 rounded transition-colors duration-150
             ${isVoting ? "opacity-50" : ""}
             ${userVote === -1 ? "bg-red-500 text-white" : "bg-gray-200 text-black"}`}
-      >
-        <TbArrowBigDownLine size={30} />
-        {downVotes}
-      </button>
+        >
+          反対
+          <TbArrowBigDownLine size={30} />
+          {downVotes}
+        </button>
+      </div>
+
+      {/* 賛成反対の集計を反映させた棒グラフを表示 */}
+      <div className="mt-4">
+        <div className="text-sm mb-3">
+          投票結果: {totalVotes}票 (賛成: {upVotes}票 / 反対: {downVotes}票)
+        </div>
+
+        {/* グラフコンテナ */}
+        <div className="w-full h-8 bg-gray-200 rounded-md overflow-hidden flex">
+          {/* 賛成バー */}
+          <div
+            className="h-full bg-green-500 flex items-center justify-center text-white text-xs font-bold"
+            style={{ width: `${upVotePercentage}%` }}
+          >
+            {upVotePercentage > 10 ? `${Math.round(upVotePercentage)}%` : ""}
+          </div>
+
+          {/* 反対バー */}
+          <div
+            className="h-full bg-red-500 flex items-center justify-center text-white text-xs font-bold"
+            style={{ width: `${downVotePercentage}%` }}
+          >
+            {downVotePercentage > 10
+              ? `${Math.round(downVotePercentage)}%`
+              : ""}
+          </div>
+        </div>
+
+        {/* パーセント表示 */}
+        <div className="flex justify-between text-sm text-gray-600 mt-3">
+          <div>賛成: {Math.round(upVotePercentage)}%</div>
+          <div>反対: {Math.round(downVotePercentage)}%</div>
+        </div>
+      </div>
     </div>
   );
 };
