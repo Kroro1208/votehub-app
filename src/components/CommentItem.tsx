@@ -85,21 +85,22 @@ const CommentItem = ({ comment, postId }: CommentItemProps) => {
       <div className="mb-3 bg-gray-800 rounded-lg p-4 shadow-sm">
         {/* コメントヘッダー */}
         <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-green-700 flex items-center justify-center text-white font-medium">
-              {comment.author.charAt(0).toUpperCase()}
+          <div className="flex gap-5">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-green-700 flex items-center justify-center text-white font-medium">
+                {comment.author.charAt(0).toUpperCase()}
+              </div>
+              <span className="font-medium text-white">{comment.author}</span>
             </div>
-            <span className="font-medium text-white">{comment.author}</span>
+            {/* コメント本文 */}
+            <p className="text-gray-200 my-2 whitespace-pre-wrap">
+              {comment.content}
+            </p>
           </div>
           <span className="text-xs text-gray-400">
             {formatDate(comment.created_at)}
           </span>
         </div>
-
-        {/* コメント本文 */}
-        <p className="text-gray-200 my-2 whitespace-pre-wrap">
-          {comment.content}
-        </p>
 
         {/* アクションボタン */}
         <div className="flex justify-between items-center mt-2">
@@ -120,9 +121,9 @@ const CommentItem = ({ comment, postId }: CommentItemProps) => {
               className="flex items-center text-sm font-medium text-gray-400 hover:text-gray-300"
             >
               {isCollapsed ? (
-                <ChevronsUp size={18} />
-              ) : (
                 <ChevronsUpDown size={18} />
+              ) : (
+                <ChevronsUp size={18} />
               )}
               <span className="ml-1">{comment.children.length}件の返信</span>
             </button>
@@ -190,7 +191,7 @@ const CommentItem = ({ comment, postId }: CommentItemProps) => {
                   </>
                 ) : (
                   <>
-                    <Send size={16} className="mr-2" />
+                    <Send size={16} className="" />
                     <span>返信する</span>
                   </>
                 )}
