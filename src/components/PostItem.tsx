@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import type { PostType } from "./PostList";
+import { MessagesSquare, Speech } from "lucide-react";
 
 interface PostItemType {
   post: PostType;
@@ -36,6 +37,16 @@ const PostItem = ({ post }: PostItemType) => {
               alt={post.title}
               className="w-full rounded-[20px] object-cover max-h-[150px] mx-auto"
             />
+          </div>
+          <div className="flex gap-3">
+            <span className="flex gap-2">
+              <Speech />
+              {post.vote_count ?? 0}
+            </span>
+            <span className="flex gap-2">
+              <MessagesSquare />
+              {post.comment_count ?? 0}
+            </span>
           </div>
         </div>
       </Link>
