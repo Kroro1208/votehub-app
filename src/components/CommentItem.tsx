@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../supabase-client";
 import { ChevronsUp, ChevronsUpDown, MessageSquare, Send } from "lucide-react";
+import CommentVotes from "./CommentVotes";
 
 interface CommentItemProps {
   comment: Comment & {
@@ -97,9 +98,12 @@ const CommentItem = ({ comment, postId }: CommentItemProps) => {
               {comment.content}
             </p>
           </div>
-          <span className="text-xs text-gray-400">
-            {formatDate(comment.created_at)}
-          </span>
+          <div className="flex flex-col gap-2 items-center">
+            <span className="text-xs text-gray-400">
+              {formatDate(comment.created_at)}
+            </span>
+            <CommentVotes commentId={comment.id} postId={postId} />
+          </div>
         </div>
 
         {/* アクションボタン */}
