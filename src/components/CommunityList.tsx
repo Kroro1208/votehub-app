@@ -121,7 +121,7 @@ const CommunityList = () => {
             {filteredCommunities?.map((community) => (
               <div
                 key={community.id}
-                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100 transform hover:-translate-y-1 hover:scale-102 transition-transform duration-300"
+                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100 transform hover:-translate-y-1 hover:scale-102"
               >
                 <div className="h-3 bg-gradient-to-r from-green-400 to-blue-500" />
                 <div className="p-6">
