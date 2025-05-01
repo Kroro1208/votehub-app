@@ -40,8 +40,8 @@ const CommentVotes = ({ commentId, postId }: VoteProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isVoting, setIsVoting] = useState(false);
-  const [, setVotesState] = useAtom(commentVotesAtomFamily);
-  const [, setMostVotedState] = useAtom(mostVotedCommentAtomFamily);
+  const [, setVotesState] = useAtom(commentVotesAtomFamily); // コメントごとのリアクションを管理するsetter
+  const [, setMostVotedState] = useAtom(mostVotedCommentAtomFamily); // postに紐づくコメントの最も多いリアクションのsetter
 
   const {
     data: votes,

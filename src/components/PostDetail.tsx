@@ -55,6 +55,8 @@ const PostDetail = ({ postId }: Props) => {
     commentId: null,
     votes: 0,
   };
+
+  // 最もリアクションの多いコメントを管理する
   const [mostVotedComment, setMostVotedComment] = useState<Comment | null>(
     null
   );
@@ -116,7 +118,6 @@ const PostDetail = ({ postId }: Props) => {
           </div>
         </div>
       )}
-
       <VoteButton postId={postId} />
       <CommentSection postId={postId} />
     </div>
