@@ -75,9 +75,6 @@ const CommunityList = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl mb-3">
-            コミュニティを探索する
-          </h1>
           <p className="max-w-2xl mx-auto text-xl text-gray-500">
             あなたの興味に合わせたコミュニティを見つけましょう
           </p>
