@@ -3,6 +3,7 @@ import ErrorMessage from "./ErrorMessage";
 import Loading from "./Loading";
 import type { PostType } from "./PostList";
 import { supabase } from "../supabase-client";
+import { useNavigate } from "react-router";
 
 interface Props {
   communityId: number;
@@ -26,6 +27,7 @@ const getCommunitityItem = async (
 };
 
 const CommunityItem = ({ communityId }: Props) => {
+  const navigate = useNavigate();
   const {
     data: communityItemData,
     isPending,
@@ -34,6 +36,17 @@ const CommunityItem = ({ communityId }: Props) => {
     queryKey: ["communitiyPost", communityId],
     queryFn: () => getCommunitityItem(communityId),
   });
+
+  const handleNavigate = (id: number) => {
+    navigate(`/post/${id}`);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, id: number) => {
+    if (e.key === "Enter" || e.key === "") {
+      e.preventDefault();
+      navigate(`/post/${id}`);
+    }
+  };
 
   if (isPending) return <Loading />;
   if (error) return <ErrorMessage error={error} />;
@@ -47,8 +60,12 @@ const CommunityItem = ({ communityId }: Props) => {
       <div className="space-y-6">
         {communityItemData?.map((item) => (
           <div
+            onClick={() => handleNavigate(item.id)}
+            onKeyDown={(e) => {
+              handleKeyDown(e, item.id);
+            }}
             key={item.id}
-            className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
+            className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 cursor-pointer"
           >
             <div className="flex gap-4">
               <img
