@@ -94,7 +94,7 @@ const PostDetail = ({ postId }: Props) => {
         alt={data.title}
         className="mt-4 rounded object-cover w-full h-64"
       />
-      <p className="text-gray-400">{data?.content}</p>
+      <h2 className="text-gray-400 text-xl">{data?.content}</h2>
       <p className="text-gray-500 text-sm">
         {new Date(data?.created_at).toLocaleDateString()}
       </p>

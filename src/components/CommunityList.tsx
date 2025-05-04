@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../supabase-client";
 import { Link } from "react-router";
@@ -10,7 +11,7 @@ export interface Community {
   created_at: string;
 }
 
-const getCommunitites = async (): Promise<Community[]> => {
+export const getCommunitites = async (): Promise<Community[]> => {
   const { data, error } = await supabase
     .from("communities")
     .select("*")

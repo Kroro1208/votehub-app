@@ -1,13 +1,15 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { type ChangeEvent, useEffect, useState } from "react";
 import { supabase } from "../supabase-client";
 import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
+import { type Community, getCommunitites } from "./CommunityList";
 
 interface PostInput {
   title: string;
   content: string;
   avatar_url: string | null;
+  community_id?: number | null;
 }
 
 const createPost = async (post: PostInput, imageFile: File) => {
@@ -43,6 +45,7 @@ const CreatePost = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [communityId, setCommunityId] = useState<number | null>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -54,6 +57,11 @@ const CreatePost = () => {
     const objUrl = URL.createObjectURL(selectedFile);
     setImagePreview(objUrl);
   }, [selectedFile]);
+
+  const { data: communityData } = useQuery<Community[], Error>({
+    queryKey: ["communities"],
+    queryFn: getCommunitites,
+  });
 
   const { mutate } = useMutation({
     mutationFn: (data: { post: PostInput; imageFile: File }) => {
@@ -84,6 +92,7 @@ const CreatePost = () => {
         title,
         content,
         avatar_url: user?.user_metadata.avatar_url || null,
+        community_id: communityId,
       },
       imageFile: selectedFile,
     });
@@ -99,6 +108,11 @@ const CreatePost = () => {
   const handleRemoveImage = () => {
     setSelectedFile(null);
     setImagePreview(null);
+  };
+
+  const handleCommunityChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setCommunityId(value ? Number(value) : null);
   };
 
   return (
@@ -137,6 +151,24 @@ const CreatePost = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors resize-none"
             placeholder="投稿の内容を入力してください"
           />
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="community" className="block text-sm font-medium">
+            コミュニティを選択
+          </label>
+          <select
+            id="community"
+            onChange={handleCommunityChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+          >
+            <option value={""}>選択する</option>
+            {communityData?.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-2">
