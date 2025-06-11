@@ -283,7 +283,7 @@ git checkout -b feature/point-system
 
 ## 参考資料・学習リソース
 
-- [Next.js 14 公式ドキュメント](https://nextjs.org/docs)
+- [React19 公式ドキュメント](https://ja.react.dev/blog/2024/12/05/react-19)
 - [Supabase公式ドキュメント](https://supabase.com/docs)
 - [Supabase Auth Helpers for Next.js](https://supabase.com/docs/guides/auth/auth-helpers/nextjs)
 - [shadcn/ui コンポーネント](https://ui.shadcn.com/)
