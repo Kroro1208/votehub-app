@@ -6,7 +6,7 @@
 
 ## 技術スタック
 
-- **フレームワーク**: Next.js 14 (App Router) + TypeScript
+- **フレームワーク**: React19 + TypeScript
 - **スタイリング**: Tailwind CSS + shadcn/ui
 - **バックエンド**: Supabase (PostgreSQL + Auth + Storage + Realtime)
 - **ORM**: Supabase クライアント + TypeScript型生成
