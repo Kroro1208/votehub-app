@@ -137,16 +137,16 @@ export default function Navbar() {
                 Create Post
               </Link>
               <Link
-                to="/communities"
+                to="/space"
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
               >
-                Communities
+                Space
               </Link>
               <Link
-                to="/community/create"
+                to="/community/space"
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
               >
-                Create Community
+                Create Space
               </Link>
             </div>
           </div>

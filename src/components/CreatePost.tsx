@@ -89,7 +89,8 @@ const CreatePost = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFile) return;
+    if (!selectedFile) return alert("画像をアップロードしてください");
+    if (!voteDeadline) return alert("投票期限を設定してください");
     mutate({
       post: {
         title,

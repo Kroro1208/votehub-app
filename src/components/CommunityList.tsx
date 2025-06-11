@@ -149,7 +149,7 @@ const CommunityList = () => {
                   </div>
                   <div className="mt-6">
                     <Link
-                      to={`/community/${community.id}`}
+                      to={`/space/${community.id}`}
                       className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-blue-500 to-green-400 hover:from-blue-600 hover:to-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
                     >
                       詳細を見る

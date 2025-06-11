@@ -8,6 +8,7 @@ import VoteGageBar from "./VoteGageBar";
 
 interface PostProps {
   postId: number;
+  voteDeadline?: string | null;
 }
 interface Vote {
   id: number;
@@ -32,10 +33,17 @@ const getVotes = async (postId: number): Promise<Vote[]> => {
   return data as Vote[];
 };
 
-const VoteButton = ({ postId }: PostProps) => {
+const VoteButton = ({ postId, voteDeadline }: PostProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isVoting, setIsVoting] = useState(false);
+
+  const isVotingExpired = () => {
+    if (!voteDeadline) return false;
+    return new Date() > new Date(voteDeadline);
+  };
+
+  const votingExpired = isVotingExpired();
 
   const {
     data: votes,
@@ -174,37 +182,47 @@ const VoteButton = ({ postId }: PostProps) => {
   if (error) return <div>{error.message}</div>;
 
   return (
-    <div className="flex gap-3">
-      <div className="flex items-center space-x-4 my-4">
-        {/* 賛成 */}
-        <button
-          type="button"
-          onClick={() => mutate(1)}
-          disabled={isVoting}
-          className={`cursor-pointer px-5 py-1 rounded transition-colors duration-150
-            ${isVoting ? "opacity-50" : ""}
-            ${userVote === 1 ? "bg-green-500 text-white" : "bg-gray-200 text-black"}`}
-        >
-          賛成
-          <TbArrowBigUpLine size={30} />
-          {upVotes}
-        </button>
-        {/* 反対 */}
-        <button
-          type="button"
-          onClick={() => mutate(-1)}
-          disabled={isVoting}
-          className={`cursor-pointer px-5 py-1 rounded transition-colors duration-150
-            ${isVoting ? "opacity-50" : ""}
-            ${userVote === -1 ? "bg-red-500 text-white" : "bg-gray-200 text-black"}`}
-        >
-          反対
-          <TbArrowBigDownLine size={30} />
-          {downVotes}
-        </button>
-      </div>
+    <div className="flex flex-col gap-3">
+      {/* 投票期限が過ぎている場合の表示 */}
+      {votingExpired && (
+        <div className="w-full text-center py-3 px-4 bg-gray-300 text-gray-600 rounded-lg">
+          <span className="font-semibold">投票期限が終了しました</span>
+        </div>
+      )}
 
-      {/* 賛成反対の集計を反映させた棒グラフを表示 */}
+      {/* 投票期限内の場合の投票ボタン */}
+      {!votingExpired && (
+        <div className="flex items-center space-x-4 my-4">
+          {/* 賛成 */}
+          <button
+            type="button"
+            onClick={() => mutate(1)}
+            disabled={isVoting}
+            className={`cursor-pointer px-5 py-1 rounded transition-colors duration-150
+              ${isVoting ? "opacity-50" : ""}
+              ${userVote === 1 ? "bg-green-500 text-white" : "bg-gray-200 text-black"}`}
+          >
+            賛成
+            <TbArrowBigUpLine size={30} />
+            {upVotes}
+          </button>
+          {/* 反対 */}
+          <button
+            type="button"
+            onClick={() => mutate(-1)}
+            disabled={isVoting}
+            className={`cursor-pointer px-5 py-1 rounded transition-colors duration-150
+              ${isVoting ? "opacity-50" : ""}
+              ${userVote === -1 ? "bg-red-500 text-white" : "bg-gray-200 text-black"}`}
+          >
+            反対
+            <TbArrowBigDownLine size={30} />
+            {downVotes}
+          </button>
+        </div>
+      )}
+
+      {/* 賛成反対の集計を反映させた棒グラフを表示（常に表示） */}
       <VoteGageBar
         totalVotes={totalVotes}
         upVotes={upVotes}
@@ -212,6 +230,20 @@ const VoteButton = ({ postId }: PostProps) => {
         upVotePercentage={upVotePercentage}
         downVotePercentage={downVotePercentage}
       />
+
+      {/* 投票期限の表示 */}
+      {voteDeadline && (
+        <div className="text-sm text-gray-500 mt-2 text-center">
+          投票期限:{" "}
+          {new Date(voteDeadline).toLocaleDateString("ja-JP", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </div>
+      )}
     </div>
   );
 };
