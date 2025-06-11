@@ -17,14 +17,30 @@ interface CommunityItemType extends PostType {
 const getCommunitityItem = async (
   communityId: number
 ): Promise<CommunityItemType[]> => {
+  // get_posts_with_counts関数を使用して投票数とコメント数を取得
   const { data, error } = await supabase
-    .from("posts")
-    .select("*, communities(name)")
-    .eq("community_id", communityId)
-    .order("created_at", { ascending: false });
+    .rpc("get_posts_with_counts")
+    .eq("community_id", communityId);
 
   if (error) throw new Error(error.message);
-  return data as CommunityItemType[];
+
+  // コミュニティ名を追加で取得
+  const postsWithCommunity = await Promise.all(
+    data.map(async (post: PostType) => {
+      const { data: communityData } = await supabase
+        .from("communities")
+        .select("name")
+        .eq("id", post.community_id)
+        .single();
+
+      return {
+        ...post,
+        communities: communityData ? { name: communityData.name } : undefined,
+      };
+    })
+  );
+
+  return postsWithCommunity as CommunityItemType[];
 };
 
 const CommunityItem = ({ communityId }: Props) => {

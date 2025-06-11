@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../supabase-client";
 import PostItem from "./PostItem";
+import { useEffect } from "react";
+import { useAtom } from "jotai";
+import { postsAtom } from "../stores/PostAtom";
 
 export interface PostType {
   id: number;
@@ -12,6 +15,7 @@ export interface PostType {
   vote_count?: number;
   comment_count?: number;
   vote_deadline?: string | null;
+  community_id?: number | null;
 }
 
 const fetchPosts = async (): Promise<PostType[]> => {
@@ -22,11 +26,18 @@ const fetchPosts = async (): Promise<PostType[]> => {
 };
 
 const PostList = () => {
+  const [, setPosts] = useAtom(postsAtom);
+
   const { data, isPending, error } = useQuery<PostType[], Error>({
     queryKey: ["posts"],
     queryFn: fetchPosts,
   });
-  console.log("data", data);
+
+  useEffect(() => {
+    if (data) {
+      setPosts(data);
+    }
+  }, [data, setPosts]);
 
   if (isPending) return <div>Loading...</div>;
   if (error) return <div>{error.message}</div>;
