@@ -41,16 +41,16 @@ export default function Navbar() {
               Create Post
             </Link>
             <Link
-              to="/communities"
+              to="/space"
               className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
             >
-              Communities
+              Space
             </Link>
             <Link
-              to="/community/create"
+              to="/space/create"
               className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
             >
-              Create Community
+              Create Space
             </Link>
           </div>
 

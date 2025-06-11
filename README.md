@@ -302,6 +302,5 @@ git checkout -b feature/point-system
 
 1. Supabaseプロジェクトの作成・設定
 2. Claude に全体的な実装方針を相談
-3. GitHub Copilot の設定確認
-4. Next.js 14 + Supabase開発環境のセットアップ確認
-5. このREADMEの内容を基にした詳細な実装計画の作成
+3. GitHub Copilot の設定確認4.　React19 + Supabase開発環境のセットアップ確認
+4. このREADMEの内容を基にした詳細な実装計画の作成

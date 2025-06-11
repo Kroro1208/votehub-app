@@ -10,6 +10,7 @@ interface PostInput {
   content: string;
   avatar_url: string | null;
   community_id?: number | null;
+  vote_deadline?: string | null; // 投票期限の追加
 }
 
 const createPost = async (post: PostInput, imageFile: File) => {
@@ -46,6 +47,8 @@ const CreatePost = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [communityId, setCommunityId] = useState<number | null>(null);
+  const [voteDeadline, setVoteDeadline] = useState<string>(""); // 投票期限のstate追加
+
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -93,6 +96,9 @@ const CreatePost = () => {
         content,
         avatar_url: user?.user_metadata.avatar_url || null,
         community_id: communityId,
+        vote_deadline: voteDeadline
+          ? new Date(voteDeadline).toISOString()
+          : null,
       },
       imageFile: selectedFile,
     });
@@ -133,7 +139,7 @@ const CreatePost = () => {
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+            className="w-full px-4 py-2 border text-white border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
             placeholder="タイトルを入力してください"
           />
         </div>
@@ -169,6 +175,19 @@ const CreatePost = () => {
               </option>
             ))}
           </select>
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="vote_deadline" className="block text-sm font-medium">
+            投票期限
+          </label>
+          <input
+            type="datetime-local"
+            id="vote_deadline"
+            value={voteDeadline}
+            onChange={(e) => setVoteDeadline(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+            placeholder="投票期限を設定してください"
+          />
         </div>
 
         <div className="space-y-2">

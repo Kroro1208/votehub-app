@@ -11,6 +11,7 @@ export interface PostType {
   avatar_url?: string;
   vote_count?: number;
   comment_count?: number;
+  vote_deadline?: string | null;
 }
 
 const fetchPosts = async (): Promise<PostType[]> => {

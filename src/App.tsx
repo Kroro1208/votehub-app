@@ -16,9 +16,9 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/create" element={<CreatePostPage />} />
           <Route path="/post/:id" element={<PostPage />} />
-          <Route path="/community/create" element={<CreateCommunityPage />} />
-          <Route path="/communities" element={<CommunitiesPage />} />
-          <Route path="/community/:id" element={<CommyunityDetailPage />} />
+          <Route path="/space/create" element={<CreateCommunityPage />} />
+          <Route path="/space" element={<CommunitiesPage />} />
+          <Route path="/space/:id" element={<CommyunityDetailPage />} />
         </Routes>
       </div>
     </div>

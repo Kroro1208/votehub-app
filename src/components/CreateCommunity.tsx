@@ -37,7 +37,7 @@ const CreateCommunity = () => {
     <div className="max-w-2xl mx-auto p-6">
       <div className="bg-gray-700 rounded-xl shadow-lg p-8">
         <div className="text-center">
-          <h2 className="text-2xl font-bold">コミュニティを作成</h2>
+          <h2 className="text-2xl font-bold">スペースを作成</h2>
           <div className="mt-1 h-1 w-54 bg-blue-500 mx-auto rounded" />
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -46,7 +46,7 @@ const CreateCommunity = () => {
               htmlFor="community-name"
               className="block text-sm font-medium text-gray-700"
             >
-              コミュニティ名
+              スペース名
             </label>
             <input
               value={name}
@@ -55,7 +55,7 @@ const CreateCommunity = () => {
               required
               onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 outline-none"
-              placeholder="コミュニティ名を入力"
+              placeholder="スペース名を入力"
             />
           </div>
 
@@ -64,7 +64,7 @@ const CreateCommunity = () => {
               htmlFor="community-description"
               className="block text-sm font-medium text-gray-700"
             >
-              コミュニティの説明
+              スペースの説明
             </label>
             <textarea
               value={description}
@@ -73,7 +73,7 @@ const CreateCommunity = () => {
               rows={5}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 outline-none resize-none"
-              placeholder="このコミュニティについて説明してください"
+              placeholder="このスペースについて説明してください"
             />
           </div>
 
@@ -96,7 +96,7 @@ const CreateCommunity = () => {
                     fill="none"
                     viewBox="0 0 24 24"
                   >
-                    <title>コミュニティ作成</title>
+                    <title>スペース作成</title>
                     <circle
                       className="opacity-25"
                       cx="12"
@@ -114,7 +114,7 @@ const CreateCommunity = () => {
                   作成中...
                 </div>
               ) : (
-                "コミュニティを作成"
+                "スペースを作成"
               )}
             </button>
           </div>
@@ -128,7 +128,7 @@ const CreateCommunity = () => {
                     viewBox="0 0 20 20"
                     fill="currentColor"
                   >
-                    <title>コミュニティ作成</title>
+                    <title>スペース作成</title>
                     <path
                       fillRule="evenodd"
                       d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -138,7 +138,7 @@ const CreateCommunity = () => {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-red-700">
-                    コミュニティ作成中にエラーが発生しました
+                    スペース作成中にエラーが発生しました
                   </p>
                 </div>
               </div>
