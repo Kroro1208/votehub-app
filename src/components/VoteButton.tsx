@@ -187,15 +187,6 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
 
   return (
     <div className="flex flex-col gap-3">
-      {/* 投票済みバッジ */}
-      {hasUserVoted && (
-        <div className="flex items-center justify-center gap-2 py-2 px-4 bg-blue-100 text-blue-700 rounded-lg border border-blue-200">
-          <CheckCircle size={20} />
-          <span className="font-medium">
-            投票済み（{userVote === 1 ? "賛成" : "反対"}）
-          </span>
-        </div>
-      )}
       {/* 投票期限が過ぎている場合の表示 */}
       {votingExpired && (
         <div className="w-full text-center py-3 px-4 bg-gray-300 text-gray-600 rounded-lg">
@@ -203,50 +194,60 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
         </div>
       )}
 
-      {/* 投票期限内の場合の投票ボタン */}
-      {!votingExpired && (
-        <div className="flex items-center space-x-4 my-4">
-          {/* 賛成 */}
-          <button
-            type="button"
-            onClick={() => mutate(1)}
-            disabled={isVoting || hasUserVoted}
-            className={`flex items-center gap-2 px-5 py-3 rounded-lg font-medium transition-all duration-200 ${
-              userVote === 1
-                ? "bg-green-600 text-white shadow-lg"
-                : "bg-green-500 text-white hover:bg-green-600"
-            } ${
-              hasUserVoted || isVoting ? "opacity-40 cursor-not-allowed" : ""
-            }`}
-          >
-            <TbArrowBigUpLine size={24} />
-            <span>賛成</span>
-            <span className="bg-white/20 px-2 py-1 rounded text-sm">
-              {upVotes}
-            </span>
-          </button>
+      <div className="flex items-center gap-3">
+        {/* 投票期限内の場合の投票ボタン */}
+        {!votingExpired && (
+          <>
+            {/* 賛成ボタン */}
+            <button
+              type="button"
+              onClick={() => mutate(1)}
+              disabled={isVoting || hasUserVoted}
+              className={`flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-medium transition-all duration-200 min-w-[120px] h-12 ${
+                userVote === 1
+                  ? "bg-green-600 text-white shadow-lg"
+                  : "bg-green-500 text-white hover:bg-green-600"
+              } ${
+                hasUserVoted || isVoting ? "opacity-40 cursor-not-allowed" : ""
+              }`}
+            >
+              <TbArrowBigUpLine size={24} />
+              <span>賛成</span>
+              <span className="bg-white/20 px-2 py-1 rounded text-sm">
+                {upVotes}
+              </span>
+            </button>
 
-          {/* 反対ボタン */}
-          <button
-            type="button"
-            onClick={() => mutate(-1)}
-            disabled={isVoting || hasUserVoted}
-            className={`flex items-center gap-2 px-5 py-3 rounded-lg font-medium transition-all duration-200 ${
-              userVote === -1
-                ? "bg-red-600 text-white shadow-lg"
-                : "bg-red-500 text-white hover:bg-red-600"
-            } ${
-              hasUserVoted || isVoting ? "opacity-40 cursor-not-allowed" : ""
-            }`}
-          >
-            <TbArrowBigDownLine size={24} />
-            <span>反対</span>
-            <span className="bg-white/20 px-2 py-1 rounded text-sm">
-              {downVotes}
-            </span>
-          </button>
-        </div>
-      )}
+            {/* 反対ボタン */}
+            <button
+              type="button"
+              onClick={() => mutate(-1)}
+              disabled={isVoting || hasUserVoted}
+              className={`flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-medium transition-all duration-200 min-w-[120px] h-12 ${
+                userVote === -1
+                  ? "bg-red-600 text-white shadow-lg"
+                  : "bg-red-500 text-white hover:bg-red-600"
+              } ${
+                hasUserVoted || isVoting ? "opacity-40 cursor-not-allowed" : ""
+              }`}
+            >
+              <TbArrowBigDownLine size={24} />
+              <span>反対</span>
+              <span className="bg-white/20 px-2 py-1 rounded text-sm">
+                {downVotes}
+              </span>
+            </button>
+          </>
+        )}
+
+        {/* 投票済みバッジ */}
+        {hasUserVoted && (
+          <div className="flex items-center justify-center gap-2 px-5 py-3 bg-blue-100 text-blue-700 rounded-lg border border-blue-200 font-medium h-12 min-w-[200px]">
+            <CheckCircle size={20} />
+            <span>投票済み（{userVote === 1 ? "賛成" : "反対"}）</span>
+          </div>
+        )}
+      </div>
 
       {/* 賛成反対の集計を反映させた棒グラフを表示（常に表示） */}
       <VoteGageBar
