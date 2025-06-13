@@ -16,6 +16,7 @@ export interface PostType {
   comment_count?: number;
   vote_deadline?: string | null;
   community_id?: number | null;
+  user_id: string | null;
 }
 
 const fetchPosts = async (): Promise<PostType[]> => {

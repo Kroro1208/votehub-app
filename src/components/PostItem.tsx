@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import type { PostType } from "./PostList";
-import { MessagesSquare, Speech, Clock, CheckCircle } from "lucide-react";
+import { MessagesSquare, Speech, CheckCircle } from "lucide-react";
 import { supabase } from "../supabase-client";
 import { useAuth } from "../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
@@ -36,31 +36,26 @@ const PostItem = ({ post }: PostItemType) => {
 
   const hasUserVoted = userVote !== null;
 
+  // 投稿者かどうかをチェック
+  const isPostOwner = user?.id === post.user_id;
+
   // 投票期限をチェックする関数
   const isVotingExpired = () => {
     if (!post.vote_deadline) return false;
     return new Date() > new Date(post.vote_deadline);
   };
 
-  // 投票期限を日本語で表示する関数
-  const formatDeadline = (deadline: string) => {
-    const date = new Date(deadline);
+  // 説得タイム（期限の1時間前）かどうかをチェック
+  const isPersuasionTime = () => {
+    if (!post.vote_deadline) return false;
+    const deadline = new Date(post.vote_deadline);
     const now = new Date();
-    const diffMs = date.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffMs < 0) {
-      return "期限終了";
-    } else if (diffDays === 0) {
-      return "今日まで";
-    } else if (diffDays === 1) {
-      return "明日まで";
-    } else {
-      return `${diffDays}日後まで`;
-    }
+    const oneHourBeforeDeadline = new Date(deadline.getTime() - 60 * 60 * 1000);
+    return now >= oneHourBeforeDeadline && now < deadline;
   };
 
   const votingExpired = isVotingExpired();
+  const showPersuasionButton = isPostOwner && isPersuasionTime();
 
   return (
     <div className="relative group">
@@ -78,20 +73,21 @@ const PostItem = ({ post }: PostItemType) => {
             ) : (
               <div className="w-[35px] h-[35px] rounded-full bg-gradient-to-tl from-[#0ce73b] to-[#63c087]" />
             )}
-            <div className="flex flex-col flex-1">
+            <div className="flex flex-1 items-center gap-3">
               <div className="text-[20px] leading-[22px] font-semibold mt-2">
                 {post.title}
               </div>
               {/* 投票期限表示 */}
               {post.vote_deadline && (
                 <div
-                  className={`flex items-center gap-1 text-xs mt-1 ${
-                    votingExpired ? "text-red-400" : "text-yellow-400"
+                  className={`flex items-center gap-1 text-xs mt-1 justify-center mx-auto ${
+                    votingExpired
+                      ? "text-red-400"
+                      : showPersuasionButton
+                        ? "text-orange-400"
+                        : "text-yellow-400"
                   }`}
-                >
-                  <Clock size={12} />
-                  <span>{formatDeadline(post.vote_deadline)}</span>
-                </div>
+                ></div>
               )}
             </div>
           </div>
@@ -132,10 +128,16 @@ const PostItem = ({ post }: PostItemType) => {
                 className={`text-xs px-2 py-1 rounded ${
                   votingExpired
                     ? "bg-red-500/20 text-red-300"
-                    : "bg-green-500/20 text-green-300"
+                    : showPersuasionButton
+                      ? "bg-orange-500/20 text-orange-300"
+                      : "bg-green-500/20 text-green-300"
                 }`}
               >
-                {votingExpired ? "投票終了" : "投票中"}
+                {votingExpired
+                  ? "投票終了"
+                  : showPersuasionButton
+                    ? "説得タイム"
+                    : "投票中"}
               </div>
             )}
           </div>

@@ -213,8 +213,8 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
             disabled={isVoting || hasUserVoted}
             className={`flex items-center gap-2 px-5 py-3 rounded-lg font-medium transition-all duration-200 ${
               userVote === 1
-                ? "bg-green-500 text-white shadow-lg"
-                : "bg-gray-200 text-black hover:bg-green-100 hover:text-green-700"
+                ? "bg-green-600 text-white shadow-lg"
+                : "bg-green-500 text-white hover:bg-green-600"
             } ${
               hasUserVoted || isVoting ? "opacity-40 cursor-not-allowed" : ""
             }`}
@@ -233,8 +233,8 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
             disabled={isVoting || hasUserVoted}
             className={`flex items-center gap-2 px-5 py-3 rounded-lg font-medium transition-all duration-200 ${
               userVote === -1
-                ? "bg-red-500 text-white shadow-lg"
-                : "bg-gray-200 text-black hover:bg-red-100 hover:text-red-700"
+                ? "bg-red-600 text-white shadow-lg"
+                : "bg-red-500 text-white hover:bg-red-600"
             } ${
               hasUserVoted || isVoting ? "opacity-40 cursor-not-allowed" : ""
             }`}
