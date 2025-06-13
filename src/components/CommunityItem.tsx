@@ -4,7 +4,14 @@ import Loading from "./Loading";
 import type { PostType } from "./PostList";
 import { supabase } from "../supabase-client";
 import { Link } from "react-router";
-import { Clock, MessageCircle, TrendingUp, Calendar } from "lucide-react";
+import {
+  Clock,
+  MessageCircle,
+  TrendingUp,
+  Calendar,
+  CheckCircle,
+} from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
 
 interface Props {
   communityId: number;
@@ -43,7 +50,22 @@ const getCommunitityItem = async (
   return postsWithCommunity as CommunityItemType[];
 };
 
+// ユーザーの投票済み投稿IDを取得する関数
+const getUserVotedPostIds = async (userId?: string): Promise<Set<number>> => {
+  if (!userId) return new Set();
+
+  const { data, error } = await supabase
+    .from("votes")
+    .select("post_id")
+    .eq("user_id", userId);
+
+  if (error) throw new Error(error.message);
+  return new Set(data.map((vote) => vote.post_id));
+};
+
 const CommunityItem = ({ communityId }: Props) => {
+  const { user } = useAuth();
+
   const {
     data: communityItemData,
     isPending,
@@ -51,6 +73,13 @@ const CommunityItem = ({ communityId }: Props) => {
   } = useQuery<CommunityItemType[], Error>({
     queryKey: ["communitiyPost", communityId],
     queryFn: () => getCommunitityItem(communityId),
+  });
+
+  // ユーザーの投票済み投稿IDを取得
+  const { data: votedPostIds } = useQuery({
+    queryKey: ["userVotedPosts", user?.id],
+    queryFn: () => getUserVotedPostIds(user?.id),
+    enabled: !!user?.id,
   });
 
   // 投票期限をチェックする関数
@@ -96,6 +125,8 @@ const CommunityItem = ({ communityId }: Props) => {
         <div className="grid gap-6">
           {communityItemData?.map((item) => {
             const votingExpired = isVotingExpired(item.vote_deadline);
+            // 投票済みかどうかを判定
+            const hasUserVoted = votedPostIds?.has(item.id) ?? false;
 
             return (
               <Link key={item.id} to={`/post/${item.id}`}>
@@ -144,6 +175,14 @@ const CommunityItem = ({ communityId }: Props) => {
                             >
                               <Clock size={12} />
                               <span>{formatDeadline(item.vote_deadline)}</span>
+                            </div>
+                          )}
+
+                          {/* 投票済みバッジ */}
+                          {hasUserVoted && (
+                            <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-600">
+                              <CheckCircle size={12} />
+                              <span>投票済み</span>
                             </div>
                           )}
                         </div>

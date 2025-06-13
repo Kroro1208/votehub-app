@@ -5,6 +5,7 @@ import { supabase } from "../supabase-client";
 import { useAuth } from "../hooks/useAuth";
 import { useState } from "react";
 import VoteGageBar from "./VoteGageBar";
+import { CheckCircle } from "lucide-react";
 
 interface PostProps {
   postId: number;
@@ -173,6 +174,9 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
   const totalVotes = upVotes + downVotes;
   const userVote = votes?.find((item) => item.user_id === user?.id)?.vote;
 
+  // 投票済みかどうか
+  const hasUserVoted = userVote !== undefined;
+
   // 投票の割合を計算（0票の場合は0%として表示）
   const upVotePercentage = totalVotes > 0 ? (upVotes / totalVotes) * 100 : 0;
   const downVotePercentage =
@@ -183,6 +187,15 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
 
   return (
     <div className="flex flex-col gap-3">
+      {/* 投票済みバッジ */}
+      {hasUserVoted && (
+        <div className="flex items-center justify-center gap-2 py-2 px-4 bg-blue-100 text-blue-700 rounded-lg border border-blue-200">
+          <CheckCircle size={20} />
+          <span className="font-medium">
+            投票済み（{userVote === 1 ? "賛成" : "反対"}）
+          </span>
+        </div>
+      )}
       {/* 投票期限が過ぎている場合の表示 */}
       {votingExpired && (
         <div className="w-full text-center py-3 px-4 bg-gray-300 text-gray-600 rounded-lg">
@@ -197,27 +210,40 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
           <button
             type="button"
             onClick={() => mutate(1)}
-            disabled={isVoting}
-            className={`cursor-pointer px-5 py-1 rounded transition-colors duration-150
-              ${isVoting ? "opacity-50" : ""}
-              ${userVote === 1 ? "bg-green-500 text-white" : "bg-gray-200 text-black"}`}
+            disabled={isVoting || hasUserVoted}
+            className={`flex items-center gap-2 px-5 py-3 rounded-lg font-medium transition-all duration-200 ${
+              userVote === 1
+                ? "bg-green-500 text-white shadow-lg"
+                : "bg-gray-200 text-black hover:bg-green-100 hover:text-green-700"
+            } ${
+              hasUserVoted || isVoting ? "opacity-40 cursor-not-allowed" : ""
+            }`}
           >
-            賛成
-            <TbArrowBigUpLine size={30} />
-            {upVotes}
+            <TbArrowBigUpLine size={24} />
+            <span>賛成</span>
+            <span className="bg-white/20 px-2 py-1 rounded text-sm">
+              {upVotes}
+            </span>
           </button>
-          {/* 反対 */}
+
+          {/* 反対ボタン */}
           <button
             type="button"
             onClick={() => mutate(-1)}
-            disabled={isVoting}
-            className={`cursor-pointer px-5 py-1 rounded transition-colors duration-150
-              ${isVoting ? "opacity-50" : ""}
-              ${userVote === -1 ? "bg-red-500 text-white" : "bg-gray-200 text-black"}`}
+            disabled={isVoting || hasUserVoted}
+            className={`flex items-center gap-2 px-5 py-3 rounded-lg font-medium transition-all duration-200 ${
+              userVote === -1
+                ? "bg-red-500 text-white shadow-lg"
+                : "bg-gray-200 text-black hover:bg-red-100 hover:text-red-700"
+            } ${
+              hasUserVoted || isVoting ? "opacity-40 cursor-not-allowed" : ""
+            }`}
           >
-            反対
-            <TbArrowBigDownLine size={30} />
-            {downVotes}
+            <TbArrowBigDownLine size={24} />
+            <span>反対</span>
+            <span className="bg-white/20 px-2 py-1 rounded text-sm">
+              {downVotes}
+            </span>
           </button>
         </div>
       )}

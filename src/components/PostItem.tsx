@@ -1,12 +1,41 @@
 import { Link } from "react-router";
 import type { PostType } from "./PostList";
-import { MessagesSquare, Speech, Clock } from "lucide-react";
+import { MessagesSquare, Speech, Clock, CheckCircle } from "lucide-react";
+import { supabase } from "../supabase-client";
+import { useAuth } from "../hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 
 interface PostItemType {
   post: PostType;
 }
 
+// 投稿の投票状況を取得する関数
+const getUserVoteForPost = async (postId: number, userId?: string) => {
+  if (!userId) return null;
+
+  const { data, error } = await supabase
+    .from("votes")
+    .select("vote")
+    .eq("post_id", postId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  return data?.vote;
+};
+
 const PostItem = ({ post }: PostItemType) => {
+  const { user } = useAuth();
+
+  // ユーザーの投票状況を取得
+  const { data: userVote } = useQuery({
+    queryKey: ["userVote", post.id, user?.id],
+    queryFn: () => getUserVoteForPost(post.id, user?.id),
+    enabled: !!user?.id,
+  });
+
+  const hasUserVoted = userVote !== null;
+
   // 投票期限をチェックする関数
   const isVotingExpired = () => {
     if (!post.vote_deadline) return false;
@@ -66,6 +95,14 @@ const PostItem = ({ post }: PostItemType) => {
               )}
             </div>
           </div>
+
+          {/* 投票済みバッジ */}
+          {hasUserVoted && (
+            <div className="flex items-center gap-1 text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded mt-2 w-fit">
+              <CheckCircle size={12} />
+              <span>投票済み</span>
+            </div>
+          )}
 
           {/* Image Banner */}
           <div className="mt-2 flex-1">
