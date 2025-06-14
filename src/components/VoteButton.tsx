@@ -137,7 +137,7 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
       // 新しい投票データを作成
       const newVotes = [...previousVotes];
       const userVoteIndex = previousVotes.findIndex(
-        (v) => v.user_id === user.id
+        (v) => v.user_id === user.id,
       );
 
       // ケース1: 既存の投票がない場合、新規追加
