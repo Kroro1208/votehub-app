@@ -4,6 +4,7 @@ import { MessagesSquare, Speech, CheckCircle } from "lucide-react";
 import { supabase } from "../supabase-client";
 import { useAuth } from "../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
+import { Badge } from "./ui/badge";
 
 interface PostItemType {
   post: PostType;
@@ -73,32 +74,22 @@ const PostItem = ({ post }: PostItemType) => {
             ) : (
               <div className="w-[35px] h-[35px] rounded-full bg-gradient-to-tl from-[#0ce73b] to-[#63c087]" />
             )}
-            <div className="flex flex-1 items-center gap-3">
-              <div className="text-[20px] leading-[22px] font-semibold mt-2">
-                {post.title}
-              </div>
-              {/* 投票期限表示 */}
-              {post.vote_deadline && (
-                <div
-                  className={`flex items-center gap-1 text-xs mt-1 justify-center mx-auto ${
-                    votingExpired
-                      ? "text-red-400"
-                      : showPersuasionButton
-                        ? "text-orange-400"
-                        : "text-yellow-400"
-                  }`}
-                ></div>
+            <div className="flex flex-1 justify-between items-center gap-3">
+              <p>{post.title}</p>
+              {hasUserVoted && (
+                <div className="flex items-center gap-1 text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded mt-2 w-fit">
+                  <CheckCircle size={12} />
+                  <span>投票済み</span>
+                </div>
               )}
             </div>
           </div>
 
-          {/* 投票済みバッジ */}
-          {hasUserVoted && (
-            <div className="flex items-center gap-1 text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded mt-2 w-fit">
-              <CheckCircle size={12} />
-              <span>投票済み</span>
-            </div>
-          )}
+          <div className="flex justify-between mt-2">
+            <Badge variant="outline" className="bg-amber-100 text-black">
+              space: {post.communities?.name}
+            </Badge>
+          </div>
 
           {/* Image Banner */}
           <div className="mt-2 flex-1">

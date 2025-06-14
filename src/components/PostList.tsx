@@ -17,11 +17,25 @@ export interface PostType {
   vote_deadline?: string | null;
   community_id?: number | null;
   user_id: string | null;
+  communities?: {
+    id: number;
+    name: string;
+  };
 }
 
 const fetchPosts = async (): Promise<PostType[]> => {
-  const { data, error } = await supabase.rpc("get_posts_with_counts");
-
+  const { data, error } = await supabase
+    .from("posts")
+    .select(
+      `
+      *,
+      communities (
+        id,
+        name
+      )
+    `,
+    )
+    .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
   return data as PostType[];
 };
