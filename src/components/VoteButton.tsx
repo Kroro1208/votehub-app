@@ -203,17 +203,19 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
               type="button"
               onClick={() => mutate(1)}
               disabled={isVoting || hasUserVoted}
-              className={`flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-medium transition-all duration-200 min-w-[120px] h-12 ${
+
+              className={`group relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all duration-300 min-w-[140px] h-14 overflow-hidden ${
                 userVote === 1
-                  ? "bg-green-600 text-white shadow-lg"
-                  : "bg-green-500 text-white hover:bg-green-600"
+                  ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-green-500/25 scale-105"
+                  : "bg-gradient-to-r from-emerald-400 to-green-400 text-white hover:from-emerald-500 hover:to-green-500 hover:shadow-lg hover:shadow-green-500/25 hover:scale-105 active:scale-95"
               } ${
-                hasUserVoted || isVoting ? "opacity-40 cursor-not-allowed" : ""
+                hasUserVoted || isVoting ? "opacity-50 cursor-not-allowed hover:scale-100" : "shadow-md"
               }`}
             >
-              <TbArrowBigUpLine size={24} />
-              <span>賛成</span>
-              <span className="bg-white/20 px-2 py-1 rounded text-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <TbArrowBigUpLine size={26} className="relative z-10" />
+              <span className="relative z-10">賛成</span>
+              <span className="relative z-10 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold">
                 {upVotes}
               </span>
             </button>
@@ -223,17 +225,18 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
               type="button"
               onClick={() => mutate(-1)}
               disabled={isVoting || hasUserVoted}
-              className={`flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-medium transition-all duration-200 min-w-[120px] h-12 ${
+              className={`group relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all duration-300 min-w-[140px] h-14 overflow-hidden ${
                 userVote === -1
-                  ? "bg-red-600 text-white shadow-lg"
-                  : "bg-red-500 text-white hover:bg-red-600"
+                  ? "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/25 scale-105"
+                  : "bg-gradient-to-r from-red-400 to-rose-400 text-white hover:from-red-500 hover:to-rose-500 hover:shadow-lg hover:shadow-red-500/25 hover:scale-105 active:scale-95"
               } ${
-                hasUserVoted || isVoting ? "opacity-40 cursor-not-allowed" : ""
+                hasUserVoted || isVoting ? "opacity-50 cursor-not-allowed hover:scale-100" : "shadow-md"
               }`}
             >
-              <TbArrowBigDownLine size={24} />
-              <span>反対</span>
-              <span className="bg-white/20 px-2 py-1 rounded text-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <TbArrowBigDownLine size={26} className="relative z-10" />
+              <span className="relative z-10">反対</span>
+              <span className="relative z-10 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold">
                 {downVotes}
               </span>
             </button>
