@@ -14,140 +14,136 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-0 w-full z-40 bg-[rgba(10,10,10,0.8)] backdrop-blur-lg border-b border-white/10 shadow-lg">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="flex items-center h-16">
-          {/* ロゴ */}
-          <div className="flex-shrink-0">
-            <Link to="/" className="font-mono text-xl font-bold text-white">
-              Vote Post<span className="text-green-500">.app</span>
-            </Link>
-          </div>
+      {/* Sidebarのスペースを考慮したコンテナ */}
+      <div className="ml-64">
+        <div className="max-w-6xl mx-auto xl:mr-80 px-4">
+          <div className="flex items-center h-16">
+            {/* 中央部分にスペースを作成 */}
+            <div className="flex-grow" />
 
-          {/* 中央部分にスペースを作成 */}
-          <div className="flex-grow" />
-
-          {/* Desktop Links */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link
-              to="/"
-              className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
-            >
-              Home
-            </Link>
-            <Link
-              to="/create"
-              className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
-            >
-              Create Post
-            </Link>
-            <Link
-              to="/space"
-              className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
-            >
-              Space
-            </Link>
-            <Link
-              to="/space/create"
-              className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
-            >
-              Create Space
-            </Link>
-          </div>
-
-          {/* 中央と右側の間にスペース */}
-          <div className="hidden md:block w-8" />
-
-          {/* 認証セクション */}
-          <div className="hidden md:flex items-center">
-            {user ? (
-              <div className="flex space-x-4 items-center justify-center">
-                {user ? (
-                  <div>
-                    {user.user_metadata.avatar_url && (
-                      <img
-                        alt="user"
-                        src={user.user_metadata.avatar_url}
-                        className="rounded-full size-10 object-cover"
-                      />
-                    )}
-                  </div>
-                ) : (
-                  <FaRegUser />
-                )}
-                <span className="text-blue-300">{displayName}</span>
-                <div>
-                  <button
-                    type="button"
-                    onClick={signOut}
-                    className="cursor-pointer flex gap-3 items-center justify-center bg-red-500 px-3 py-1 rounded"
-                  >
-                    <span className="text-gray-300">SignOut</span>
-                    <VscSignOut size={25} />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={signInWithGoogle}
-                className="cursor-pointer bg-blue-500 px-3 py-1 rounded"
-              >
-                <span className="text-gray-300">SignUp</span>
-              </button>
-            )}
-          </div>
-
-          {/* モバイルメニューボタン */}
-          <div className="ml-auto md:hidden">
-            <button
-              type="button"
-              onClick={() => setMenuOpen((prev) => !prev)}
-              className="text-gray-300 focus:outline-none p-2"
-              aria-label="Toggle menu"
-            >
-              <div className="relative transform transition-all duration-300 ease-in-out">
-                {menuOpen ? (
-                  <RiCloseLargeFill className="text-2xl transition-transform duration-300 ease-in-out" />
-                ) : (
-                  <CgMenuGridO className="text-2xl transition-transform duration-300 ease-in-out" />
-                )}
-              </div>
-            </button>
-          </div>
-
-          {/* モバイル用メニュー - アニメーション付き */}
-          <div
-            className={`md:hidden fixed left-0 right-0 top-16 bg-[rgba(10,10,10,0.95)] backdrop-blur-md transform transition-all duration-300 ease-in-out overflow-hidden ${
-              menuOpen
-                ? "max-h-64 opacity-100 border-b border-white/10 shadow-lg"
-                : "max-h-0 opacity-0"
-            }`}
-          >
-            <div className="px-4 py-3 space-y-2">
+            {/* Desktop Links */}
+            <div className="hidden md:flex items-center space-x-8">
               <Link
                 to="/"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
                 Home
               </Link>
               <Link
                 to="/create"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
                 Create Post
               </Link>
               <Link
                 to="/space"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
                 Space
               </Link>
               <Link
-                to="/community/space"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                to="/space/create"
+                className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
                 Create Space
               </Link>
+            </div>
+
+            {/* 中央と右側の間にスペース */}
+            <div className="hidden md:block w-12" />
+
+            {/* 認証セクション */}
+            <div className="hidden md:flex items-center flex-shrink-0">
+              {user ? (
+                <div className="flex space-x-4 items-center justify-center min-w-0">
+                  {user ? (
+                    <div className="flex-shrink-0">
+                      {user.user_metadata.avatar_url && (
+                        <img
+                          alt="user"
+                          src={user.user_metadata.avatar_url}
+                          className="rounded-full size-10 object-cover"
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <FaRegUser />
+                  )}
+                  <span className="text-blue-300 truncate">{displayName}</span>
+                  <div className="flex-shrink-0">
+                    <button
+                      type="button"
+                      onClick={signOut}
+                      className="cursor-pointer flex gap-3 items-center justify-center bg-red-500 px-3 py-1 rounded"
+                    >
+                      <span className="text-gray-300">SignOut</span>
+                      <VscSignOut size={25} />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={signInWithGoogle}
+                  className="cursor-pointer bg-blue-500 px-3 py-1 rounded"
+                >
+                  <span className="text-gray-300">SignUp</span>
+                </button>
+              )}
+            </div>
+
+            {/* モバイルメニューボタン */}
+            <div className="ml-auto md:hidden">
+              <button
+                type="button"
+                onClick={() => setMenuOpen((prev) => !prev)}
+                className="text-gray-300 focus:outline-none p-2"
+                aria-label="Toggle menu"
+              >
+                <div className="relative transform transition-all duration-300 ease-in-out">
+                  {menuOpen ? (
+                    <RiCloseLargeFill className="text-2xl transition-transform duration-300 ease-in-out" />
+                  ) : (
+                    <CgMenuGridO className="text-2xl transition-transform duration-300 ease-in-out" />
+                  )}
+                </div>
+              </button>
+            </div>
+
+            {/* モバイル用メニュー - アニメーション付き */}
+            <div
+              className={`md:hidden fixed left-64 right-0 top-16 bg-[rgba(10,10,10,0.95)] backdrop-blur-md transform transition-all duration-300 ease-in-out overflow-hidden ${
+                menuOpen
+                  ? "max-h-64 opacity-100 border-b border-white/10 shadow-lg"
+                  : "max-h-0 opacity-0"
+              }`}
+            >
+              <div className="px-4 py-3 space-y-2">
+                <Link
+                  to="/"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                >
+                  Home
+                </Link>
+                <Link
+                  to="/create"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                >
+                  Create Post
+                </Link>
+                <Link
+                  to="/space"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                >
+                  Space
+                </Link>
+                <Link
+                  to="/community/space"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                >
+                  Create Space
+                </Link>
+              </div>
             </div>
           </div>
         </div>

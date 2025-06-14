@@ -23,45 +23,70 @@ export interface PostType {
   };
 }
 
-const fetchPosts = async (): Promise<PostType[]> => {
-  const { data, error } = await supabase
-    .from("posts")
-    .select(
-      `
-      *,
-      communities (
-        id,
-        name
-      )
-    `,
-    )
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
-  return data as PostType[];
-};
+interface PostListProps {
+  filter?: "urgent" | "popular" | "recent";
+}
 
-const PostList = () => {
+const PostList = ({ filter }: PostListProps) => {
   const [, setPosts] = useAtom(postsAtom);
 
-  const { data, isPending, error } = useQuery<PostType[], Error>({
-    queryKey: ["posts"],
-    queryFn: fetchPosts,
+  const getFilteredQuery = () => {
+    const query = supabase.from("posts").select(`
+        *,
+        communities (id, name)
+      `);
+
+    switch (filter) {
+      case "urgent": {
+        // 期限間近（24時間以内）の投票
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return query
+          .not("vote_deadline", "is", null)
+          .lte("vote_deadline", tomorrow.toISOString())
+          .gte("vote_deadline", new Date().toISOString())
+          .order("vote_deadline", { ascending: true });
+      }
+
+      case "popular":
+        // 投票数が多い順
+        return query.order("vote_count", { ascending: false });
+
+      case "recent":
+        // 新着順
+        return query.order("created_at", { ascending: false });
+
+      default:
+        // すべて（デフォルト）
+        return query.order("created_at", { ascending: false });
+    }
+  };
+
+  const {
+    data: posts,
+    isPending,
+    error,
+  } = useQuery<PostType[], Error>({
+    queryKey: ["posts", filter],
+    queryFn: async () => {
+      const { data, error } = await getFilteredQuery();
+      if (error) throw new Error(error.message);
+      return data as PostType[];
+    },
   });
 
   useEffect(() => {
-    if (data) {
-      setPosts(data);
+    if (posts) {
+      setPosts(posts);
     }
-  }, [data, setPosts]);
+  }, [posts, setPosts]);
 
   if (isPending) return <div>Loading...</div>;
   if (error) return <div>{error.message}</div>;
 
   return (
-    <div className="flex flex-wrap gap-6 justify-center">
-      {data.map((item) => (
-        <PostItem key={item.id} post={item} />
-      ))}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {posts?.map((item) => <PostItem key={item.id} post={item} />)}
     </div>
   );
 };

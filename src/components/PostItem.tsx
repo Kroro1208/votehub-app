@@ -1,10 +1,9 @@
 import { Link } from "react-router";
 import type { PostType } from "./PostList";
-import { MessagesSquare, Speech, CheckCircle } from "lucide-react";
+import { Clock, Users, CheckCircle, AlertTriangle, Trophy } from "lucide-react";
 import { supabase } from "../supabase-client";
 import { useAuth } from "../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { Badge } from "./ui/badge";
 
 interface PostItemType {
   post: PostType;
@@ -58,83 +57,151 @@ const PostItem = ({ post }: PostItemType) => {
   const votingExpired = isVotingExpired();
   const showPersuasionButton = isPostOwner && isPersuasionTime();
 
+  // 残り時間を計算
+  const getTimeRemaining = () => {
+    if (!post.vote_deadline) return null;
+    const now = new Date();
+    const deadline = new Date(post.vote_deadline);
+    const diff = deadline.getTime() - now.getTime();
+
+    if (diff <= 0) return "終了";
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (hours > 24) {
+      const days = Math.floor(hours / 24);
+      return `${days}日`;
+    } else if (hours > 0) {
+      return `${hours}時間`;
+    } else {
+      return `${minutes}分`;
+    }
+  };
+
+  const timeRemaining = getTimeRemaining();
+
   return (
-    <div className="relative group">
-      <div className="absolute -inset-1 rounded-[20px] bg-gradient-to-r from-pink-600 to-purple-600 blur-sm opacity-0 group-hover:opacity-50 transition duration-300 pointer-events-none" />
-      <Link to={`/post/${post.id}`} className="block relative z-10">
-        <div className="w-80 h-76 bg-[rgb(24,27,32)] border border-[rgb(84,90,106)] rounded-[20px] text-white flex flex-col p-5 overflow-hidden transition-colors duration-300 group-hover:bg-gray-800">
-          {/* Header: Avatar and Title */}
-          <div className="flex items-center space-x-2">
-            {post?.avatar_url ? (
-              <img
-                src={post.avatar_url}
-                alt="UserAvatar"
-                className="w-[35px] h-[35px] rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-[35px] h-[35px] rounded-full bg-gradient-to-tl from-[#0ce73b] to-[#63c087]" />
-            )}
-            <div className="flex flex-1 justify-between items-center gap-3">
-              <p>{post.title}</p>
-              {hasUserVoted && (
-                <div className="flex items-center gap-1 text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded mt-2 w-fit">
-                  <CheckCircle size={12} />
-                  <span>投票済み</span>
+    <Link to={`/post/${post.id}`} className="block group">
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-all duration-300 group-hover:scale-[1.02]">
+        {/* Status Banner */}
+        <div
+          className={`h-1 ${
+            votingExpired
+              ? "bg-slate-400"
+              : showPersuasionButton
+                ? "bg-orange-500"
+                : "bg-gradient-to-r from-violet-500 to-purple-600"
+          }`}
+        />
+
+        {/* Header */}
+        <div className="p-4 pb-2">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center space-x-3">
+              {post?.avatar_url ? (
+                <img
+                  src={post.avatar_url}
+                  alt="UserAvatar"
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tl from-violet-500 to-purple-500" />
+              )}
+              <div>
+                <h3 className="font-semibold text-slate-800 line-clamp-1">
+                  {post.title}
+                </h3>
+                <div className="flex items-center space-x-2 mt-1">
+                  <span className="text-xs bg-violet-100 text-violet-700 px-2 py-1 rounded-full">
+                    {post.communities?.name}
+                  </span>
+                  {hasUserVoted && (
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full flex items-center space-x-1">
+                      <CheckCircle size={10} />
+                      <span>投票済み</span>
+                    </span>
+                  )}
                 </div>
+              </div>
+            </div>
+
+            {/* Status Icon */}
+            <div className="flex flex-col items-end space-y-1">
+              {votingExpired ? (
+                <Trophy size={20} className="text-slate-400" />
+              ) : showPersuasionButton ? (
+                <AlertTriangle size={20} className="text-orange-500" />
+              ) : (
+                <Clock size={20} className="text-violet-500" />
+              )}
+
+              {timeRemaining && (
+                <span
+                  className={`text-xs font-medium ${
+                    votingExpired
+                      ? "text-slate-500"
+                      : showPersuasionButton
+                        ? "text-orange-600"
+                        : "text-violet-600"
+                  }`}
+                >
+                  {votingExpired ? "終了" : `残り${timeRemaining}`}
+                </span>
               )}
             </div>
           </div>
+        </div>
 
-          <div className="flex justify-between mt-2">
-            <Badge variant="outline" className="bg-amber-100 text-black">
-              space: {post.communities?.name}
-            </Badge>
-          </div>
-
-          {/* Image Banner */}
-          <div className="mt-2 flex-1">
+        {/* Image */}
+        {post.image_url && (
+          <div className="px-4">
             <img
               src={post.image_url}
               alt={post.title}
-              className="w-full rounded-[20px] object-cover max-h-[150px] mx-auto"
+              className="w-full h-48 object-cover rounded-lg"
             />
           </div>
+        )}
 
-          {/* Stats and Vote Status */}
-          <div className="flex justify-between items-center">
-            <div className="flex gap-3">
-              <span className="flex gap-2">
-                <Speech />
-                {post.vote_count ?? 0}
-              </span>
-              <span className="flex gap-2">
-                <MessagesSquare />
-                {post.comment_count ?? 0}
-              </span>
+        {/* Stats */}
+        <div className="p-4 pt-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 text-slate-600">
+                <Users size={16} />
+                <span className="text-sm font-medium">
+                  {post.vote_count ?? 0}
+                </span>
+                <span className="text-xs">投票</span>
+              </div>
+
+              <div className="flex items-center space-x-2 text-slate-600">
+                <div className="w-4 h-4 rounded-full bg-slate-300" />
+                <span className="text-sm">{post.comment_count ?? 0}</span>
+                <span className="text-xs">コメント</span>
+              </div>
             </div>
 
-            {/* 投票状況表示 */}
-            {post.vote_deadline && (
-              <div
-                className={`text-xs px-2 py-1 rounded ${
-                  votingExpired
-                    ? "bg-red-500/20 text-red-300"
-                    : showPersuasionButton
-                      ? "bg-orange-500/20 text-orange-300"
-                      : "bg-green-500/20 text-green-300"
-                }`}
-              >
-                {votingExpired
-                  ? "投票終了"
+            <div
+              className={`text-xs px-3 py-1 rounded-full font-medium ${
+                votingExpired
+                  ? "bg-slate-100 text-slate-600"
                   : showPersuasionButton
-                    ? "説得タイム"
-                    : "投票中"}
-              </div>
-            )}
+                    ? "bg-orange-100 text-orange-700"
+                    : "bg-violet-100 text-violet-700"
+              }`}
+            >
+              {votingExpired
+                ? "結果発表"
+                : showPersuasionButton
+                  ? "説得タイム"
+                  : "投票受付中"}
+            </div>
           </div>
         </div>
-      </Link>
-    </div>
+      </div>
+    </Link>
   );
 };
 
