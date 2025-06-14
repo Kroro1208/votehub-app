@@ -44,7 +44,16 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
     return new Date() > new Date(voteDeadline);
   };
 
+  const isPersuasionTime = () => {
+    if (!voteDeadline) return false;
+    const deadline = new Date(voteDeadline);
+    const now = new Date();
+    const oneHourBeforeDeadline = new Date(deadline.getTime() - 60 * 60 * 1000);
+    return now >= oneHourBeforeDeadline && now < deadline;
+  };
+
   const votingExpired = isVotingExpired();
+  const persuasionTime = isPersuasionTime();
 
   const {
     data: votes,
@@ -126,7 +135,7 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
       // 新しい投票データを作成
       const newVotes = [...previousVotes];
       const userVoteIndex = previousVotes.findIndex(
-        (v) => v.user_id === user.id,
+        (v) => v.user_id === user.id
       );
 
       // ケース1: 既存の投票がない場合、新規追加
@@ -195,6 +204,13 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
       )}
 
       <div className="flex items-center gap-3">
+        {/* 投票期限が過ぎている場合の表示 */}
+        {votingExpired && (
+          <div className="w-full text-center py-3 px-4 bg-gray-300 text-gray-600 rounded-lg">
+            <span className="font-semibold">投票期限が終了しました</span>
+          </div>
+        )}
+
         {/* 投票期限内の場合の投票ボタン */}
         {!votingExpired && (
           <>
@@ -244,6 +260,15 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
               </span>
             </button>
           </>
+        )}
+
+        {/* 説得タイム中の通知 */}
+        {persuasionTime && !votingExpired && (
+          <div className="w-full text-center py-3 px-4 bg-orange-100 text-orange-700 rounded-lg border border-orange-200">
+            <span className="font-semibold">
+              説得タイム中！投票を変更できます
+            </span>
+          </div>
         )}
 
         {/* 投票済みバッジ */}

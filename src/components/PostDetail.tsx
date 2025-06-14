@@ -59,7 +59,7 @@ const fetchCommentById = async (id: number | null): Promise<Comment | null> => {
 const createPersuasionComment = async (
   postId: number,
   content: string,
-  userId: string,
+  userId: string
 ) => {
   // ユーザーの表示名を取得（CommentSectionと同じロジック）
   const {
@@ -161,7 +161,7 @@ const PostDetail = ({ postId }: Props) => {
 
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const diffHours = Math.floor(
-      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
     );
     const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
@@ -185,7 +185,7 @@ const PostDetail = ({ postId }: Props) => {
 
   // 最もリアクションの多いコメントを管理する
   const [mostVotedComment, setMostVotedComment] = useState<Comment | null>(
-    null,
+    null
   );
 
   // 最も投票の多いコメントのIDが変わったらコメント情報を取得

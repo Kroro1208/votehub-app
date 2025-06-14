@@ -21,7 +21,7 @@ const getUserVoteForPost = async (postId: number, userId?: string) => {
     .maybeSingle();
 
   if (error) throw new Error(error.message);
-  return data?.vote;
+  return data ? data?.vote : null;
 };
 
 const PostItem = ({ post }: PostItemType) => {
@@ -34,7 +34,7 @@ const PostItem = ({ post }: PostItemType) => {
     enabled: !!user?.id,
   });
 
-  const hasUserVoted = userVote !== null;
+  const hasUserVoted = userVote !== null && userVote !== undefined;
 
   // 投稿者かどうかをチェック
   const isPostOwner = user?.id === post.user_id;
