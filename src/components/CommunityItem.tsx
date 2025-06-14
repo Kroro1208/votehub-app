@@ -18,11 +18,11 @@ interface Props {
 }
 
 interface CommunityItemType extends PostType {
-  communities?: { name: string };
+  communities?: { id: number; name: string };
 }
 
 const getCommunitityItem = async (
-  communityId: number,
+  communityId: number
 ): Promise<CommunityItemType[]> => {
   // get_posts_with_counts関数を使用して投票数とコメント数を取得
   const { data, error } = await supabase
@@ -36,15 +36,17 @@ const getCommunitityItem = async (
     data.map(async (post: PostType) => {
       const { data: communityData } = await supabase
         .from("communities")
-        .select("name")
+        .select("id, name")
         .eq("id", post.community_id)
         .single();
 
       return {
         ...post,
-        communities: communityData ? { name: communityData.name } : undefined,
+        communities: communityData
+          ? { id: communityData.id, name: communityData.name }
+          : undefined,
       };
-    }),
+    })
   );
 
   return postsWithCommunity as CommunityItemType[];
@@ -159,7 +161,7 @@ const CommunityItem = ({ communityId }: Props) => {
                                   day: "numeric",
                                   hour: "2-digit",
                                   minute: "2-digit",
-                                },
+                                }
                               )}
                             </time>
                           </div>
