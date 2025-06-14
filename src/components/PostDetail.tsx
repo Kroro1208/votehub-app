@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../supabase-client";
 import type { PostType } from "./PostList";
 import VoteButton from "./VoteButton";
@@ -8,6 +8,16 @@ import { mostVotedCommentAtomFamily } from "../stores/CommentVoteAtom";
 import { useState, useEffect } from "react";
 import { Calendar, Clock, MessageCircle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { Textarea } from "./ui/textarea";
+import { Button } from "./ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 
 interface Props {
   postId: number;
@@ -46,7 +56,47 @@ const fetchCommentById = async (id: number | null): Promise<Comment | null> => {
   return data as Comment;
 };
 
+const createPersuasionComment = async (
+  postId: number,
+  content: string,
+  userId: string
+) => {
+  // ユーザーの表示名を取得（CommentSectionと同じロジック）
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("ユーザー情報の取得に失敗しました");
+  }
+
+  const effectiveUserName =
+    user.user_metadata?.user_name ||
+    user.email?.split("@")[0] ||
+    "匿名ユーザー";
+
+  const { data, error } = await supabase
+    .from("comments")
+    .insert({
+      post_id: postId,
+      content,
+      user_id: userId,
+      author: effectiveUserName, // authorフィールドを追加
+      is_persuasion_comment: true,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data as Comment;
+};
+
 const PostDetail = ({ postId }: Props) => {
+  const queryClient = useQueryClient();
+  const [showPersuasionModal, setShowPersuasionModal] = useState(false);
+  const [persuasionContent, setPersuasionContent] = useState("");
+
   const { user } = useAuth();
 
   const { data, error, isPending } = useQuery<PostType, Error>({
@@ -61,6 +111,33 @@ const PostDetail = ({ postId }: Props) => {
   const isVotingExpired = () => {
     if (!data?.vote_deadline) return false;
     return new Date() > new Date(data.vote_deadline);
+  };
+
+  const persuasionCommentMutation = useMutation({
+    mutationFn: ({ content }: { content: string }) =>
+      createPersuasionComment(postId, content, user?.id || ""),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+      setShowPersuasionModal(false);
+      setPersuasionContent("");
+    },
+    onError: (error) => {
+      console.error("説得コメントの投稿に失敗しました", error);
+      alert("説得コメントの投稿に失敗しました。もう一度お試しください。");
+    },
+  });
+
+  const handlePersuasionModal = () => {
+    setShowPersuasionModal(true);
+  };
+
+  const handlePersuasionSubmit = () => {
+    if (!persuasionContent.trim()) {
+      alert("説得コメントを入力してください。");
+      return;
+    }
+    persuasionCommentMutation.mutate({ content: persuasionContent });
   };
 
   // 説得タイム（期限の1時間前）かどうかをチェック
@@ -131,11 +208,10 @@ const PostDetail = ({ postId }: Props) => {
     fetchComment();
   }, [mostVotedInfo.commentId]);
 
-  // 説得コメントボタンのクリックハンドラー
-  const handlePersuasionComment = () => {
-    // 説得コメント投稿機能を実装予定
-    console.log("説得コメントボタンがクリックされました");
-    // モーダルを開く、フォームを表示するなどの処理を追加
+  // モーダルを閉じる
+  const handleCloseModal = () => {
+    setShowPersuasionModal(false);
+    setPersuasionContent("");
   };
 
   if (isPending) return <div>Loading...</div>;
@@ -266,7 +342,7 @@ const PostDetail = ({ postId }: Props) => {
           {showPersuasionButton && (
             <div className="mt-4 pt-4 border-t border-orange-300">
               <button
-                onClick={handlePersuasionComment}
+                onClick={handlePersuasionModal}
                 className="flex items-center gap-3 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md transition-all duration-200 transform hover:scale-105"
               >
                 <MessageCircle size={20} />
@@ -312,6 +388,62 @@ const PostDetail = ({ postId }: Props) => {
 
       <VoteButton postId={postId} voteDeadline={data.vote_deadline} />
       <CommentSection postId={postId} />
+      {/* 説得コメントモーダル */}
+      <Dialog open={showPersuasionModal} onOpenChange={setShowPersuasionModal}>
+        <DialogContent className="sm:max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">
+              説得コメント
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
+              投票期限まで残り僅かです。投票者への最後のメッセージを送信してください。
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <Textarea
+              value={persuasionContent}
+              onChange={(e) => setPersuasionContent(e.target.value)}
+              placeholder="投票者に向けたメッセージを入力してください..."
+              className="min-h-[120px] resize-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              maxLength={500}
+            />
+            <div className="text-right text-xs text-gray-500 dark:text-gray-400">
+              {persuasionContent.length}/500
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={handleCloseModal}
+              disabled={persuasionCommentMutation.isPending}
+              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              キャンセル
+            </Button>
+            <Button
+              onClick={handlePersuasionSubmit}
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+              disabled={
+                persuasionCommentMutation.isPending || !persuasionContent.trim()
+              }
+            >
+              {persuasionCommentMutation.isPending ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  投稿中...
+                </>
+              ) : (
+                <>
+                  <MessageCircle size={16} className="mr-2" />
+                  投稿する
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -3,7 +3,13 @@ import { useAuth } from "../hooks/useAuth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../supabase-client";
 import CommentItem from "./CommentItem";
-import { MessageSquareText, Send, AlertCircle, Loader2 } from "lucide-react";
+import {
+  MessageSquareText,
+  Send,
+  AlertCircle,
+  Loader2,
+  Megaphone,
+} from "lucide-react";
 
 interface PostProps {
   postId: number;
@@ -22,6 +28,7 @@ export interface Comment {
   user_id: string;
   created_at: string;
   author: string;
+  is_persuasion_comment?: boolean; // 説得コメントフラグを追加
 }
 
 const createComment = async (
@@ -43,7 +50,6 @@ const createComment = async (
   if (error) throw new Error(error.message);
 };
 
-// useQuery用
 const getComment = async (postId: number): Promise<Comment[]> => {
   const { data, error } = await supabase
     .from("comments")
@@ -130,8 +136,15 @@ const CommentSection = ({ postId }: PostProps) => {
     return roots;
   };
 
-  const commentTree = comments ? createCommentTree(comments) : [];
+  // 説得コメントと通常のコメントを分ける
+  const persuasionComments =
+    comments?.filter((comment) => comment.is_persuasion_comment) || [];
+  const userComments =
+    comments?.filter((comment) => !comment.is_persuasion_comment) || [];
+
+  const commentTree = userComments ? createCommentTree(userComments) : [];
   const commentCount = comments?.length || 0;
+  const regularCommentCount = userComments.length;
 
   return (
     <div className="mt-10 bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-700">
@@ -141,6 +154,46 @@ const CommentSection = ({ postId }: PostProps) => {
           コメント {commentCount > 0 && `(${commentCount})`}
         </h3>
       </div>
+
+      {/* 説得コメントセクション */}
+      {persuasionComments.length > 0 && (
+        <div className="mb-8 bg-gradient-to-r from-orange-900/30 to-red-900/30 border border-orange-500/50 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Megaphone className="text-orange-400" size={20} />
+            <h4 className="text-lg font-semibold text-orange-400">
+              投稿者からの説得メッセージ
+            </h4>
+          </div>
+          <div className="space-y-3">
+            {persuasionComments.map((comment) => (
+              <div
+                key={comment.id}
+                className="bg-gray-800/50 border border-orange-500/30 rounded-lg p-4"
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-1 bg-orange-500 text-white text-xs rounded-full font-medium">
+                      投稿者
+                    </span>
+                    <span className="text-orange-300 font-medium text-sm">
+                      {comment.author}
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-400">
+                    {new Date(comment.created_at).toLocaleDateString("ja-JP", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+                <p className="text-white leading-relaxed">{comment.content}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* コメント入力セクション */}
       {user ? (
@@ -223,8 +276,17 @@ const CommentSection = ({ postId }: PostProps) => {
         </div>
       )}
 
-      {/* コメント表示部分 */}
+      {/* 通常のコメント表示部分 */}
       <div className="space-y-2">
+        {regularCommentCount > 0 && (
+          <div className="flex items-center gap-2 mb-4 pt-4 border-t border-gray-600">
+            <MessageSquareText className="text-gray-400" size={20} />
+            <h4 className="text-lg font-medium text-gray-300">
+              コメント ({regularCommentCount})
+            </h4>
+          </div>
+        )}
+
         {commentIsPending ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="animate-spin text-green-400" size={32} />
