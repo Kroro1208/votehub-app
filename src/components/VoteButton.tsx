@@ -6,6 +6,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useState } from "react";
 import VoteGageBar from "./VoteGageBar";
 import { CheckCircle } from "lucide-react";
+import { Button } from "./ui/button";
 
 interface PostProps {
   postId: number;
@@ -44,6 +45,7 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
     return new Date() > new Date(voteDeadline);
   };
 
+  // 説得タイム（期限の1時間前）かどうかをチェック
   const isPersuasionTime = () => {
     if (!voteDeadline) return false;
     const deadline = new Date(voteDeadline);
@@ -186,6 +188,10 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
   // 投票済みかどうか
   const hasUserVoted = userVote !== undefined;
 
+  // 投票ボタンを無効にする条件を更新
+  // 説得タイム中は投票済みでもボタンを有効にする
+  const isVotingDisabled = isVoting || (hasUserVoted && !persuasionTime);
+
   // 投票の割合を計算（0票の場合は0%として表示）
   const upVotePercentage = totalVotes > 0 ? (upVotes / totalVotes) * 100 : 0;
   const downVotePercentage =
@@ -204,27 +210,22 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
       )}
 
       <div className="flex items-center gap-3">
-        {/* 投票期限が過ぎている場合の表示 */}
-        {votingExpired && (
-          <div className="w-full text-center py-3 px-4 bg-gray-300 text-gray-600 rounded-lg">
-            <span className="font-semibold">投票期限が終了しました</span>
-          </div>
-        )}
-
         {/* 投票期限内の場合の投票ボタン */}
         {!votingExpired && (
           <>
             {/* 賛成ボタン */}
-            <button
+            <Button
               type="button"
               onClick={() => mutate(1)}
-              disabled={isVoting || hasUserVoted}
+              disabled={isVotingDisabled}
               className={`group relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all duration-300 min-w-[140px] h-14 overflow-hidden ${
                 userVote === 1
-                  ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-green-500/25 scale-105"
+                  ? persuasionTime
+                    ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-green-500/25 scale-105 ring-2 ring-orange-300"
+                    : "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-green-500/25 scale-105"
                   : "bg-gradient-to-r from-emerald-400 to-green-400 text-white hover:from-emerald-500 hover:to-green-500 hover:shadow-lg hover:shadow-green-500/25 hover:scale-105 active:scale-95"
               } ${
-                hasUserVoted || isVoting
+                isVotingDisabled
                   ? "opacity-50 cursor-not-allowed hover:scale-100"
                   : "shadow-md"
               }`}
@@ -235,19 +236,21 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
               <span className="relative z-10 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold">
                 {upVotes}
               </span>
-            </button>
+            </Button>
 
             {/* 反対ボタン */}
-            <button
+            <Button
               type="button"
               onClick={() => mutate(-1)}
-              disabled={isVoting || hasUserVoted}
+              disabled={isVotingDisabled}
               className={`group relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all duration-300 min-w-[140px] h-14 overflow-hidden ${
                 userVote === -1
-                  ? "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/25 scale-105"
+                  ? persuasionTime
+                    ? "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/25 scale-105 ring-2 ring-orange-300"
+                    : "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/25 scale-105"
                   : "bg-gradient-to-r from-red-400 to-rose-400 text-white hover:from-red-500 hover:to-rose-500 hover:shadow-lg hover:shadow-red-500/25 hover:scale-105 active:scale-95"
               } ${
-                hasUserVoted || isVoting
+                isVotingDisabled
                   ? "opacity-50 cursor-not-allowed hover:scale-100"
                   : "shadow-md"
               }`}
@@ -258,24 +261,23 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
               <span className="relative z-10 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold">
                 {downVotes}
               </span>
-            </button>
+            </Button>
           </>
         )}
 
+        {/* 投票済みバッジ */}
+        {hasUserVoted && !persuasionTime && (
+          <div className="flex items-center justify-center gap-2 px-5 py-3 bg-blue-100 text-blue-700 rounded-lg border border-blue-200 font-medium h-12 min-w-[200px]">
+            <CheckCircle size={20} />
+            <span>投票済み（{userVote === 1 ? "賛成" : "反対"}）</span>
+          </div>
+        )}
         {/* 説得タイム中の通知 */}
         {persuasionTime && !votingExpired && (
           <div className="w-full text-center py-3 px-4 bg-orange-100 text-orange-700 rounded-lg border border-orange-200">
             <span className="font-semibold">
               説得タイム中！投票を変更できます
             </span>
-          </div>
-        )}
-
-        {/* 投票済みバッジ */}
-        {hasUserVoted && (
-          <div className="flex items-center justify-center gap-2 px-5 py-3 bg-blue-100 text-blue-700 rounded-lg border border-blue-200 font-medium h-12 min-w-[200px]">
-            <CheckCircle size={20} />
-            <span>投票済み（{userVote === 1 ? "賛成" : "反対"}）</span>
           </div>
         )}
       </div>
