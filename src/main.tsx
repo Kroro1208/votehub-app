@@ -19,7 +19,7 @@ if (rootElement) {
           </Router>
         </AuthProvider>
       </QueryClientProvider>
-    </StrictMode>
+    </StrictMode>,
   );
 } else {
   console.error("Root element not found");

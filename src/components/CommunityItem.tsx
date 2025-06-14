@@ -22,7 +22,7 @@ interface CommunityItemType extends PostType {
 }
 
 const getCommunitityItem = async (
-  communityId: number
+  communityId: number,
 ): Promise<CommunityItemType[]> => {
   // get_posts_with_counts関数を使用して投票数とコメント数を取得
   const { data, error } = await supabase
@@ -44,7 +44,7 @@ const getCommunitityItem = async (
         ...post,
         communities: communityData ? { name: communityData.name } : undefined,
       };
-    })
+    }),
   );
 
   return postsWithCommunity as CommunityItemType[];
@@ -159,7 +159,7 @@ const CommunityItem = ({ communityId }: Props) => {
                                   day: "numeric",
                                   hour: "2-digit",
                                   minute: "2-digit",
-                                }
+                                },
                               )}
                             </time>
                           </div>

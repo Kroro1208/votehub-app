@@ -1,9 +1,6 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(claude doctor --help)",
-      "Bash(npm i:*)"
-    ],
+    "allow": ["Bash(claude doctor --help)", "Bash(npm i:*)"],
     "deny": []
   }
 }

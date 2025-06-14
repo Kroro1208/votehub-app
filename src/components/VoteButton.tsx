@@ -126,7 +126,7 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
       // 新しい投票データを作成
       const newVotes = [...previousVotes];
       const userVoteIndex = previousVotes.findIndex(
-        (v) => v.user_id === user.id
+        (v) => v.user_id === user.id,
       );
 
       // ケース1: 既存の投票がない場合、新規追加
@@ -203,13 +203,14 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
               type="button"
               onClick={() => mutate(1)}
               disabled={isVoting || hasUserVoted}
-
               className={`group relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all duration-300 min-w-[140px] h-14 overflow-hidden ${
                 userVote === 1
                   ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-green-500/25 scale-105"
                   : "bg-gradient-to-r from-emerald-400 to-green-400 text-white hover:from-emerald-500 hover:to-green-500 hover:shadow-lg hover:shadow-green-500/25 hover:scale-105 active:scale-95"
               } ${
-                hasUserVoted || isVoting ? "opacity-50 cursor-not-allowed hover:scale-100" : "shadow-md"
+                hasUserVoted || isVoting
+                  ? "opacity-50 cursor-not-allowed hover:scale-100"
+                  : "shadow-md"
               }`}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -230,7 +231,9 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
                   ? "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/25 scale-105"
                   : "bg-gradient-to-r from-red-400 to-rose-400 text-white hover:from-red-500 hover:to-rose-500 hover:shadow-lg hover:shadow-red-500/25 hover:scale-105 active:scale-95"
               } ${
-                hasUserVoted || isVoting ? "opacity-50 cursor-not-allowed hover:scale-100" : "shadow-md"
+                hasUserVoted || isVoting
+                  ? "opacity-50 cursor-not-allowed hover:scale-100"
+                  : "shadow-md"
               }`}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

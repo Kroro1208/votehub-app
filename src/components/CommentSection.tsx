@@ -35,7 +35,7 @@ const createComment = async (
   newComment: NewComment,
   postId: number,
   userId?: string,
-  author?: string
+  author?: string,
 ) => {
   if (!userId || !author) {
     throw new Error("コメントするにはログインが必要です");
@@ -99,7 +99,7 @@ const CommentSection = ({ postId }: PostProps) => {
   };
 
   const createCommentTree = (
-    flatComments: Comment[]
+    flatComments: Comment[],
   ): (Comment & { children: Comment[] })[] => {
     // まずすべてのコメントをマップに追加しておく
     const map = new Map<number, Comment & { children: Comment[] }>();

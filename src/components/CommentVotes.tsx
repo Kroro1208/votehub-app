@@ -67,7 +67,7 @@ const CommentVotes = ({ commentId, postId }: VoteProps) => {
         upVotes,
         downVotes,
         setVotesState,
-        setMostVotedState
+        setMostVotedState,
       );
     }
   }, [
@@ -155,7 +155,7 @@ const CommentVotes = ({ commentId, postId }: VoteProps) => {
       // 新しい投票データを作成
       const newVotes = [...previousVotes];
       const userVoteIndex = previousVotes.findIndex(
-        (v) => v.user_id === user.id
+        (v) => v.user_id === user.id,
       );
 
       // ケース1: 既存の投票がない場合、新規追加
@@ -191,7 +191,7 @@ const CommentVotes = ({ commentId, postId }: VoteProps) => {
         newUpVotes,
         newDownVotes,
         setVotesState,
-        setMostVotedState
+        setMostVotedState,
       );
 
       return { previousVotes };
@@ -201,15 +201,15 @@ const CommentVotes = ({ commentId, postId }: VoteProps) => {
       if (context?.previousVotes) {
         queryClient.setQueryData(
           ["comment_votes", commentId],
-          context.previousVotes
+          context.previousVotes,
         );
 
         // Jotaiの状態も元に戻す
         const prevUpVotes = context.previousVotes.filter(
-          (v) => v.vote === 1
+          (v) => v.vote === 1,
         ).length;
         const prevDownVotes = context.previousVotes.filter(
-          (v) => v.vote === -1
+          (v) => v.vote === -1,
         ).length;
         updateCommentVotes(
           commentId,
@@ -217,7 +217,7 @@ const CommentVotes = ({ commentId, postId }: VoteProps) => {
           prevUpVotes,
           prevDownVotes,
           setVotesState,
-          setMostVotedState
+          setMostVotedState,
         );
       }
       console.error(err);

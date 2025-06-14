@@ -30,8 +30,8 @@ export const updateCommentVotes = (
   downVotes: number,
   setter: (update: (prev: CommentVotesMap) => CommentVotesMap) => void,
   mostVotedSetter: (
-    update: (prev: MostVotedCommentsMap) => MostVotedCommentsMap
-  ) => void
+    update: (prev: MostVotedCommentsMap) => MostVotedCommentsMap,
+  ) => void,
 ) => {
   const totalVotes = upVotes + downVotes;
 

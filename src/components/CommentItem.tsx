@@ -17,7 +17,7 @@ const createReply = async (
   postId: number,
   parentCommentId: number,
   userId?: string,
-  author?: string
+  author?: string,
 ) => {
   if (!userId || !author) {
     throw new Error("コメントするにはログインが必要です");
@@ -52,7 +52,7 @@ const CommentItem = ({ comment, postId }: CommentItemProps) => {
         postId,
         comment.id,
         user?.id,
-        effectiveUserName
+        effectiveUserName,
       );
     },
     onSuccess: () => {

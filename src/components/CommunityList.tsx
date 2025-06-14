@@ -32,7 +32,7 @@ const CommunityList = () => {
   const filteredCommunities = data?.filter(
     (community) =>
       community.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      community.description.toLowerCase().includes(searchTerm.toLowerCase())
+      community.description.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (isPending)
