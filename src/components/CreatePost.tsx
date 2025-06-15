@@ -65,7 +65,7 @@ const createPostSchema = z.object({
     .refine((files) => files?.length === 1, "画像をアップロードしてください")
     .refine(
       (files) => ["image/jpeg", "image/png"].includes(files?.[0]?.type || ""),
-      "対応している画像形式はJPEG、PNGです",
+      "対応している画像形式はJPEG、PNGです"
     ),
 });
 
@@ -176,7 +176,6 @@ const CreatePost = () => {
   };
 
   const handleRemoveImage = () => {
-    // React Hook Formの正しい方法でファイルをクリア
     setValue("image", new DataTransfer().files as FileList);
     setImagePreview(null);
   };
