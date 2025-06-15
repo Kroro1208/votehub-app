@@ -1,10 +1,45 @@
+import { useAtomValue } from "jotai";
+import { postsAtom } from "../stores/PostAtom";
+import { PostType } from "./PostList";
+import { useHandlePost } from "../hooks/useHandlePost";
+
 const RightPanel = () => {
+  const posts = useAtomValue(postsAtom);
+  const urgentPost = posts
+    .filter((post) => {
+      if (!post.vote_deadline) return false;
+      const deadline = new Date(post.vote_deadline);
+      const now = new Date();
+      const oneDayBeforeDeadline = new Date(
+        deadline.getTime() - 24 * 60 * 60 * 1000,
+      );
+      return now >= oneDayBeforeDeadline && now < deadline;
+    })
+    .sort((a, b) => {
+      const deadlineA = new Date(a.vote_deadline!).getTime();
+      const deadlineB = new Date(b.vote_deadline!).getTime();
+      return deadlineA - deadlineB;
+    })
+    .slice(0, 5); // 最大5件
+
+  const UrgentPostItem = ({ post }: { post: PostType }) => {
+    const { getTimeRemaining } = useHandlePost(post);
+    const timeRemaining = getTimeRemaining();
+    return (
+      <div className="text-sm">
+        <p className="text-slate-800 font-medium">{post.title}</p>
+        <p className="text-orange-600 text-xs">残り {timeRemaining}</p>
+      </div>
+    );
+  };
+
   return (
     <div className="fixed right-6 top-32 w-72 hidden xl:block">
       <div className="bg-yellow-100 rounded-xl shadow-sm border border-slate-200 p-4 mb-4">
         <h3 className="font-semibold text-slate-800 mb-3">
           🔥 トレンドトピック
         </h3>
+        {/* TODO */}
         <div className="space-y-3">
           {["環境問題", "テクノロジー", "スポーツ"].map((topic, i) => (
             <div key={i} className="flex items-center justify-between">
@@ -19,13 +54,15 @@ const RightPanel = () => {
 
       <div className="bg-yellow-100 rounded-xl shadow-sm border border-slate-200 p-4">
         <h3 className="font-semibold text-slate-800 mb-3">⏰ 終了間近</h3>
+        {/* TODO */}
         <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="text-sm">
-              <p className="text-slate-800 font-medium">投票タイトル{i}</p>
-              <p className="text-orange-600 text-xs">残り {i * 2}時間</p>
-            </div>
-          ))}
+          {urgentPost.length > 0 ? (
+            urgentPost.map((post) => (
+              <UrgentPostItem key={post.id} post={post} />
+            ))
+          ) : (
+            <p className="text-sm text-slate-500">終了間近の投稿はありません</p>
+          )}
         </div>
       </div>
     </div>
