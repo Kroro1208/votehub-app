@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../supabase-client";
 import { Link } from "react-router";
 import { useState } from "react";
+import { Search, Users, Calendar, ArrowRight, Sparkles } from "lucide-react";
+import Error from "./Error";
 
 export interface Community {
   id: number;
@@ -17,7 +19,7 @@ export const getCommunitites = async (): Promise<Community[]> => {
     .select("*")
     .order("created_at", { ascending: true });
 
-  if (error) throw new Error(error.message);
+  if (error) throw new globalThis.Error(error.message);
   return data as Community[];
 };
 
@@ -37,143 +39,144 @@ const CommunityList = () => {
 
   if (isPending)
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gray-50">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-blue-500 rounded-full animate-spin" />
-          <p className="mt-4 text-gray-600 font-medium">読み込み中...</p>
-        </div>
-      </div>
-    );
-
-  if (error)
-    return (
-      <div className="min-h-screen flex justify-center items-center bg-gray-50">
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full text-center border-l-4 border-red-500">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-16 w-16 text-red-500 mx-auto mb-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <title>community</title>
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
-          </svg>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">
-            エラーが発生しました
-          </h2>
-          <p className="text-gray-600">{error.message}</p>
-        </div>
-      </div>
-    );
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <p className="max-w-2xl mx-auto text-xl text-gray-500">
-            あなたの興味に合わせたスペースを見つけましょう
+      <div className="flex justify-center items-center py-20">
+        <div className="text-center">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-violet-200 border-t-violet-500 rounded-full animate-spin mx-auto mb-4"></div>
+            <Sparkles className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-violet-500 w-6 h-6" />
+          </div>
+          <p className="text-slate-600 font-medium text-lg">
+            スペースを読み込み中...
           </p>
         </div>
+      </div>
+    );
 
-        {/* 検索フィールド */}
-        <div className="max-w-xl mx-auto mb-10">
+  if (error) {
+    <Error error={error} />;
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* 検索とフィルターセクション */}
+      <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
+        <div className="max-w-2xl mx-auto">
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg
-                className="h-5 w-5 text-gray-400"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="スペースを検索..."
-              className="block w-full pl-10 pr-3 py-4 border text-gray-900 border-gray-300 rounded-xl leading-5 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out text-lg"
+              placeholder="スペース名や説明で検索..."
+              className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-200 shadow-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
+      </div>
 
-        {/* コミュニティカードグリッド */}
-        {filteredCommunities?.length === 0 ? (
-          <div className="text-center py-10">
-            <p className="text-xl text-gray-500">検索結果がありません</p>
+      {/* 統計情報 */}
+      {data && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-gradient-to-r from-violet-500 to-purple-600 rounded-2xl p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-violet-100 text-sm font-medium">
+                  総スペース数
+                </p>
+                <p className="text-3xl font-bold">{data.length}</p>
+              </div>
+              <Users className="w-8 h-8 text-violet-200" />
+            </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredCommunities?.map((community) => (
-              <div
-                key={community.id}
-                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100 transform hover:-translate-y-1 hover:scale-102"
-              >
-                <div className="h-3 bg-gradient-to-r from-green-400 to-blue-500" />
-                <div className="p-6">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 bg-gradient-to-r from-blue-500 to-green-400 p-3 rounded-full text-white">
+          <div className="bg-gradient-to-r from-blue-500 to-cyan-600 rounded-2xl p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100 text-sm font-medium">検索結果</p>
+                <p className="text-3xl font-bold">
+                  {filteredCommunities?.length || 0}
+                </p>
+              </div>
+              <Search className="w-8 h-8 text-blue-200" />
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-emerald-100 text-sm font-medium">
+                  アクティブ
+                </p>
+                <p className="text-3xl font-bold">{data.length}</p>
+              </div>
+              <Sparkles className="w-8 h-8 text-emerald-200" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* コミュニティグリッド */}
+      {filteredCommunities?.length === 0 ? (
+        <div className="text-center py-16">
+          <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Search className="w-12 h-12 text-slate-400" />
+          </div>
+          <h3 className="text-2xl font-bold text-slate-600 mb-2">
+            検索結果がありません
+          </h3>
+          <p className="text-slate-500">別のキーワードで検索してみてください</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCommunities?.map((community, index) => (
+            <div
+              key={community.id}
+              className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-100 overflow-hidden transform hover:-translate-y-2 hover:scale-[1.02]"
+              style={{
+                animationDelay: `${index * 100}ms`,
+                animation: "slideInUp 0.6s ease-out forwards",
+              }}
+            >
+              {/* カードヘッダー */}
+              <div className="h-2 bg-gradient-to-r from-violet-500 via-purple-500 to-blue-500" />
+
+              <div className="p-6">
+                {/* アバターとタイトル */}
+                <div className="flex items-start space-x-4 mb-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
                       {community.name.charAt(0).toUpperCase()}
                     </div>
-                    <div className="ml-4">
-                      <h3 className="text-xl font-semibold text-gray-900">
-                        <Link
-                          to={`/community/${community.id}`}
-                          className="hover:text-blue-600 transition-colors duration-200"
-                        >
-                          {community.name}
-                        </Link>
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        作成日:{" "}
-                        {new Date(community.created_at).toLocaleDateString()}
-                      </p>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-xl font-bold text-slate-800 group-hover:text-violet-600 transition-colors duration-200 mb-1">
+                      {community.name}
+                    </h3>
+                    <div className="flex items-center text-sm text-slate-500">
+                      <Calendar className="w-4 h-4 mr-1" />
+                      {new Date(community.created_at).toLocaleDateString(
+                        "ja-JP",
+                      )}
                     </div>
                   </div>
-                  <div className="mt-4">
-                    <p className="text-gray-600 line-clamp-3">
-                      {community.description}
-                    </p>
-                  </div>
-                  <div className="mt-6">
-                    <Link
-                      to={`/space/${community.id}`}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-blue-500 to-green-400 hover:from-blue-600 hover:to-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-                    >
-                      詳細を見る
-                      <svg
-                        className="ml-2 -mr-1 h-4 w-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </Link>
-                  </div>
                 </div>
+
+                {/* 説明 */}
+                <p className="text-slate-600 text-sm leading-relaxed mb-6 line-clamp-3">
+                  {community.description}
+                </p>
+
+                {/* アクションボタン */}
+                <Link
+                  to={`/space/${community.id}`}
+                  className="group/btn inline-flex items-center justify-center w-full px-4 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold rounded-xl hover:from-violet-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <span>スペースに参加</span>
+                  <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-200" />
+                </Link>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

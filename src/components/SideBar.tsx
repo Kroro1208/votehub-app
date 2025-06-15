@@ -21,7 +21,7 @@ const Sidebar = () => {
     { icon: Clock, label: "期限間近", path: "/urgent" },
     { icon: Trophy, label: "結果発表", path: "/results" },
     { icon: BarChart3, label: "統計", path: "/stats" },
-    { icon: Users, label: "コミュニティ", path: "/communities" },
+    { icon: Users, label: "スペース", path: "/space" },
     { icon: Settings, label: "設定", path: "/settings" },
   ];
 
