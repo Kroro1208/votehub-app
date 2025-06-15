@@ -62,7 +62,7 @@ const Sidebar = () => {
       </nav>
 
       {/* Create Vote Button */}
-      <Link to="/create-vote" className="block mb-8">
+      <Link to="/create" className="block mb-8">
         <Button className="w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center shadow-lg">
           <span>投票を作成</span>
         </Button>

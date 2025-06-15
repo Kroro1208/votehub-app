@@ -1,10 +1,12 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { type ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../supabase-client";
 import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { type Community, getCommunitites } from "./CommunityList";
 import "react-datepicker/dist/react-datepicker.css";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
   Upload,
@@ -29,6 +31,7 @@ import {
 } from "./ui/select";
 import { Button } from "./ui/button";
 import DatePicker from "react-datepicker";
+import { z } from "zod";
 
 interface PostInput {
   title: string;
@@ -37,6 +40,36 @@ interface PostInput {
   community_id?: number | null;
   vote_deadline?: string | null;
 }
+
+// スキーマ定義
+const createPostSchema = z.object({
+  title: z
+    .string()
+    .min(1, "タイトルは必須です")
+    .max(100, "タイトルは100文字以内で入力してください"),
+  content: z
+    .string()
+    .min(1, "内容は必須です")
+    .max(1000, "内容は1000文字以内で入力してください"),
+  community_id: z.number().int().nullable(),
+  vote_deadline: z
+    .date({
+      required_error: "投票期限は必須です",
+      invalid_type_error: "投票期限は有効な日時を選択してください",
+    })
+    .refine((date) => date > new Date(), {
+      message: "投票期限は未来の日付を選択してください",
+    }),
+  image: z
+    .instanceof(FileList)
+    .refine((files) => files?.length === 1, "画像をアップロードしてください")
+    .refine(
+      (files) => ["image/jpeg", "image/png"].includes(files?.[0]?.type || ""),
+      "対応している画像形式はJPEG、PNGです"
+    ),
+});
+
+type CreatePostFormData = z.infer<typeof createPostSchema>;
 
 const createPost = async (post: PostInput, imageFile: File) => {
   const fileExt = imageFile.name.split(".").pop() || "";
@@ -65,28 +98,44 @@ const createPost = async (post: PostInput, imageFile: File) => {
 };
 
 const CreatePost = () => {
-  const [title, setTitle] = useState<string>("");
-  const [content, setContent] = useState<string>("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [communityId, setCommunityId] = useState<number | null>(null);
-  const [voteDeadline, setVoteDeadline] = useState<string>("");
 
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<CreatePostFormData>({
+    resolver: zodResolver(createPostSchema),
+    defaultValues: {
+      title: "",
+      content: "",
+      community_id: null,
+      vote_deadline: undefined,
+    },
+  });
+
+  const watchImage = watch("image");
+
   useEffect(() => {
-    if (!selectedFile) {
+    if (!watchImage || watchImage.length === 0) {
       setImagePreview(null);
       return;
     }
-    const objUrl = URL.createObjectURL(selectedFile);
+    const file = watchImage[0];
+    const objUrl = URL.createObjectURL(file);
     setImagePreview(objUrl);
 
     // Cleanup function to revoke object URL
     return () => URL.revokeObjectURL(objUrl);
-  }, [selectedFile]);
+  }, [watchImage]);
 
   const { data: communityData } = useQuery<Community[], Error>({
     queryKey: ["communities"],
@@ -102,9 +151,7 @@ const CreatePost = () => {
     },
     onSuccess: (data) => {
       console.log("結果", data);
-      setTitle("");
-      setContent("");
-      setSelectedFile(null);
+      reset();
       setIsSubmitting(false);
       navigate("/");
     },
@@ -114,39 +161,27 @@ const CreatePost = () => {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedFile) return alert("画像をアップロードしてください");
-    if (!voteDeadline) return alert("投票期限を設定してください");
+  const onSubmit = (data: CreatePostFormData) => {
+    const imageFile = data.image[0];
     mutate({
       post: {
-        title,
-        content,
+        title: data.title,
+        content: data.content,
         avatar_url: user?.user_metadata.avatar_url || null,
-        community_id: communityId,
-        vote_deadline: voteDeadline
-          ? new Date(voteDeadline).toISOString()
-          : null,
+        community_id: data.community_id,
+        vote_deadline: data.vote_deadline.toISOString(),
       },
-      imageFile: selectedFile,
+      imageFile,
     });
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    if (e.target.files?.[0]) {
-      setSelectedFile(e.target.files[0]);
-    }
-  };
-
   const handleRemoveImage = () => {
-    setSelectedFile(null);
+    // React Hook Formの正しい方法でファイルをクリア
+    setValue("image", new DataTransfer().files as FileList);
     setImagePreview(null);
   };
 
-  const handleCommunityChange = (value: string) => {
-    setCommunityId(value ? Number(value) : null);
-  };
+  const watchedContent = watch("content");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-blue-950 dark:to-indigo-950 py-8 px-4 transition-colors duration-300">
@@ -163,7 +198,7 @@ const CreatePost = () => {
 
         <Card className="backdrop-blur-sm bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 shadow-xl shadow-blue-100/50 dark:shadow-blue-900/50 rounded-2xl">
           <CardContent className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               {/* Title Input */}
               <div className="group">
                 <Label
@@ -178,12 +213,15 @@ const CreatePost = () => {
                 <Input
                   id="title"
                   type="text"
-                  required
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  {...register("title")}
                   placeholder="魅力的なタイトルを入力してください..."
                   className="h-14 text-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all duration-300 rounded-xl"
                 />
+                {errors.title && (
+                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                    {errors.title.message}
+                  </p>
+                )}
               </div>
 
               {/* Content Textarea */}
@@ -199,10 +237,8 @@ const CreatePost = () => {
                 </Label>
                 <Textarea
                   id="content"
-                  required
                   rows={8}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  {...register("content")}
                   placeholder="あなたの考えや意見を詳しく説明してください..."
                   className="resize-none text-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-green-500 dark:focus:border-green-400 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 transition-all duration-300 rounded-xl"
                 />
@@ -211,9 +247,14 @@ const CreatePost = () => {
                     詳細な説明を追加することで、より良い議論が生まれます
                   </span>
                   <span className="text-sm text-gray-600 dark:text-gray-300 font-medium bg-gray-100 dark:bg-gray-600 px-3 py-1 rounded-full">
-                    {content.length} 文字
+                    {watchedContent.length} 文字
                   </span>
                 </div>
+                {errors.content && (
+                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                    {errors.content.message}
+                  </p>
+                )}
               </div>
 
               {/* Community Selection and Vote Deadline - Side by Side */}
@@ -226,22 +267,38 @@ const CreatePost = () => {
                     </div>
                     コミュニティ
                   </Label>
-                  <Select onValueChange={handleCommunityChange}>
-                    <SelectTrigger className="text-sm border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-300 rounded-xl flex items-center">
-                      <SelectValue placeholder="コミュニティを選択してください" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
-                      {communityData?.map((item) => (
-                        <SelectItem
-                          key={item.id}
-                          value={item.id.toString()}
-                          className="text-lg py-3 text-gray-900 dark:text-gray-100 focus:bg-purple-50 dark:focus:bg-purple-900/50"
-                        >
-                          {item.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    name="community_id"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={(value) =>
+                          field.onChange(value ? Number(value) : null)
+                        }
+                        value={field.value?.toString() || ""}
+                      >
+                        <SelectTrigger className="text-sm border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-300 rounded-xl flex items-center">
+                          <SelectValue placeholder="コミュニティを選択してください" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
+                          {communityData?.map((item) => (
+                            <SelectItem
+                              key={item.id}
+                              value={item.id.toString()}
+                              className="text-lg py-3 text-gray-900 dark:text-gray-100 focus:bg-purple-50 dark:focus:bg-purple-900/50"
+                            >
+                              {item.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.community_id && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                      {errors.community_id.message}
+                    </p>
+                  )}
                 </div>
 
                 {/* Vote Deadline */}
@@ -256,25 +313,27 @@ const CreatePost = () => {
                     投票期限
                   </Label>
                   <div className="relative">
-                    {/* <Input
-                      id="vote_deadline"
-                      type="datetime-local"
-                      value={voteDeadline}
-                      onChange={(e) => setVoteDeadline(e.target.value)}
-                      className="h-10 flex items-center border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 transition-all duration-300 rounded-xl dir-rtl text-left"
-                    /> */}
-                    <DatePicker
-                      selected={voteDeadline ? new Date(voteDeadline) : null}
-                      onChange={(date) =>
-                        setVoteDeadline(date?.toISOString() || "")
-                      }
-                      showTimeSelect
-                      dateFormat="yyyy/MM/dd HH:mm"
-                      timeIntervals={15}
-                      placeholderText="投票期限を選択してください"
-                      className="h-10 min-w-72 flex items-center border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 transition-all duration-300 rounded-xl dir-rtl text-left pl-3"
+                    <Controller
+                      name="vote_deadline"
+                      control={control}
+                      render={({ field }) => (
+                        <DatePicker
+                          selected={field.value}
+                          onChange={(date) => field.onChange(date)}
+                          showTimeSelect
+                          dateFormat="yyyy/MM/dd HH:mm"
+                          timeIntervals={15}
+                          placeholderText="投票期限を選択してください"
+                          className="h-10 min-w-72 flex items-center border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 transition-all duration-300 rounded-xl dir-rtl text-left pl-3"
+                        />
+                      )}
                     />
                   </div>
+                  {errors.vote_deadline && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                      {errors.vote_deadline.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -295,9 +354,14 @@ const CreatePost = () => {
                     id="image"
                     type="file"
                     accept="image/*"
-                    onChange={handleFileChange}
+                    {...register("image")}
                   />
                 </div>
+                {errors.image && (
+                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                    {errors.image.message}
+                  </p>
+                )}
 
                 {imagePreview && (
                   <Card className="mt-6 overflow-hidden border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-2xl shadow-lg">
@@ -324,12 +388,12 @@ const CreatePost = () => {
                             <ImageIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                           </div>
                           <span className="font-semibold text-gray-700 dark:text-gray-200">
-                            {selectedFile?.name}
+                            {watchImage?.[0].name}
                           </span>
                         </div>
                         <span className="bg-white dark:bg-gray-800 px-4 py-2 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 shadow-sm">
-                          {selectedFile
-                            ? Math.round(selectedFile.size / 1024)
+                          {watchImage?.[0]
+                            ? Math.round(watchImage?.[0].size / 1024)
                             : ""}
                           KB
                         </span>

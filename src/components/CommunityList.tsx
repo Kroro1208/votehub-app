@@ -77,7 +77,7 @@ const CommunityList = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <p className="max-w-2xl mx-auto text-xl text-gray-500">
-            あなたの興味に合わせたコミュニティを見つけましょう
+            あなたの興味に合わせたスペースを見つけましょう
           </p>
         </div>
 
@@ -101,7 +101,7 @@ const CommunityList = () => {
             </div>
             <input
               type="text"
-              placeholder="コミュニティを検索..."
+              placeholder="スペースを検索..."
               className="block w-full pl-10 pr-3 py-4 border text-gray-900 border-gray-300 rounded-xl leading-5 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out text-lg"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
