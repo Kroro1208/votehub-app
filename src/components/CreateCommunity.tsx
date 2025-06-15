@@ -1,150 +1,283 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import { useNavigate } from "react-router";
 import { supabase } from "../supabase-client";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
+import { Button } from "./ui/button";
+import { toast } from "react-toastify";
 
-interface CommunityInput {
-  name: string;
-  description: string;
-}
+const communitySchema = z.object({
+  name: z.string().min(1, "スペース名は必須です"),
+  description: z.string().min(1, "スペースの説明は必須です"),
+});
 
-const createCommunity = async (community: CommunityInput) => {
+type CommunityFormData = z.infer<typeof communitySchema>;
+
+const createCommunity = async (community: CommunityFormData) => {
   const { data, error } = await supabase.from("communities").insert(community);
   if (error) throw new Error(error.message);
   return data;
 };
 
 const CreateCommunity = () => {
-  const [name, setName] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<CommunityFormData>({
+    resolver: zodResolver(communitySchema),
+    defaultValues: {
+      name: "",
+      description: "",
+    },
+  });
 
   const { mutate, isError, isPending } = useMutation({
     mutationFn: createCommunity,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["communities"] });
-      navigate("/communities");
+      toast.success("スペースが作成されました");
+      navigate("/space");
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    mutate({ name, description });
+  const onSubmit = (data: CommunityFormData) => {
+    mutate(data);
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <div className="bg-gray-700 rounded-xl shadow-lg p-8">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold">スペースを作成</h2>
-          <div className="mt-1 h-1 w-54 bg-blue-500 mx-auto rounded" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-400 to-gray-200 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md mx-auto">
+        {/* ヘッダー */}
+        <div className="text-center mb-8">
+          <div className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+            <svg
+              className="h-8 w-8 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-1.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            新しいスペースを作成
+          </h2>
+          <p className="text-gray-600">
+            コミュニティを作成して、仲間とつながりましょう
+          </p>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label
-              htmlFor="community-name"
-              className="block text-sm font-medium text-gray-700"
-            >
-              スペース名
-            </label>
-            <input
-              value={name}
-              type="text"
-              id="name"
-              required
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 outline-none"
-              placeholder="スペース名を入力"
-            />
-          </div>
 
-          <div className="space-y-2">
-            <label
-              htmlFor="community-description"
-              className="block text-sm font-medium text-gray-700"
-            >
-              スペースの説明
-            </label>
-            <textarea
-              value={description}
-              id="description"
-              required
-              rows={5}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 outline-none resize-none"
-              placeholder="このスペースについて説明してください"
-            />
-          </div>
-
-          <div className="pt-4">
-            <button
-              type="submit"
-              disabled={isPending}
-              className={`w-full py-3 px-6 rounded-lg text-white font-medium transition-colors duration-200 
-                ${
-                  isPending
-                    ? "bg-blue-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 active:bg-blue-800"
-                }`}
-            >
-              {isPending ? (
-                <div className="flex items-center justify-center">
+        {/* フォーム */}
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* スペース名 */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="name"
+                className="text-sm font-semibold text-gray-700 flex items-center"
+              >
+                <svg
+                  className="h-4 w-4 mr-2 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.99 1.99 0 013 12V7a4 4 0 014-4z"
+                  />
+                </svg>
+                スペース名
+              </Label>
+              <Input
+                type="text"
+                id="name"
+                {...register("name")}
+                className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 bg-gray-50 focus:bg-white ${
+                  errors.name
+                    ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                } focus:ring-4 outline-none`}
+                placeholder="例：写真愛好家の集い"
+              />
+              {errors.name && (
+                <div className="flex items-center mt-2">
                   <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <title>スペース作成</title>
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  作成中...
-                </div>
-              ) : (
-                "スペースを作成"
-              )}
-            </button>
-          </div>
-
-          {isError && (
-            <div className="mt-4 bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="h-5 w-5 text-red-500"
-                    viewBox="0 0 20 20"
+                    className="h-4 w-4 text-red-500 mr-2"
                     fill="currentColor"
+                    viewBox="0 0 20 20"
                   >
-                    <title>スペース作成</title>
                     <path
                       fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
                       clipRule="evenodd"
                     />
                   </svg>
+                  <p className="text-sm text-red-600">{errors.name.message}</p>
                 </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-700">
-                    スペース作成中にエラーが発生しました
+              )}
+            </div>
+
+            {/* スペースの説明 */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="description"
+                className="text-sm font-semibold text-gray-700 flex items-center"
+              >
+                <svg
+                  className="h-4 w-4 mr-2 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                スペースの説明
+              </Label>
+              <Textarea
+                id="description"
+                {...register("description")}
+                rows={5}
+                className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 bg-gray-50 focus:bg-white resize-none ${
+                  errors.description
+                    ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                } focus:ring-4 outline-none`}
+                placeholder="このスペースの目的や内容について詳しく説明してください..."
+              />
+              {errors.description && (
+                <div className="flex items-center mt-2">
+                  <svg
+                    className="h-4 w-4 text-red-500 mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <p className="text-sm text-red-600">
+                    {errors.description.message}
                   </p>
                 </div>
-              </div>
+              )}
             </div>
-          )}
-        </form>
+
+            {/* 送信ボタン */}
+            <div className="pt-4">
+              <Button
+                type="submit"
+                disabled={isPending || isSubmitting}
+                className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-200 transform ${
+                  isPending || isSubmitting
+                    ? "bg-gray-400 cursor-not-allowed scale-95"
+                    : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:scale-105 shadow-lg hover:shadow-xl"
+                }`}
+              >
+                {isPending || isSubmitting ? (
+                  <div className="flex items-center justify-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    作成中...
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center">
+                    <svg
+                      className="h-5 w-5 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
+                    </svg>
+                    スペースを作成
+                  </div>
+                )}
+              </Button>
+            </div>
+
+            {/* エラーメッセージ */}
+            {isError && (
+              <div className="mt-4 bg-red-50 border border-red-200 rounded-xl p-4">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="h-5 w-5 text-red-400"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-red-800">
+                      スペース作成中にエラーが発生しました
+                    </p>
+                    <p className="text-sm text-red-600 mt-1">
+                      もう一度お試しください
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </form>
+        </div>
+
+        {/* フッター */}
+        <div className="text-center mt-8">
+          <p className="text-sm text-gray-500">
+            作成したスペースは後から編集できます
+          </p>
+        </div>
       </div>
     </div>
   );

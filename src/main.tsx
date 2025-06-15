@@ -5,6 +5,7 @@ import App from "./App.tsx";
 import { BrowserRouter as Router } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthProvider";
+import { ToastContainer } from "react-toastify";
 
 const client = new QueryClient();
 
@@ -16,6 +17,7 @@ if (rootElement) {
         <AuthProvider>
           <Router>
             <App />
+            <ToastContainer />
           </Router>
         </AuthProvider>
       </QueryClientProvider>
