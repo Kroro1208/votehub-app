@@ -9,6 +9,7 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { toast } from "react-toastify";
+import { FaPeopleLine } from "react-icons/fa6";
 
 const communitySchema = z.object({
   name: z.string().min(1, "スペース名は必須です"),
@@ -59,19 +60,7 @@ const CreateCommunity = () => {
         {/* ヘッダー */}
         <div className="text-center mb-8">
           <div className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-            <svg
-              className="h-8 w-8 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-1.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"
-              />
-            </svg>
+            <FaPeopleLine size={50} />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             新しいスペースを作成
