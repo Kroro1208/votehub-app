@@ -5,6 +5,7 @@ import { RiCloseLargeFill } from "react-icons/ri";
 import { useAuth } from "../hooks/useAuth";
 import { VscSignOut } from "react-icons/vsc";
 import { FaRegUser } from "react-icons/fa";
+import { Button } from "./ui/button";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -16,13 +17,10 @@ export default function Navbar() {
     <nav className="fixed top-0 w-full z-40 bg-[rgba(10,10,10,0.8)] backdrop-blur-lg border-b border-white/10 shadow-lg">
       {/* Sidebarのスペースを考慮したコンテナ */}
       <div className="ml-64">
-        <div className="max-w-6xl mx-auto xl:mr-80 px-4">
-          <div className="flex items-center h-16">
-            {/* 中央部分にスペースを作成 */}
-            <div className="flex-grow" />
-
-            {/* Desktop Links */}
-            <div className="hidden md:flex items-center space-x-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between h-16 pr-6">
+            {/* Desktop Links - 左側に配置 */}
+            <div className="hidden md:flex items-center space-x-8 pl-3">
               <Link
                 to="/"
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
@@ -49,10 +47,7 @@ export default function Navbar() {
               </Link>
             </div>
 
-            {/* 中央と右側の間にスペース */}
-            <div className="hidden md:block w-12" />
-
-            {/* 認証セクション */}
+            {/* 認証セクション - 右端に配置 */}
             <div className="hidden md:flex items-center flex-shrink-0">
               {user ? (
                 <div className="flex space-x-4 items-center justify-center min-w-0">
@@ -71,30 +66,30 @@ export default function Navbar() {
                   )}
                   <span className="text-blue-300 truncate">{displayName}</span>
                   <div className="flex-shrink-0">
-                    <button
+                    <Button
                       type="button"
                       onClick={signOut}
                       className="cursor-pointer flex gap-3 items-center justify-center bg-red-500 px-3 py-1 rounded"
                     >
                       <span className="text-gray-300">SignOut</span>
                       <VscSignOut size={25} />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : (
-                <button
+                <Button
                   type="button"
                   onClick={signInWithGoogle}
                   className="cursor-pointer bg-blue-500 px-3 py-1 rounded"
                 >
                   <span className="text-gray-300">SignUp</span>
-                </button>
+                </Button>
               )}
             </div>
 
             {/* モバイルメニューボタン */}
-            <div className="ml-auto md:hidden">
-              <button
+            <div className="md:hidden">
+              <Button
                 type="button"
                 onClick={() => setMenuOpen((prev) => !prev)}
                 className="text-gray-300 focus:outline-none p-2"
@@ -107,7 +102,7 @@ export default function Navbar() {
                     <CgMenuGridO className="text-2xl transition-transform duration-300 ease-in-out" />
                   )}
                 </div>
-              </button>
+              </Button>
             </div>
 
             {/* モバイル用メニュー - アニメーション付き */}
