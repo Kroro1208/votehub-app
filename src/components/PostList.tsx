@@ -21,6 +21,7 @@ export interface PostType {
     id: number;
     name: string;
   };
+  comments?: { count: number }[];
 }
 
 interface PostListProps {
@@ -33,7 +34,8 @@ const PostList = ({ filter }: PostListProps) => {
   const getFilteredQuery = () => {
     const query = supabase.from("posts").select(`
         *,
-        communities (id, name)
+        communities (id, name),
+        comments(count)
       `);
 
     switch (filter) {
@@ -71,7 +73,14 @@ const PostList = ({ filter }: PostListProps) => {
     queryFn: async () => {
       const { data, error } = await getFilteredQuery();
       if (error) throw new Error(error.message);
-      return data as PostType[];
+
+      // コメント数を集計してpostに追加
+      const postsWithCommentCount = data?.map((post) => ({
+        ...post,
+        comment_count: post.comments?.length || 0,
+      }));
+
+      return postsWithCommentCount as PostType[];
     },
   });
 

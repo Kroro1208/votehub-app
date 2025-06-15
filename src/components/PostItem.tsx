@@ -68,7 +68,7 @@ const PostItem = ({ post }: PostItemType) => {
             </div>
 
             {/* Status Icon */}
-            <div className="flex flex-col items-end space-y-1">
+            <div className="flex flex-col items-end space-y-1 min-w-0">
               {votingExpired ? (
                 <Trophy size={20} className="text-slate-400" />
               ) : showPersuasionButton ? (
@@ -79,7 +79,7 @@ const PostItem = ({ post }: PostItemType) => {
 
               {timeRemaining && (
                 <span
-                  className={`text-xs font-medium ${
+                  className={`text-xs font-medium whitespace-nowrap ${
                     votingExpired
                       ? "text-slate-500"
                       : showPersuasionButton
