@@ -33,6 +33,7 @@ const CreateCommunity = () => {
     formState: { errors, isSubmitting },
   } = useForm<CommunityFormData>({
     resolver: zodResolver(communitySchema),
+    mode: "onChange",
     defaultValues: {
       name: "",
       description: "",
