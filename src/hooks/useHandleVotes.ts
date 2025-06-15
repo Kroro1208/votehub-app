@@ -25,7 +25,7 @@ const getVotes = async (postId: number): Promise<Vote[]> => {
   return data as Vote[];
 };
 
-export const useHadleVotes = (postId: number) => {
+export const useHandleVotes = (postId: number) => {
   const [isVoting, setIsVoting] = useState(false);
   const { user } = useAuth();
   const queryClient = useQueryClient();

@@ -4,7 +4,7 @@ import { TbArrowBigDownLine } from "react-icons/tb";
 import VoteGageBar from "./VoteGageBar";
 import { CheckCircle } from "lucide-react";
 import { Button } from "./ui/button";
-import { useHadleVotes } from "../hooks/useHandleVotes";
+import { useHandleVotes } from "../hooks/useHandleVotes";
 
 interface PostProps {
   postId: number;
@@ -24,7 +24,7 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
     totalVotes,
     isPending,
     error,
-  } = useHadleVotes(postId);
+  } = useHandleVotes(postId);
 
   const isVotingExpired = () => {
     if (!voteDeadline) return false;
