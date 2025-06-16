@@ -22,7 +22,13 @@ type CommunityFormData = z.infer<typeof communitySchema>;
 
 const createCommunity = async (community: CommunityFormData) => {
   const { data, error } = await supabase.from("communities").insert(community);
-  if (error) throw new Error(error.message);
+  if (error) {
+    // Postgresのユニーク制約違反エラー（23505）をチェック
+    if (error.code === "23505") {
+      throw new Error("このスペース名は既に使用されています");
+    }
+    throw new Error(error.message);
+  }
   return data;
 };
 
@@ -49,6 +55,9 @@ const CreateCommunity = () => {
       queryClient.invalidateQueries({ queryKey: ["communities"] });
       toast.success("スペースが作成されました");
       navigate("/space");
+    },
+    onError: (errors: Error) => {
+      toast.error(errors.message);
     },
   });
 
