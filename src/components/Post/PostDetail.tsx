@@ -357,14 +357,22 @@ const PostDetail = ({ postId }: Props) => {
         </div>
       )}
 
-      <img
-        src={data.image_url ?? undefined}
-        alt={data.title}
-        className="mt-4 rounded object-cover w-full h-64"
-      />
-      <h2 className="text-gray-400 text-xl whitespace-pre-line">
-        <PostContentDisplay content={data?.content} />
-      </h2>
+      {/* 画像と投稿内容を横並びに配置 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4 lg:items-center">
+        {/* 左側：画像 */}
+        <div className="h-fit">
+          <img
+            src={data.image_url ?? undefined}
+            alt={data.title}
+            className="rounded-lg object-cover w-full h-auto max-h-96 shadow-lg"
+          />
+        </div>
+
+        {/* 右側：賛成・反対・詳細 */}
+        <div className="h-fit">
+          <PostContentDisplay content={data?.content} />
+        </div>
+      </div>
       <p className="text-gray-500 text-sm">
         {new Date(data?.created_at).toLocaleDateString()}
       </p>
