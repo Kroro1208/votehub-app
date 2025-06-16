@@ -6,10 +6,11 @@ import { supabase } from "../../supabase-client";
 import { Link } from "react-router";
 import {
   Clock,
-  MessageCircle,
-  TrendingUp,
-  Calendar,
+  Users,
   CheckCircle,
+  AlertTriangle,
+  Trophy,
+  TrendingUp,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -90,17 +91,35 @@ const CommunityItem = ({ communityId }: Props) => {
     return new Date() > new Date(voteDeadline);
   };
 
-  // 投票期限を日本語で表示する関数
-  const formatDeadline = (deadline: string) => {
-    const date = new Date(deadline);
-    const now = new Date();
-    const diffMs = date.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  // 残り時間を計算する関数
+  const getTimeRemaining = (voteDeadline?: string | null) => {
+    if (!voteDeadline) return null;
 
-    if (diffMs < 0) return "期限終了";
-    if (diffDays === 0) return "今日まで";
-    if (diffDays === 1) return "明日まで";
-    return `${diffDays}日後まで`;
+    const deadline = new Date(voteDeadline);
+    const now = new Date();
+    const diffMs = deadline.getTime() - now.getTime();
+
+    if (diffMs <= 0) return null;
+
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor(
+      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+    );
+
+    if (diffDays > 0) return `${diffDays}日`;
+    if (diffHours > 0) return `${diffHours}時間`;
+    return "1時間未満";
+  };
+
+  // 説得タイムかどうかを判定する関数
+  const isPersuasionTime = (voteDeadline?: string | null) => {
+    if (!voteDeadline) return false;
+
+    const deadline = new Date(voteDeadline);
+    const now = new Date();
+    const persuasionStart = new Date(deadline.getTime() - 24 * 60 * 60 * 1000); // 24時間前
+
+    return now >= persuasionStart && now < deadline;
   };
 
   if (isPending) return <Loading />;
@@ -114,8 +133,8 @@ const CommunityItem = ({ communityId }: Props) => {
           <div className="bg-blue-100 rounded-2xl shadow-sm border border-gray-200 p-8">
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               {communityItemData?.[0]?.communities?.name ?? "このコミュニティ"}
+              の投稿一覧
             </h1>
-            <p className="text-gray-600 mt-2">の投稿一覧</p>
             <div className="flex items-center gap-2 mt-4 text-sm text-gray-500">
               <TrendingUp size={16} />
               <span>{communityItemData?.length || 0}件の投稿</span>
@@ -123,116 +142,129 @@ const CommunityItem = ({ communityId }: Props) => {
           </div>
         </div>
 
-        {/* 投稿一覧 */}
-        <div className="grid gap-6">
+        {/* 投稿一覧 - 3列グリッド */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {communityItemData?.map((item) => {
             const votingExpired = isVotingExpired(item.vote_deadline);
-            // 投票済みかどうかを判定
             const hasUserVoted = votedPostIds?.has(item.id) ?? false;
+            const isPostOwner = user?.id === item.user_id;
+            const showPersuasionButton =
+              isPostOwner && isPersuasionTime(item.vote_deadline);
+            const timeRemaining = getTimeRemaining(item.vote_deadline);
 
             return (
-              <Link key={item.id} to={`/post/${item.id}`}>
-                <article className="group bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl hover:border-blue-200 transition-all duration-300 overflow-hidden">
-                  <div className="p-6">
-                    {/* ヘッダー部分 */}
-                    <div className="flex items-start gap-4 mb-4">
-                      <div className="relative">
-                        <img
-                          src={item.avatar_url || undefined}
-                          alt="ユーザーアバター"
-                          className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
-                        />
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
+              <Link
+                key={item.id}
+                to={`/post/${item.id}`}
+                className="block group"
+              >
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] h-full flex flex-col">
+                  {/* Status Banner */}
+                  <div
+                    className={`h-1 ${
+                      votingExpired
+                        ? "bg-slate-400"
+                        : showPersuasionButton
+                          ? "bg-orange-500"
+                          : "bg-gradient-to-r from-violet-500 to-purple-600"
+                    }`}
+                  />
+
+                  {/* Header */}
+                  <div className="p-3 pb-2 flex-shrink-0">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center space-x-2 min-w-0 flex-1">
+                        {item?.avatar_url ? (
+                          <img
+                            src={item.avatar_url}
+                            alt="UserAvatar"
+                            className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-tl from-violet-500 to-purple-500 flex-shrink-0" />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-slate-800 text-sm line-clamp-2 leading-tight">
+                            {item.title}
+                          </h3>
+                        </div>
                       </div>
 
-                      <div className="flex-1 min-w-0">
-                        <h2 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
-                          {item.title}
-                        </h2>
-
-                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <Calendar size={14} />
-                            <time>
-                              {new Date(item.created_at).toLocaleDateString(
-                                "ja-JP",
-                                {
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                },
-                              )}
-                            </time>
-                          </div>
-
-                          {/* 投票期限バッジ */}
-                          {item.vote_deadline && (
-                            <div
-                              className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                                votingExpired
-                                  ? "bg-red-100 text-red-600"
-                                  : "bg-blue-100 text-blue-600"
-                              }`}
-                            >
-                              <Clock size={12} />
-                              <span>{formatDeadline(item.vote_deadline)}</span>
-                            </div>
-                          )}
-
-                          {/* 投票済みバッジ */}
-                          {hasUserVoted && (
-                            <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-600">
-                              <CheckCircle size={12} />
-                              <span>投票済み</span>
-                            </div>
-                          )}
-                        </div>
+                      {/* Status Icon */}
+                      <div className="flex flex-col items-end ml-2 flex-shrink-0">
+                        {votingExpired ? (
+                          <Trophy size={16} className="text-slate-400" />
+                        ) : showPersuasionButton ? (
+                          <AlertTriangle
+                            size={16}
+                            className="text-orange-500"
+                          />
+                        ) : (
+                          <Clock size={16} className="text-violet-500" />
+                        )}
                       </div>
                     </div>
 
-                    {/* コンテンツ */}
-                    <p className="text-gray-700 mb-4 line-clamp-3 leading-relaxed">
-                      {item.content}
-                    </p>
-
-                    {/* 画像 */}
-                    {item.image_url && (
-                      <div className="relative mb-4 overflow-hidden rounded-xl">
-                        <img
-                          src={item.image_url}
-                          alt={item.title}
-                          className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      </div>
-                    )}
-
-                    {/* フッター統計 */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <TrendingUp size={16} />
-                          <span>{item.vote_count || 0} 票</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MessageCircle size={16} />
-                          <span>{item.comment_count || 0} コメント</span>
-                        </div>
-                      </div>
-
-                      <div
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          votingExpired
-                            ? "bg-gray-100 text-gray-600"
-                            : "bg-green-100 text-green-600"
-                        }`}
-                      >
-                        {votingExpired ? "投票終了" : "投票中"}
-                      </div>
+                    {/* Badges */}
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <span className="text-xs bg-violet-100 text-violet-700 px-2 py-1 rounded-full">
+                        {item.communities?.name}
+                      </span>
+                      {hasUserVoted && (
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full flex items-center space-x-1">
+                          <CheckCircle size={8} />
+                          <span>投票済</span>
+                        </span>
+                      )}
                     </div>
                   </div>
-                </article>
+
+                  {/* Image */}
+                  {item.image_url && (
+                    <div className="px-3 flex-shrink-0">
+                      <img
+                        src={item.image_url}
+                        alt={item.title}
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                    </div>
+                  )}
+
+                  {/* Stats - Footer */}
+                  <div className="p-3 pt-2 mt-auto">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-1 text-slate-600">
+                          <Users size={14} />
+                          <span className="text-xs font-medium">
+                            {item.vote_count ?? 0}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center space-x-1 text-slate-600">
+                          <div className="w-3 h-3 rounded-full bg-slate-300" />
+                          <span className="text-xs">
+                            {item.comment_count ?? 0}
+                          </span>
+                        </div>
+                      </div>
+
+                      {timeRemaining && (
+                        <span
+                          className={`text-xs font-medium whitespace-nowrap ${
+                            votingExpired
+                              ? "text-slate-500"
+                              : showPersuasionButton
+                                ? "text-orange-600"
+                                : "text-violet-600"
+                          }`}
+                        >
+                          {votingExpired ? "終了" : `残り${timeRemaining}`}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </Link>
             );
           })}
@@ -243,7 +275,7 @@ const CommunityItem = ({ communityId }: Props) => {
           <div className="text-center py-16">
             <div className="rounded-2xl shadow-sm border border-gray-200 p-12">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MessageCircle size={32} className="text-gray-400" />
+                <Users size={32} className="text-gray-400" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 まだ投稿がありません

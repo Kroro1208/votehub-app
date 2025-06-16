@@ -1,9 +1,10 @@
 import { Link } from "react-router";
 import type { PostType } from "./PostList";
-import { Clock, Users, CheckCircle, AlertTriangle, Trophy } from "lucide-react";
+import { Clock, Users, CheckCircle, AlertTriangle } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useHandleVotes } from "../../hooks/useHandleVotes";
 import { useHandlePost } from "../../hooks/useHandlePost";
+import { FaRegCalendarTimes } from "react-icons/fa";
 
 interface PostItemType {
   post: PostType;
@@ -70,7 +71,7 @@ const PostItem = ({ post }: PostItemType) => {
             {/* Status Icon */}
             <div className="flex flex-col items-end space-y-1 min-w-0">
               {votingExpired ? (
-                <Trophy size={20} className="text-slate-400" />
+                <FaRegCalendarTimes size={20} className="text-slate-400" />
               ) : showPersuasionButton ? (
                 <AlertTriangle size={20} className="text-orange-500" />
               ) : (

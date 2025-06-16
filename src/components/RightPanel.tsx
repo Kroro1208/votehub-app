@@ -2,6 +2,7 @@ import { useAtomValue } from "jotai";
 import { postsAtom } from "../stores/PostAtom";
 import { PostType } from "./Post/PostList";
 import { useHandlePost } from "../hooks/useHandlePost";
+import { Link } from "react-router";
 
 const RightPanel = () => {
   const posts = useAtomValue(postsAtom);
@@ -26,10 +27,12 @@ const RightPanel = () => {
     const { getTimeRemaining } = useHandlePost(post);
     const timeRemaining = getTimeRemaining();
     return (
-      <div className="text-sm">
-        <p className="text-slate-800 font-medium">{post.title}</p>
-        <p className="text-orange-600 text-xs">残り {timeRemaining}</p>
-      </div>
+      <Link to={`/post/${post.id}`} className="block group">
+        <div className="text-sm">
+          <p className="text-slate-800 font-medium">{post.title}</p>
+          <p className="text-orange-600 text-xs">残り {timeRemaining}</p>
+        </div>
+      </Link>
     );
   };
 
@@ -54,7 +57,6 @@ const RightPanel = () => {
 
       <div className="bg-yellow-100 rounded-xl shadow-sm border border-slate-200 p-4">
         <h3 className="font-semibold text-slate-800 mb-3">⏰ 終了間近</h3>
-        {/* TODO */}
         <div className="space-y-3">
           {urgentPost.length > 0 ? (
             urgentPost.map((post) => (

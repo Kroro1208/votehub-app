@@ -34,43 +34,17 @@ import { Button } from "../ui/button";
 import DatePicker from "react-datepicker";
 import { z } from "zod";
 import { toast } from "react-toastify";
+import { createPostSchema } from "../../utils/schema";
 
 interface PostInput {
   title: string;
   content: string;
   avatar_url: string | null;
   community_id?: number | null;
+  tag_id?: number | null;
   vote_deadline?: string | null;
   user_id?: string;
 }
-
-// スキーマ定義
-const createPostSchema = z.object({
-  title: z
-    .string()
-    .min(1, "タイトルは必須です")
-    .max(100, "タイトルは100文字以内で入力してください"),
-  content: z
-    .string()
-    .min(1, "内容は必須です")
-    .max(1000, "内容は1000文字以内で入力してください"),
-  community_id: z.number().int().nullable(),
-  vote_deadline: z
-    .date({
-      required_error: "投票期限は必須です",
-      invalid_type_error: "投票期限は有効な日時を選択してください",
-    })
-    .refine((date) => date > new Date(), {
-      message: "投票期限は未来の日付を選択してください",
-    }),
-  image: z
-    .instanceof(FileList)
-    .refine((files) => files?.length === 1, "画像をアップロードしてください")
-    .refine(
-      (files) => ["image/jpeg", "image/png"].includes(files?.[0]?.type || ""),
-      "対応している画像形式はJPEG、PNGです",
-    ),
-});
 
 type CreatePostFormData = z.infer<typeof createPostSchema>;
 
@@ -104,9 +78,52 @@ const createPost = async (post: PostInput, imageFile: File) => {
   return data;
 };
 
+// タグを取得する関数
+const getTagsForCommunity = async (communityId: number) => {
+  if (!communityId || communityId <= 0) {
+    return [];
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("tags")
+      .select("*")
+      .eq("community_id", communityId)
+      .order("name");
+
+    if (error) {
+      console.error("タグ取得エラー:", error);
+      return [];
+    }
+    return data || [];
+  } catch (error) {
+    console.error("タグ取得で予期しないエラー:", error);
+    return [];
+  }
+};
+
+// 新しいタグを作成する関数
+const createTag = async (name: string, communityId: number) => {
+  const { data, error } = await supabase
+    .from("tags")
+    .insert({
+      name: name.trim(),
+      community_id: communityId,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+};
+
 const CreatePost = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [newTagName, setNewTagName] = useState("");
+  const [isCreatingTag, setIsCreatingTag] = useState(false);
 
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -126,11 +143,22 @@ const CreatePost = () => {
       title: "",
       content: "",
       community_id: null,
+      tag_id: null,
       vote_deadline: undefined,
     },
   });
 
   const watchImage = watch("image");
+  const watchCommunityId = watch("community_id");
+
+  // タグデータを取得
+  const { data: tagsData, refetch: refetchTags } = useQuery({
+    queryKey: ["tags", watchCommunityId],
+    queryFn: () => getTagsForCommunity(watchCommunityId || 0),
+    enabled: !!watchCommunityId && watchCommunityId > 0,
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
+  });
 
   useEffect(() => {
     if (!watchImage || watchImage.length === 0) {
@@ -183,6 +211,7 @@ const CreatePost = () => {
         content: data.content,
         avatar_url: user?.user_metadata.avatar_url || null,
         community_id: data.community_id,
+        tag_id: data.tag_id || null,
         vote_deadline: data.vote_deadline.toISOString(),
         user_id: user?.id,
       },
@@ -193,6 +222,28 @@ const CreatePost = () => {
   const handleRemoveImage = () => {
     setValue("image", new DataTransfer().files as FileList);
     setImagePreview(null);
+  };
+
+  // 新しいタグを作成
+  const handleCreateTag = async () => {
+    if (!newTagName.trim() || !watchCommunityId) {
+      toast.error("タグ名とスペースを選択してください");
+      return;
+    }
+
+    setIsCreatingTag(true);
+    try {
+      const newTag = await createTag(newTagName, watchCommunityId);
+      await refetchTags();
+      setValue("tag_id", newTag.id);
+      setNewTagName("");
+      toast.success("新しいタグを作成しました");
+    } catch (error) {
+      toast.error("タグの作成に失敗しました");
+      console.error("タグ作成エラー:", error);
+    } finally {
+      setIsCreatingTag(false);
+    }
   };
 
   const watchedContent = watch("content");
@@ -264,7 +315,7 @@ const CreatePost = () => {
                         </Label>
                       </div>
                       <Input
-                        placeholder="賛成する理由を書いてください..."
+                        placeholder="賛成意見の内容を書いてください"
                         className="text-sm border-green-200 dark:border-green-700 focus:border-green-400 dark:focus:border-green-500"
                         onChange={(e) => {
                           const currentContent = watch("content") || "";
@@ -289,7 +340,7 @@ const CreatePost = () => {
                         </Label>
                       </div>
                       <Input
-                        placeholder="反対する理由を書いてください..."
+                        placeholder="反対意見の内容を書いてください..."
                         className="text-sm border-red-200 dark:border-red-700 focus:border-red-400 dark:focus:border-red-500"
                         onChange={(e) => {
                           const currentContent = watch("content") || "";
@@ -323,7 +374,7 @@ const CreatePost = () => {
                       </Label>
                       <Textarea
                         rows={4}
-                        placeholder="追加の詳細説明があれば記入してください..."
+                        placeholder="追加の補足説明があれば記入してください..."
                         className="text-sm resize-none border-gray-200 dark:border-gray-600"
                         onChange={(e) => {
                           const currentContent = watch("content") || "";
@@ -388,7 +439,7 @@ const CreatePost = () => {
                             <SelectItem
                               key={item.id}
                               value={item.id.toString()}
-                              className="text-lg py-3 text-gray-900 dark:text-gray-100 focus:bg-purple-50 dark:focus:bg-purple-900/50"
+                              className="py-3 text-gray-900 dark:text-gray-100 focus:bg-purple-50 dark:focus:bg-purple-900/50"
                             >
                               {item.name}
                             </SelectItem>
@@ -439,6 +490,71 @@ const CreatePost = () => {
                   )}
                 </div>
               </div>
+
+              {/* タグ選択 - スペースが選択された場合のみ表示 */}
+              {watchCommunityId && watchCommunityId > 0 && (
+                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border">
+                  <Label
+                    htmlFor="tag_id"
+                    className="text-lg font-semibold text-gray-700 dark:text-gray-200"
+                  >
+                    カテゴリ（タグ）
+                  </Label>
+
+                  {/* 既存タグの選択 */}
+                  <Controller
+                    name="tag_id"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value?.toString() || ""}
+                        onValueChange={(value) => {
+                          field.onChange(
+                            value === "none" ? null : parseInt(value),
+                          );
+                        }}
+                      >
+                        <SelectTrigger className="border-2 border-gray-200 dark:border-gray-600">
+                          <SelectValue placeholder="カテゴリを選択してください" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">カテゴリなし</SelectItem>
+                          {tagsData?.map((tag) => (
+                            <SelectItem key={tag.id} value={tag.id.toString()}>
+                              #{tag.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+
+                  {/* 新しいタグの作成 */}
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      placeholder="新しいカテゴリ名"
+                      value={newTagName}
+                      onChange={(e) => setNewTagName(e.target.value)}
+                      className="flex-1"
+                      maxLength={20}
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleCreateTag}
+                      disabled={!newTagName.trim() || isCreatingTag}
+                      variant="outline"
+                      size="sm"
+                      className="bg-green-500 text-white"
+                    >
+                      {isCreatingTag ? "作成中..." : "作成"}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    例: サッカー、筋トレ、ヨガなど（20文字以内）
+                  </p>
+                </div>
+              )}
 
               {/* Image Upload Section */}
               <div className="group">
