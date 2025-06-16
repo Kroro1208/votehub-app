@@ -232,13 +232,88 @@ src/
 - **RealtimeFeed**: リアルタイム投票フィード
 - **UserDashboard**: ユーザー統計・スコア表示
 
-## 開発優先順位
+## 開発状況・実装済み機能
 
-1. **フェーズ1**: 既存構造の拡張・ユーザー管理・基本投票機能
-2. **フェーズ2**: コメント評価・ポイントシステム・投稿制限
-3. **フェーズ3**: 説得機能・スコアシステム・ランキング
-4. **フェーズ4**: 会員制度・収益化・優先表示機能
-5. **フェーズ5**: リアルタイムフィード・拡散システム
+### ✅ 実装済み (フェーズ1-2)
+
+#### 認証・ユーザー管理
+
+- Google OAuth認証システム (Supabase Auth)
+- ユーザー情報取得・管理 (avatar_url, user_name)
+- AuthProvider + useAuth カスタムフック
+
+#### 投稿・コミュニティシステム
+
+- 投稿作成・表示・詳細機能 (CreatePost, PostList, PostItem, PostDetail)
+- コミュニティ/スペース機能 (Community components)
+- 画像アップロード機能 (post-images バケット)
+- 投稿フィルタリング (Home, Hot, New タブ)
+
+#### 投票システム
+
+- 基本投票機能 (VoteButton, VoteGageBar)
+- 投票期限管理 (vote_deadline)
+- 楽観的UI更新 (TanStack Query)
+- 投票統計表示
+
+#### コメント・評価システム
+
+- コメント投稿・表示機能
+- コメントへのUpvote/Downvote
+- ネスト構造対応 (parent_comment_id)
+- 説得コメント機能 (is_persuasion_comment)
+
+#### UI/UXシステム
+
+- ShadCN/ui コンポーネント統合
+- Tailwind CSS レスポンシブデザイン
+- ナビゲーション (Navbar, SideBar, RightPanel)
+- ダークテーマ対応
+
+#### 状態管理・データフェッチ
+
+- Jotai による原子的状態管理 (postsAtom, filteredPostsAtom)
+- TanStack Query でのサーバー状態管理
+- カスタムフック (useHandlePost, useHandleVotes)
+
+### 🚧 実装中・改善が必要
+
+#### データベース構造
+
+- 既存テーブル: posts, votes, comments, communities, comment_votes
+- user_id (string) による関連付け
+- 型安全性: 手動型定義（Supabase型生成未使用）
+
+#### パフォーマンス最適化
+
+- ページネーション未実装
+- リアルタイム機能未実装
+- 画像最適化・CDN未設定
+
+### 📋 今後の開発優先順位
+
+1. **フェーズ3**: 説得機能・スコアシステム・ランキング
+
+   - 説得タイム機能の完全実装
+   - ポイント・スコアシステム
+   - ユーザーランキング機能
+
+2. **フェーズ4**: 会員制度・収益化・優先表示機能
+
+   - users テーブル作成・統合
+   - 会員グレード管理
+   - 投稿制限・優先表示機能
+
+3. **フェーズ5**: リアルタイムフィード・拡散システム
+
+   - Supabase Real-time 統合
+   - 自動拡散システム
+   - トレンド・フィード機能
+
+4. **フェーズ6**: パフォーマンス・運用改善
+   - Supabase型生成統合
+   - ページネーション実装
+   - 監視・分析システム
 
 ## 既存テーブルとの統合ポイント
 
