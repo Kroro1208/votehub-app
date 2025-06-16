@@ -363,7 +363,7 @@ const CreatePost = () => {
                     <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-lg group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
                       <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
-                    コミュニティ
+                    スペース
                   </Label>
                   <Controller
                     name="community_id"
@@ -376,7 +376,7 @@ const CreatePost = () => {
                         value={field.value?.toString() || ""}
                       >
                         <SelectTrigger className="text-sm border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-300 rounded-xl flex items-center">
-                          <SelectValue placeholder="コミュニティを選択してください" />
+                          <SelectValue placeholder="スペースを選択してください" />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
                           {communityData?.map((item) => (
