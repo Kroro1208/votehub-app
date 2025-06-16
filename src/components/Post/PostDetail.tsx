@@ -357,11 +357,13 @@ const PostDetail = ({ postId }: Props) => {
       )}
 
       <img
-        src={data.image_url}
+        src={data.image_url ?? undefined}
         alt={data.title}
         className="mt-4 rounded object-cover w-full h-64"
       />
-      <h2 className="text-gray-400 text-xl">{data?.content}</h2>
+      <h2 className="text-gray-400 text-xl whitespace-pre-line">
+        {data?.content}
+      </h2>
       <p className="text-gray-500 text-sm">
         {new Date(data?.created_at).toLocaleDateString()}
       </p>

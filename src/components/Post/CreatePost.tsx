@@ -41,6 +41,7 @@ interface PostInput {
   avatar_url: string | null;
   community_id?: number | null;
   vote_deadline?: string | null;
+  user_id?: string;
 }
 
 // スキーマ定義
@@ -166,6 +167,10 @@ const CreatePost = () => {
   });
 
   const onSubmit = (data: CreatePostFormData) => {
+    if (!user) {
+      toast.error("ログインが必要です");
+      return;
+    }
     const imageFile = data.image[0];
     mutate({
       post: {
@@ -174,6 +179,7 @@ const CreatePost = () => {
         avatar_url: user?.user_metadata.avatar_url || null,
         community_id: data.community_id,
         vote_deadline: data.vote_deadline.toISOString(),
+        user_id: user?.id,
       },
       imageFile,
     });
@@ -243,16 +249,100 @@ const CreatePost = () => {
                   </div>
                   内容
                 </Label>
-                <Textarea
-                  id="content"
-                  rows={8}
-                  {...register("content")}
-                  placeholder="あなたの考えや意見を詳しく説明してください..."
-                  className="resize-none text-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-green-500 dark:focus:border-green-400 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 transition-all duration-300 rounded-xl"
-                />
+                <div className="relative border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-xl focus-within:border-green-500 dark:focus-within:border-green-400 focus-within:ring-2 focus-within:ring-green-200 dark:focus-within:ring-green-800 transition-all duration-300">
+                  <div className="p-4 space-y-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <Label className="text-sm font-semibold text-green-700 dark:text-green-300">
+                          賛成意見
+                        </Label>
+                      </div>
+                      <Input
+                        placeholder="賛成する理由を書いてください..."
+                        className="text-sm border-green-200 dark:border-green-700 focus:border-green-400 dark:focus:border-green-500"
+                        onChange={(e) => {
+                          const currentContent = watch("content") || "";
+                          const lines = currentContent.split("\n");
+                          const proIndex = lines.findIndex((line) =>
+                            line.startsWith("賛成:"),
+                          );
+                          if (proIndex !== -1) {
+                            lines[proIndex] = `賛成: ${e.target.value}`;
+                          } else {
+                            lines.unshift(`賛成: ${e.target.value}`);
+                          }
+                          setValue("content", lines.join("\n"));
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <Label className="text-sm font-semibold text-red-700 dark:text-red-300">
+                          反対意見
+                        </Label>
+                      </div>
+                      <Input
+                        placeholder="反対する理由を書いてください..."
+                        className="text-sm border-red-200 dark:border-red-700 focus:border-red-400 dark:focus:border-red-500"
+                        onChange={(e) => {
+                          const currentContent = watch("content") || "";
+                          const lines = currentContent.split("\n");
+                          const conIndex = lines.findIndex((line) =>
+                            line.startsWith("反対:"),
+                          );
+                          if (conIndex !== -1) {
+                            lines[conIndex] = `反対: ${e.target.value}`;
+                          } else {
+                            const proIndex = lines.findIndex((line) =>
+                              line.startsWith("賛成:"),
+                            );
+                            if (proIndex !== -1) {
+                              lines.splice(
+                                proIndex + 1,
+                                0,
+                                `反対: ${e.target.value}`,
+                              );
+                            } else {
+                              lines.push(`反対: ${e.target.value}`);
+                            }
+                          }
+                          setValue("content", lines.join("\n"));
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
+                        詳細説明（任意）
+                      </Label>
+                      <Textarea
+                        rows={4}
+                        placeholder="追加の詳細説明があれば記入してください..."
+                        className="text-sm resize-none border-gray-200 dark:border-gray-600"
+                        onChange={(e) => {
+                          const currentContent = watch("content") || "";
+                          const lines = currentContent.split("\n");
+                          // 賛成・反対以外の行を削除
+                          const filteredLines = lines.filter(
+                            (line) =>
+                              line.startsWith("賛成:") ||
+                              line.startsWith("反対:"),
+                          );
+                          if (e.target.value.trim()) {
+                            filteredLines.push("", e.target.value);
+                          }
+                          setValue("content", filteredLines.join("\n"));
+                        }}
+                      />
+                    </div>
+                  </div>
+                  {/* Hidden textarea for form submission */}
+                  <input type="hidden" {...register("content")} />
+                </div>
                 <div className="flex justify-between items-center mt-3">
                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                    詳細な説明を追加することで、より良い議論が生まれます
+                    両方の視点を示すことで、より建設的な議論が期待できます
                   </span>
                   <span className="text-sm text-gray-600 dark:text-gray-300 font-medium bg-gray-100 dark:bg-gray-600 px-3 py-1 rounded-full">
                     {watchedContent.length} 文字
