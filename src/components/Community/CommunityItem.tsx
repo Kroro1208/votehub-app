@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import ErrorMessage from "./ErrorMessage";
-import Loading from "./Loading";
-import type { PostType } from "./PostList";
-import { supabase } from "../supabase-client";
+import ErrorMessage from "../ErrorMessage";
+import Loading from "../Loading";
+import type { PostType } from "../Post/PostList";
+import { supabase } from "../../supabase-client";
 import { Link } from "react-router";
 import {
   Clock,
@@ -11,7 +11,7 @@ import {
   Calendar,
   CheckCircle,
 } from "lucide-react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 interface Props {
   communityId: number;

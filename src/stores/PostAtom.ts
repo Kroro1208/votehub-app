@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import { PostType } from "../components/PostList";
+import { PostType } from "../components/Post/PostList";
 
 // 基本のpostsデータのatom
 export const postsAtom = atom<PostType[]>([]);

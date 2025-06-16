@@ -1,5 +1,5 @@
 import { useParams } from "react-router";
-import CommunityItem from "../components/CommunityItem";
+import CommunityItem from "../components/Community/CommunityItem";
 
 const CommyunityDetailPage = () => {
   const { id } = useParams<{ id: string }>();

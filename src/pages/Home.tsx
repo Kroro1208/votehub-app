@@ -1,4 +1,4 @@
-import PostList from "../components/PostList";
+import PostList from "../components/Post/PostList";
 import { Clock, TrendingUp, Users } from "lucide-react";
 import {
   Tabs,

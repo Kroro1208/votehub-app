@@ -1,10 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../supabase-client";
+import { supabase } from "../../supabase-client";
 import { Link } from "react-router";
 import { useState } from "react";
 import { Search, Users, Calendar, ArrowRight, Sparkles } from "lucide-react";
-import Error from "./Error";
+import Error from "../Error";
 
 export interface Community {
   id: number;

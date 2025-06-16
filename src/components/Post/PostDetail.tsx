@@ -1,15 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "../supabase-client";
+import { supabase } from "../../supabase-client";
 import type { PostType } from "./PostList";
-import VoteButton from "./VoteButton";
-import CommentSection from "./CommentSection";
+import VoteButton from "../Vote/VoteButton";
 import { useAtomValue } from "jotai";
-import { mostVotedCommentAtomFamily } from "../stores/CommentVoteAtom";
+import { mostVotedCommentAtomFamily } from "../../stores/CommentVoteAtom";
 import { useState, useEffect } from "react";
 import { Calendar, Clock, MessageCircle } from "lucide-react";
-import { useAuth } from "../hooks/useAuth";
-import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
+import { useAuth } from "../../hooks/useAuth";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +16,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
+} from "../ui/dialog";
+import CommentSection from "../Comment/CommentSection";
 
 interface Props {
   postId: number;

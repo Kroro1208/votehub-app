@@ -1,5 +1,5 @@
 import { useParams } from "react-router";
-import PostDetail from "../components/PostDetail";
+import PostDetail from "../components/Post/PostDetail";
 
 export default function PostPage() {
   const { id } = useParams<{ id: string }>();

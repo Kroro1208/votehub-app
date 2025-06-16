@@ -182,8 +182,7 @@ RLSポリシーで適切なアクセス制御も含めて設計してくださ�
 **Claude への相談:**
 
 ```
-「Next.js 14 App Router + Supabaseで以下のAPI Routesを実装します。
-Server ActionsとRoute Handlersの使い分けを含めて設計してください:
+React router + Supabaseで以下のAPI Routesを実装します。
 - 投票の作成・取得・更新
 - ポイントシステムの処理
 - 説得タイム機能の実装

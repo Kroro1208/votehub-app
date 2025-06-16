@@ -1,6 +1,6 @@
 import { useAtomValue } from "jotai";
 import { postsAtom } from "../stores/PostAtom";
-import { PostType } from "./PostList";
+import { PostType } from "./Post/PostList";
 import { useHandlePost } from "../hooks/useHandlePost";
 
 const RightPanel = () => {

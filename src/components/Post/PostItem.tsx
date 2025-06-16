@@ -1,9 +1,9 @@
 import { Link } from "react-router";
 import type { PostType } from "./PostList";
 import { Clock, Users, CheckCircle, AlertTriangle, Trophy } from "lucide-react";
-import { useAuth } from "../hooks/useAuth";
-import { useHandleVotes } from "../hooks/useHandleVotes";
-import { useHandlePost } from "../hooks/useHandlePost";
+import { useAuth } from "../../hooks/useAuth";
+import { useHandleVotes } from "../../hooks/useHandleVotes";
+import { useHandlePost } from "../../hooks/useHandlePost";
 
 interface PostItemType {
   post: PostType;

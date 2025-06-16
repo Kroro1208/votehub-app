@@ -1,9 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { supabase } from "../supabase-client";
+import { supabase } from "../../supabase-client";
 import { useNavigate } from "react-router";
-import { useAuth } from "../hooks/useAuth";
-import { type Community, getCommunitites } from "./CommunityList";
+import { useAuth } from "../../hooks/useAuth";
+import { type Community, getCommunitites } from "../Community/CommunityList";
 import "react-datepicker/dist/react-datepicker.css";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,18 +19,18 @@ import {
   FileText,
   Clock,
 } from "lucide-react";
-import { Card, CardContent } from "./ui/card";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
+import { Card, CardContent } from "../ui/card";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { Button } from "./ui/button";
+} from "../ui/select";
+import { Button } from "../ui/button";
 import DatePicker from "react-datepicker";
 import { z } from "zod";
 import { toast } from "react-toastify";

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import type { Comment } from "./CommentSection";
-import { useAuth } from "../hooks/useAuth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "../supabase-client";
 import { ChevronsUp, ChevronsUpDown, MessageSquare, Send } from "lucide-react";
 import CommentVotes from "./CommentVotes";
+import { supabase } from "../../supabase-client";
+import { useAuth } from "../../hooks/useAuth";
 
 interface CommentItemProps {
   comment: Comment & {

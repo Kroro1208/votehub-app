@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../supabase-client";
+import { supabase } from "../../supabase-client";
 import PostItem from "./PostItem";
 import { useEffect } from "react";
 import { useAtom } from "jotai";
-import { postsAtom } from "../stores/PostAtom";
+import { postsAtom } from "../../stores/PostAtom";
 
 export interface PostType {
   id: number;

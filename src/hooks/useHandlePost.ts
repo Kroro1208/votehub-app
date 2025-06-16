@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../supabase-client";
 import { useAuth } from "./useAuth";
-import { PostType } from "../components/PostList";
+import { PostType } from "../components/Post/PostList";
 
 const getUserVoteForPost = async (postId: number, userId?: string) => {
   if (!userId) return null;

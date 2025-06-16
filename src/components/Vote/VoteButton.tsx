@@ -1,10 +1,10 @@
 import { TbArrowBigUpLine } from "react-icons/tb";
 import { TbArrowBigDownLine } from "react-icons/tb";
 
-import VoteGageBar from "./VoteGageBar";
 import { CheckCircle } from "lucide-react";
-import { Button } from "./ui/button";
-import { useHandleVotes } from "../hooks/useHandleVotes";
+import { Button } from "../ui/button";
+import { useHandleVotes } from "../../hooks/useHandleVotes";
+import VoteGageBar from "./VoteGageBar";
 
 interface PostProps {
   postId: number;
