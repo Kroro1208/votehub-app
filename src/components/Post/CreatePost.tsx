@@ -77,6 +77,8 @@ type CreatePostFormData = z.infer<typeof createPostSchema>;
 const createPost = async (post: PostInput, imageFile: File) => {
   const fileExt = imageFile.name.split(".").pop() || "";
   const filePath = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+
+  // Supabase Storageに画像をアップロード
   const { error: uploadError } = await supabase.storage
     .from("post-images")
     .upload(filePath, imageFile);
@@ -85,10 +87,12 @@ const createPost = async (post: PostInput, imageFile: File) => {
     throw new Error(uploadError.message);
   }
 
+  // アップロードした画像のパブリックURLを取得
   const { data: publicUrlData } = supabase.storage
     .from("post-images")
     .getPublicUrl(filePath);
 
+  // 公開URLと共にSupabaseのpostsテーブルに投稿を作成
   const { data, error } = await supabase
     .from("posts")
     .insert({ ...post, image_url: publicUrlData.publicUrl })
@@ -133,11 +137,13 @@ const CreatePost = () => {
       setImagePreview(null);
       return;
     }
+
+    // 画像が選択された場合、プレビューを表示
     const file = watchImage[0];
     const objUrl = URL.createObjectURL(file);
     setImagePreview(objUrl);
 
-    // Cleanup function to revoke object URL
+    // コンポーネントのアンマウント時にオブジェクトURLを解放
     return () => URL.revokeObjectURL(objUrl);
   }, [watchImage]);
 
@@ -153,8 +159,7 @@ const CreatePost = () => {
     onMutate: () => {
       setIsSubmitting(true);
     },
-    onSuccess: (data) => {
-      console.log("結果", data);
+    onSuccess: () => {
       reset();
       setIsSubmitting(false);
       navigate("/");
