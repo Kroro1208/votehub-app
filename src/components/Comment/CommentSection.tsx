@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "../supabase-client";
 import CommentItem from "./CommentItem";
 import {
   MessageSquareText,
@@ -10,6 +8,8 @@ import {
   Loader2,
   Megaphone,
 } from "lucide-react";
+import { supabase } from "../../supabase-client";
+import { useAuth } from "../../hooks/useAuth";
 
 interface PostProps {
   postId: number;

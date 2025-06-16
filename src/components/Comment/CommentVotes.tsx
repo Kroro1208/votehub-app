@@ -1,13 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "../supabase-client";
 import { useEffect, useState } from "react";
-import { useAuth } from "../hooks/useAuth";
 import { useAtom } from "jotai";
+import { supabase } from "../../supabase-client";
+import { useAuth } from "../../hooks/useAuth";
 import {
   commentVotesAtomFamily,
   mostVotedCommentAtomFamily,
   updateCommentVotes,
-} from "../stores/CommentVoteAtom";
+} from "../../stores/CommentVoteAtom";
 
 interface VoteProps {
   commentId: number;
