@@ -138,7 +138,7 @@ const CommunityItem = ({ communityId }: Props) => {
                     <div className="flex items-start gap-4 mb-4">
                       <div className="relative">
                         <img
-                          src={item.avatar_url}
+                          src={item.avatar_url || undefined}
                           alt="ユーザーアバター"
                           className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
                         />
