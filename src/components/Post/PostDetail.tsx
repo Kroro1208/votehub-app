@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import CommentSection from "../Comment/CommentSection";
+import PostContentDisplay from "./PostContentDisplay";
 
 interface Props {
   postId: number;
@@ -362,7 +363,7 @@ const PostDetail = ({ postId }: Props) => {
         className="mt-4 rounded object-cover w-full h-64"
       />
       <h2 className="text-gray-400 text-xl whitespace-pre-line">
-        {data?.content}
+        <PostContentDisplay content={data?.content} />
       </h2>
       <p className="text-gray-500 text-sm">
         {new Date(data?.created_at).toLocaleDateString()}
@@ -370,8 +371,8 @@ const PostDetail = ({ postId }: Props) => {
 
       {/* 最も投票されたコメントがある場合は表示 */}
       {mostVotedComment && mostVotedInfo.votes > 0 && (
-        <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <h3 className="text-xl font-semibold text-green-700 mb-2">
+        <div className="mt-8 p-4 bg-orange-50 border border-green-200 rounded-lg">
+          <h3 className="text-xl font-semibold text-orange-500 mb-2">
             一番参考にされているコメント
           </h3>
           <div className="bg-white p-3 rounded shadow-sm">
