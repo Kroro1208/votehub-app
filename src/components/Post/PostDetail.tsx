@@ -364,7 +364,7 @@ const PostDetail = ({ postId }: Props) => {
           <img
             src={data.image_url ?? undefined}
             alt={data.title}
-            className="rounded-lg object-cover w-full h-auto max-h-96 shadow-lg"
+            className="rounded-lg object-contain w-full h-auto max-h-96 shadow-lg"
           />
         </div>
 

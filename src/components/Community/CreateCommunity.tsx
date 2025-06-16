@@ -10,6 +10,8 @@ import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { toast } from "react-toastify";
 import { FaPeopleLine } from "react-icons/fa6";
+import { IoPricetagsOutline } from "react-icons/io5";
+import { TbFileDescription } from "react-icons/tb";
 
 const communitySchema = z.object({
   name: z.string().min(1, "スペース名は必須です"),
@@ -79,26 +81,14 @@ const CreateCommunity = () => {
                 htmlFor="name"
                 className="text-sm font-semibold text-gray-700 flex items-center"
               >
-                <svg
-                  className="h-4 w-4 mr-2 text-gray-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.99 1.99 0 013 12V7a4 4 0 014-4z"
-                  />
-                </svg>
+                <IoPricetagsOutline size={18} />
                 スペース名
               </Label>
               <Input
                 type="text"
                 id="name"
                 {...register("name")}
-                className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 bg-gray-50 focus:bg-white ${
+                className={`w-full px-4 py-3 text-black dark:text-white rounded-xl border-2 transition-all duration-200 bg-gray-50 focus:bg-white ${
                   errors.name
                     ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
                     : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
@@ -129,26 +119,14 @@ const CreateCommunity = () => {
                 htmlFor="description"
                 className="text-sm font-semibold text-gray-700 flex items-center"
               >
-                <svg
-                  className="h-4 w-4 mr-2 text-gray-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
+                <TbFileDescription size={20} />
                 スペースの説明
               </Label>
               <Textarea
                 id="description"
                 {...register("description")}
                 rows={5}
-                className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 bg-gray-50 focus:bg-white resize-none ${
+                className={`w-full px-4 py-3 text-black dark:text-white rounded-xl border-2 transition-all duration-200 bg-gray-50 focus:bg-white resize-none ${
                   errors.description
                     ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
                     : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
