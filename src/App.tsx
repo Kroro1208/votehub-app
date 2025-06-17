@@ -6,6 +6,7 @@ import PostPage from "./pages/PostPage";
 import CreateCommunityPage from "./pages/CreateCommunityPage";
 import CommunitiesPage from "./pages/CommunitiesPage";
 import CommyunityDetailPage from "./pages/CommyunityDetailPage";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   return (
@@ -19,6 +20,8 @@ function App() {
           <Route path="/space/create" element={<CreateCommunityPage />} />
           <Route path="/space" element={<CommunitiesPage />} />
           <Route path="/space/:id" element={<CommyunityDetailPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/:userId" element={<ProfilePage />} />
         </Routes>
       </div>
     </div>

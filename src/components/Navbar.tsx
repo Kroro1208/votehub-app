@@ -51,20 +51,27 @@ export default function Navbar() {
             <div className="hidden md:flex items-center flex-shrink-0">
               {user ? (
                 <div className="flex space-x-4 items-center justify-center min-w-0">
-                  {user ? (
-                    <div className="flex-shrink-0">
-                      {user.user_metadata.avatar_url && (
-                        <img
-                          alt="user"
-                          src={user.user_metadata.avatar_url}
-                          className="rounded-full size-10 object-cover"
-                        />
-                      )}
-                    </div>
-                  ) : (
-                    <FaRegUser />
-                  )}
-                  <span className="text-blue-300 truncate">{displayName}</span>
+                  <Link
+                    to="/profile"
+                    className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+                  >
+                    {user ? (
+                      <div className="flex-shrink-0">
+                        {user.user_metadata.avatar_url && (
+                          <img
+                            alt="user"
+                            src={user.user_metadata.avatar_url}
+                            className="rounded-full size-10 object-cover"
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <FaRegUser />
+                    )}
+                    <span className="text-blue-300 truncate">
+                      {displayName}
+                    </span>
+                  </Link>
                   <div className="flex-shrink-0">
                     <Button
                       type="button"
