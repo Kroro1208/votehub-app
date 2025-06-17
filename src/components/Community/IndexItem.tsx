@@ -1,8 +1,9 @@
 import { Link } from "react-router";
 import { CommunityItemType } from "./CommunityItem";
-import { AlertTriangle, CheckCircle, Clock, Trophy, Users } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, Users } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { getTimeRemaining, isPersuasionTime } from "../../utils/formatTime";
+import { FaRegCalendarTimes } from "react-icons/fa";
 
 interface IndexItemProps {
   communityItemData: CommunityItemType[];
@@ -68,13 +69,30 @@ const IndexItem = ({ communityItemData, votedPostIds }: IndexItemProps) => {
                     </div>
 
                     {/* Status Icon */}
-                    <div className="flex flex-col items-end ml-2 flex-shrink-0">
+                    <div className="flex flex-col items-end space-y-1 min-w-0">
                       {votingExpired ? (
-                        <Trophy size={16} className="text-slate-400" />
+                        <FaRegCalendarTimes
+                          size={20}
+                          className="text-slate-400"
+                        />
                       ) : showPersuasionButton ? (
-                        <AlertTriangle size={16} className="text-orange-500" />
+                        <AlertTriangle size={20} className="text-orange-500" />
                       ) : (
-                        <Clock size={16} className="text-violet-500" />
+                        <Clock size={20} className="text-violet-500" />
+                      )}
+
+                      {(timeRemaining || votingExpired) && (
+                        <span
+                          className={`text-xs font-medium whitespace-nowrap ${
+                            votingExpired
+                              ? "text-slate-500"
+                              : showPersuasionButton
+                                ? "text-orange-600"
+                                : "text-violet-600"
+                          }`}
+                        >
+                          {votingExpired ? "終了" : `残り${timeRemaining}`}
+                        </span>
                       )}
                     </div>
                   </div>
@@ -122,20 +140,6 @@ const IndexItem = ({ communityItemData, votedPostIds }: IndexItemProps) => {
                         </span>
                       </div>
                     </div>
-
-                    {timeRemaining && (
-                      <span
-                        className={`text-xs font-medium whitespace-nowrap ${
-                          votingExpired
-                            ? "text-slate-500"
-                            : showPersuasionButton
-                              ? "text-orange-600"
-                              : "text-violet-600"
-                        }`}
-                      >
-                        {votingExpired ? "終了" : `残り${timeRemaining}`}
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
