@@ -2,5 +2,7 @@
   "permissions": {
     "allow": ["Bash(claude doctor --help)", "Bash(npm i:*)"],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": ["supabase"],
+  "enableAllProjectMcpServers": true
 }
