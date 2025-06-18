@@ -10,20 +10,21 @@
 
 ### 🎯 現在のプロジェクト状況 (2025年6月)
 
-**✅ 開発進捗: フェーズ1-2完了 + ユーザー機能追加 (コア機能実装済み)**
+**✅ 開発進捗: フェーズ1-2完了 + ネスト投稿機能実装完了 (コア機能実装済み)**
 
 - **認証・投稿・投票・コメント機能**: 完全実装
 - **リアルタイム投票・説得タイム**: 実装済み
 - **プロフィールページ機能**: 新規実装完了 (2025-06-17)
+- **ネスト投稿機能**: **新規実装完了 (2025-06-18)** - GitHub Issue #12対応
 - **UI/UX・レスポンシブデザイン**: 完成
 - **Supabaseフル統合**: 完了
 - **モダンな技術スタック**: React 19 + TypeScript + Tailwind CSS
 
-**🚀 次のステップ: フェーズ3開始準備**
+**🚀 次のステップ: ポイントシステム・エンゲージメント機能**
 
+- ユーザーポイントシステム (GitHub Issue #13)
+- コメント共感・説得力スコア機能 (GitHub Issue #2)
 - リアルタイム通知システム
-- ポイント・スコアシステム
-- プロフィール編集・ユーザーバッジ機能
 
 ## 技術スタック
 
@@ -44,7 +45,7 @@
 ### 状態管理・データフェッチ
 
 - **TanStack Query 5.74.4** (サーバー状態管理)
-- **Jotai 2.12.5** (原子的クライアント状態管理)
+- **Jotai 2.12.5** (グローバル状態管理)
 
 ### フォーム・バリデーション
 
@@ -76,7 +77,8 @@
 
 - **コミュニティ**: 既存の `communities` テーブルを活用（ジャンル別スペース）
 - **ポスト投稿**: 2択投票（賛成/反対、A/B等）を含む議題投稿
-- **ネスト構造**: 最大3段階までの投稿ネスト対応（parent_post_id使用）
+- **ネスト構造**: **最大3段階までの投稿ネスト完全実装済み**（parent_post_id使用）
+- **派生質問機能**: **投票者絞り込み対応済み**（賛成者向け/反対者向け/全員向け）
 - **メディア対応**: テキスト・画像のみ（image_url, avatar_url活用）
 
 ### 3. 投票・説得システム
@@ -296,10 +298,13 @@ CREATE TABLE priority_display_tickets (
     UNIQUE(user_id)
 );
 
--- 🔧 フェーズ4で実装予定: 投稿ネスト機能
--- postsテーブルに追加予定カラム
--- ALTER TABLE posts ADD COLUMN parent_post_id int8 REFERENCES posts(id); -- ネスト構造
--- ALTER TABLE posts ADD COLUMN nest_level integer DEFAULT 0 CHECK (nest_level <= 3);
+-- ✅ 2025-06-18実装完了: 投稿ネスト機能 (GitHub Issue #12)
+-- postsテーブルに追加済みカラム
+-- ✅ parent_post_id int8 REFERENCES posts(id) - 実装済み
+-- ✅ nest_level integer DEFAULT 0 CHECK (nest_level >= 0 AND nest_level <= 3) - 実装済み
+-- ✅ target_vote_choice integer CHECK (target_vote_choice IN (-1, 1)) - 実装済み
+--
+-- 🔧 フェーズ4で実装予定: 追加投稿機能
 -- ALTER TABLE posts ADD COLUMN option_a text;
 -- ALTER TABLE posts ADD COLUMN option_b text;
 -- ALTER TABLE posts ADD COLUMN is_priority boolean DEFAULT false;
@@ -349,6 +354,12 @@ src/
 │   ├── auth/
 │   ├── communities/
 │   ├── posts/
+│   │   ├── CreatePost.tsx          (既存)
+│   │   ├── CreateNestedPost.tsx    (NEW - 2025-06-18)
+│   │   ├── PostList.tsx            (既存 - ネスト機能追加)
+│   │   ├── PostDetail.tsx          (既存 - ネスト機能追加)
+│   │   ├── NestedPostItem.tsx      (NEW - 2025-06-18)
+│   │   └── PostContentDisplay.tsx  (既存 - 強化)
 │   ├── voting/
 │   ├── comments/
 │   ├── feed/
@@ -356,6 +367,7 @@ src/
 ├── pages/
 ├── hooks/
 ├── utils/
+│   └── schema.tsx                  (既存 - ネスト機能追加)
 ├── types/
 └── lib/
     └── supabase.ts
@@ -364,7 +376,8 @@ src/
 ### 主要機能コンポーネント
 
 - **SpaceCommunityList**: コミュニティ一覧・作成
-- **PostEditor**: 投稿作成・編集
+- **CreatePost/CreateNestedPost**: 投稿作成・編集（**ネスト対応完了**）
+- **PostList/NestedPostItem**: 投稿表示（**3階層ネスト完全対応**）
 - **VotingInterface**: 投票UI・結果表示
 - **CommentSection**: コメント表示・投稿（ネスト対応）
 - **RealtimeFeed**: リアルタイム投票フィード
@@ -385,6 +398,9 @@ src/
 #### 投稿・コミュニティシステム
 
 - **投稿作成・表示・詳細機能** (CreatePost, PostList, PostItem, PostDetail)
+- **ネスト投稿システム完全実装** (CreateNestedPost, NestedPostItem - **2025-06-18新規追加**)
+- **3階層ネスト構造対応** (parent_post_id, nest_level完全実装)
+- **投票者ターゲット機能** (target_vote_choice: 賛成者向け/反対者向け/全員向け)
 - **コミュニティ/スペース完全機能** (CommunityList, CommunityItem, CreateCommunity)
 - **画像アップロード機能** (Supabase Storage: post-images バケット)
 - **投稿フィルタリング** (すべて/期限間近/人気/新着タブ)
@@ -446,14 +462,18 @@ src/
   - ユーザー別投稿一覧表示
 - **プロフィール編集**: 未実装
 
+### ✅ 最新実装完了機能 (2025-06-18)
+
+#### ネスト投稿機能 (**GitHub Issue #12 - 完全実装済み**)
+
+- **投稿の3段階ネスト構造**: 投稿は最大3段階までネスト可能（例：本ポスト→賛成と答えた人に派生質問→さらに深掘り質問）**完全実装済み**
+- **parent_post_id を活用した階層構造表示**: **完全実装済み**
+- **ネストレベルに応じたUI表示調整**: **完全実装済み**
+- **派生投稿作成機能**: **完全実装済み**
+- **投票者ターゲット機能**: 賛成者向け/反対者向け/全員向けの絞り込み**完全実装済み**
+- **新規コンポーネント**: CreateNestedPost.tsx, NestedPostItem.tsx **完全実装済み**
+
 ### ❌ 未実装機能
-
-#### 投稿ネスト機能
-
-- **投稿の3段階ネスト構造**: 投稿は最大3段階までネスト可能（例：本ポスト→賛成と答えた人に派生質問→さらに深掘り質問）
-- parent_post_id を活用した階層構造表示
-- ネストレベルに応じたUI表示調整
-- 派生投稿作成機能
 
 #### リアルタイム通知システム
 
@@ -461,11 +481,11 @@ src/
 - 投票・コメント通知
 - 説得タイム開始通知
 
-#### ポイント・スコアシステム
+#### ポイント・スコアシステム (**GitHub Issue #13 - 次期実装対象**)
 
 - ユーザーポイント管理
 - 説得力スコア算出
-- 共感ポイント機能
+- 共感ポイント機能 (**GitHub Issue #2との連携**)
 - ランキングシステム
 
 #### 会員制度・収益化
@@ -490,22 +510,29 @@ src/
 
 ### 📋 今後の開発優先順位
 
-#### 🚀 **フェーズ3: 高度な機能拡張** (優先度: 高)
+#### 🚀 **フェーズ3: エンゲージメント・ポイントシステム** (優先度: 高)
 
-1. **リアルタイム通知システム**
+1. **ユーザーポイントシステム** (**GitHub Issue #13 - 最優先**)
+
+   - usersテーブル作成・統合
+   - ポイント獲得・消費システム実装
+   - 会員グレード管理機能
+   - 投稿制限・優先表示機能
+
+2. **コメント共感・説得力システム** (**GitHub Issue #2 - 高優先度**)
+
+   - 共感ポイント機能実装
+   - 説得力スコア算出システム
+   - ランキング・バッジシステム
+   - コメント評価の可視化
+
+3. **リアルタイム通知システム**
 
    - Supabase Real-time 通知機能
    - 投票・コメント・説得タイム開始通知
    - プッシュ通知連携
 
-2. **ポイント・スコアシステム**
-
-   - usersテーブル作成・統合
-   - ポイント獲得・消費システム
-   - 説得力スコア・共感ポイント算出
-   - ランキング・バッジシステム
-
-3. **ユーザー機能強化**
+4. **ユーザー機能強化**
    - プロフィール編集機能
    - ユーザー統計・スコア詳細表示
    - ユーザーバッジ・実績システム
