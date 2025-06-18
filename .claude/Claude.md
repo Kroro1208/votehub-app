@@ -133,115 +133,204 @@
 
 ## データベース設計（Supabase）
 
-### 現在のテーブル構造
+### 現在のテーブル構造（2025-06-18更新）
 
 ```sql
--- 既存テーブル（現在の構造）
-communities (
-  id int8 primary key,
-  created_at timestamptz,
-  name text,
-  description text
-)
+-- 現在実装済みテーブル構造
+CREATE TABLE communities (
+    id int8 PRIMARY KEY,
+    name text NOT NULL,
+    description text NOT NULL,
+    created_at timestamptz DEFAULT now()
+);
 
-posts (
-  id int8 primary key,
-  created_at timestamptz,
-  title text,
-  content text,
-  image_url text,
-  avatar_url text,
-  community_id int8 references communities(id)
-)
+CREATE TABLE posts (
+    id int8 PRIMARY KEY,
+    title text NOT NULL,
+    content text NOT NULL,
+    created_at timestamptz DEFAULT now(),
+    image_url text,
+    avatar_url text,
+    vote_deadline timestamptz,
+    community_id int8 REFERENCES communities(id),
+    user_id text NOT NULL,
+    parent_post_id int8 REFERENCES posts(id), -- ネスト投稿の親ID
+    nest_level integer DEFAULT 0 CHECK (nest_level >= 0 AND nest_level <= 3), -- ネストレベル
+    target_vote_choice integer CHECK (target_vote_choice IN (-1, 1)) -- 派生質問のターゲット投票選択
+);
 
-votes (
-  id int8 primary key,
-  created_at timestamptz,
-  post_id int8 references posts(id),
-  user_id text,
-  vote int4
-)
+CREATE TABLE votes (
+    id int8 PRIMARY KEY,
+    post_id int8 NOT NULL REFERENCES posts(id),
+    user_id text NOT NULL,
+    vote int4 NOT NULL CHECK (vote IN (1, -1)), -- 1:賛成, -1:反対
+    created_at timestamptz DEFAULT now(),
+    UNIQUE(post_id, user_id)
+);
 
-comments (
-  id int8 primary key,
-  created_at timestamptz,
-  post_id int8 references posts(id),
-  content text,
-  user_id text,
-  author text,
-  parent_comment_id int8 references comments(id) -- ネスト構造
-)
+CREATE TABLE comments (
+    id int8 PRIMARY KEY,
+    post_id int8 NOT NULL REFERENCES posts(id),
+    parent_comment_id int8 REFERENCES comments(id), -- ネスト構造
+    content text NOT NULL,
+    user_id text NOT NULL,
+    author text NOT NULL, -- 表示名
+    created_at timestamptz DEFAULT now(),
+    is_persuasion_comment boolean DEFAULT false -- 説得コメント識別
+);
 
-comment_votes (
-  id int8 primary key,
-  created_at timestamptz,
-  user_id text,
-  vote int4,
-  comment_id int8 references comments(id)
-)
+-- comment_votesテーブル（コメント評価システム）
+-- ※実装状況要確認
+CREATE TABLE comment_votes (
+    id int8 PRIMARY KEY,
+    comment_id int8 NOT NULL REFERENCES comments(id),
+    user_id text NOT NULL,
+    vote int4 NOT NULL CHECK (vote IN (1, -1)), -- 1:Upvote, -1:Downvote
+    created_at timestamptz DEFAULT now(),
+    UNIQUE(comment_id, user_id)
+);
+
+-- SQLファンクション: 投稿の統計情報取得（ネスト情報とターゲット投票選択を含む）
+CREATE OR REPLACE FUNCTION get_posts_with_counts()
+RETURNS TABLE (
+    id int8,
+    title text,
+    content text,
+    created_at timestamptz,
+    image_url text,
+    avatar_url text,
+    vote_deadline timestamptz,
+    community_id int8,
+    user_id text,
+    parent_post_id int8,
+    nest_level integer,
+    target_vote_choice integer,
+    vote_count int8,
+    comment_count int8
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        p.id,
+        p.title,
+        p.content,
+        p.created_at,
+        p.image_url,
+        p.avatar_url,
+        p.vote_deadline,
+        p.community_id,
+        p.user_id,
+        p.parent_post_id,
+        COALESCE(p.nest_level, 0) as nest_level,
+        p.target_vote_choice,
+        COALESCE(v.vote_count, 0) as vote_count,
+        COALESCE(c.comment_count, 0) as comment_count
+    FROM posts p
+    LEFT JOIN (
+        SELECT post_id, COUNT(*) as vote_count
+        FROM votes
+        GROUP BY post_id
+    ) v ON p.id = v.post_id
+    LEFT JOIN (
+        SELECT post_id, COUNT(*) as comment_count
+        FROM comments
+        GROUP BY post_id
+    ) c ON p.id = c.post_id
+    ORDER BY p.created_at DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- パフォーマンス最適化インデックス
+CREATE INDEX idx_posts_community_id ON posts(community_id);
+CREATE INDEX idx_posts_user_id ON posts(user_id);
+CREATE INDEX idx_posts_created_at ON posts(created_at);
+CREATE INDEX idx_votes_post_id ON votes(post_id);
+CREATE INDEX idx_votes_user_id ON votes(user_id);
+CREATE INDEX idx_comments_post_id ON comments(post_id);
+CREATE INDEX idx_comments_parent_id ON comments(parent_comment_id);
 ```
 
-### 必要な追加テーブル・カラム
+### フェーズ3実装予定テーブル・カラム
 
 ```sql
--- ユーザー管理テーブル（新規作成必要）
-users (
-  id text primary key, -- 既存のuser_idと統合
-  email text,
-  username text unique,
-  avatar_url text,
-  membership_tier text default 'free',
-  points integer default 0,
-  daily_posts_count integer default 0,
-  daily_posts_reset_date date default current_date,
-  created_at timestamptz default now()
-)
+-- 🚀 フェーズ3で実装予定: ユーザー管理システム
+CREATE TABLE users (
+    id text PRIMARY KEY, -- Supabase AuthのUUIDと統合
+    email text UNIQUE NOT NULL,
+    username text UNIQUE,
+    avatar_url text,
+    membership_tier text DEFAULT 'free' CHECK (membership_tier IN ('free', 'standard', 'platinum', 'diamond')),
+    points integer DEFAULT 0,
+    daily_posts_count integer DEFAULT 0,
+    daily_posts_reset_date date DEFAULT current_date,
+    created_at timestamptz DEFAULT now()
+);
 
--- postsテーブルに追加必要なカラム
-ALTER TABLE posts ADD COLUMN author_id text references users(id);
-ALTER TABLE posts ADD COLUMN parent_post_id int8 references posts(id); -- ネスト構造
-ALTER TABLE posts ADD COLUMN option_a text;
-ALTER TABLE posts ADD COLUMN option_b text;
-ALTER TABLE posts ADD COLUMN voting_deadline timestamptz;
-ALTER TABLE posts ADD COLUMN persuasion_start_time timestamptz;
-ALTER TABLE posts ADD COLUMN is_priority boolean default false;
-ALTER TABLE posts ADD COLUMN auto_shared boolean default false;
+-- 🚀 フェーズ3で実装予定: ポイント・スコアシステム
+CREATE TABLE user_scores (
+    id bigserial PRIMARY KEY,
+    user_id text REFERENCES users(id),
+    community_id int8 REFERENCES communities(id),
+    persuasion_score integer DEFAULT 0,
+    empathy_points integer DEFAULT 0,
+    total_votes_cast integer DEFAULT 0,
+    total_votes_received integer DEFAULT 0,
+    updated_at timestamptz DEFAULT now(),
+    UNIQUE(user_id, community_id)
+);
 
--- votesテーブルの修正
-ALTER TABLE votes ALTER COLUMN user_id TYPE text;
-ALTER TABLE votes ADD COLUMN choice text; -- 'A' or 'B' or 'for' or 'against'
-ALTER TABLE votes ADD COLUMN is_changed boolean default false;
-ALTER TABLE votes ADD COLUMN original_vote_time timestamptz;
+CREATE TABLE user_achievements (
+    id bigserial PRIMARY KEY,
+    user_id text REFERENCES users(id),
+    achievement_type text NOT NULL,
+    achievement_data jsonb,
+    earned_at timestamptz DEFAULT now()
+);
 
--- commentsテーブルの修正
-ALTER TABLE comments ADD COLUMN upvotes integer default 0;
-ALTER TABLE comments ADD COLUMN downvotes integer default 0;
+CREATE TABLE priority_display_tickets (
+    id bigserial PRIMARY KEY,
+    user_id text REFERENCES users(id),
+    remaining_tickets integer DEFAULT 0,
+    monthly_reset_date date DEFAULT date_trunc('month', current_date),
+    created_at timestamptz DEFAULT now(),
+    UNIQUE(user_id)
+);
 
--- 新規テーブル
-user_scores (
-  id bigserial primary key,
-  user_id text references users(id),
-  community_id int8 references communities(id),
-  persuasion_score integer default 0,
-  empathy_points integer default 0,
-  updated_at timestamptz default now()
-)
+-- 🔧 フェーズ4で実装予定: 投稿ネスト機能
+-- postsテーブルに追加予定カラム
+-- ALTER TABLE posts ADD COLUMN parent_post_id int8 REFERENCES posts(id); -- ネスト構造
+-- ALTER TABLE posts ADD COLUMN nest_level integer DEFAULT 0 CHECK (nest_level <= 3);
+-- ALTER TABLE posts ADD COLUMN option_a text;
+-- ALTER TABLE posts ADD COLUMN option_b text;
+-- ALTER TABLE posts ADD COLUMN is_priority boolean DEFAULT false;
+-- ALTER TABLE posts ADD COLUMN auto_shared boolean DEFAULT false;
 
-user_achievements (
-  id bigserial primary key,
-  user_id text references users(id),
-  achievement_type text,
-  achievement_data jsonb,
-  earned_at timestamptz default now()
-)
+-- 🔧 フェーズ4で実装予定: 投票機能拡張
+-- votesテーブルに追加予定カラム
+-- ALTER TABLE votes ADD COLUMN choice text; -- 'A' or 'B' or 'for' or 'against'
+-- ALTER TABLE votes ADD COLUMN is_changed boolean DEFAULT false;
+-- ALTER TABLE votes ADD COLUMN original_vote_time timestamptz;
+-- ALTER TABLE votes ADD COLUMN persuasion_change_time timestamptz;
 
-priority_display_tickets (
-  id bigserial primary key,
-  user_id text references users(id),
-  remaining_tickets integer default 0,
-  monthly_reset_date date default date_trunc('month', current_date),
-  created_at timestamptz default now()
-)
+-- 💎 リアルタイム通知システム（フェーズ3実装予定）
+CREATE TABLE notifications (
+    id bigserial PRIMARY KEY,
+    user_id text REFERENCES users(id),
+    type text NOT NULL CHECK (type IN ('vote', 'comment', 'persuasion_time', 'achievement')),
+    related_post_id int8 REFERENCES posts(id),
+    related_comment_id int8 REFERENCES comments(id),
+    title text NOT NULL,
+    message text NOT NULL,
+    is_read boolean DEFAULT false,
+    created_at timestamptz DEFAULT now()
+);
+
+-- インデックス追加（パフォーマンス最適化）
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_user_scores_user_community ON user_scores(user_id, community_id);
+CREATE INDEX idx_notifications_user_unread ON notifications(user_id, is_read);
+CREATE INDEX idx_notifications_created_at ON notifications(created_at);
 ```
 
 ### リアルタイム機能設定

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../../supabase-client";
 import PostItem from "./PostItem";
+import NestedPostItem from "./NestedPostItem";
 import { useEffect } from "react";
 import { useAtom } from "jotai";
 import { postsAtom } from "../../stores/PostAtom";
@@ -17,10 +18,14 @@ export interface PostType {
   vote_deadline: string | null;
   community_id: number | null;
   user_id: string;
+  parent_post_id: number | null;
+  nest_level: number;
+  target_vote_choice: number | null; // -1: 反対した人向け, 1: 賛成した人向け, null: 全員向け
   communities?: {
     id: number;
     name: string;
   };
+  children?: PostType[];
 }
 
 interface Community {
@@ -30,9 +35,10 @@ interface Community {
 
 interface PostListProps {
   filter?: "urgent" | "popular" | "recent";
+  showNested?: boolean;
 }
 
-const PostList = ({ filter }: PostListProps) => {
+const PostList = ({ filter, showNested = false }: PostListProps) => {
   const [, setPosts] = useAtom(postsAtom);
 
   const getFilteredPosts = async (): Promise<PostType[]> => {
@@ -56,14 +62,60 @@ const PostList = ({ filter }: PostListProps) => {
           return {
             ...post,
             communities: community as Community,
+            parent_post_id: post.parent_post_id || null,
+            nest_level: post.nest_level || 0,
+            target_vote_choice: post.target_vote_choice || null,
+            children: [],
           };
         }
-        return post;
+        return {
+          ...post,
+          parent_post_id: post.parent_post_id || null,
+          nest_level: post.nest_level || 0,
+          target_vote_choice: post.target_vote_choice || null,
+          children: [],
+        };
       }),
     );
 
-    // フィルタリング処理
-    let filteredPosts = [...postsWithCommunities];
+    // showNestedがtrueの場合のみネスト構造を構築
+    let filteredPosts: PostType[];
+
+    if (showNested) {
+      // ネスト構造を構築
+      const buildNestedStructure = (posts: PostType[]): PostType[] => {
+        const postMap = new Map<number, PostType>();
+        const rootPosts: PostType[] = [];
+
+        // 全ての投稿をMapに追加
+        posts.forEach((post) => {
+          postMap.set(post.id, { ...post, children: [] });
+        });
+
+        // 親子関係を構築
+        posts.forEach((post) => {
+          const currentPost = postMap.get(post.id)!;
+
+          if (post.parent_post_id && postMap.has(post.parent_post_id)) {
+            const parentPost = postMap.get(post.parent_post_id)!;
+            parentPost.children = parentPost.children || [];
+            parentPost.children.push(currentPost);
+          } else {
+            // 親がないか見つからない場合はルート投稿
+            rootPosts.push(currentPost);
+          }
+        });
+
+        return rootPosts;
+      };
+
+      filteredPosts = buildNestedStructure(postsWithCommunities);
+    } else {
+      // ネスト表示しない場合は、ルート投稿のみ表示
+      filteredPosts = postsWithCommunities.filter(
+        (post) => !post.parent_post_id,
+      );
+    }
 
     switch (filter) {
       case "urgent": {
@@ -109,10 +161,15 @@ const PostList = ({ filter }: PostListProps) => {
     data: posts,
     isPending,
     error,
+    refetch,
   } = useQuery<PostType[], Error>({
-    queryKey: ["posts", filter],
+    queryKey: ["posts", filter, showNested],
     queryFn: getFilteredPosts,
   });
+
+  const handleNestedPostCreate = () => {
+    refetch();
+  };
 
   useEffect(() => {
     if (posts) {
@@ -150,10 +207,25 @@ const PostList = ({ filter }: PostListProps) => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3">
-      {posts.map((item) => (
-        <PostItem key={item.id} post={item} />
-      ))}
+    <div
+      className={
+        showNested
+          ? "space-y-4"
+          : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3"
+      }
+    >
+      {posts.map((item) =>
+        showNested ? (
+          <NestedPostItem
+            key={item.id}
+            post={item}
+            level={0}
+            onNestedPostCreate={handleNestedPostCreate}
+          />
+        ) : (
+          <PostItem key={item.id} post={item} />
+        ),
+      )}
     </div>
   );
 };

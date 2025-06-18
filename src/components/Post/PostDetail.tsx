@@ -5,7 +5,12 @@ import VoteButton from "../Vote/VoteButton";
 import { useAtomValue } from "jotai";
 import { mostVotedCommentAtomFamily } from "../../stores/CommentVoteAtom";
 import { useState, useEffect } from "react";
-import { Calendar, Clock, MessageCircle } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  MessageCircle,
+  MessageSquarePlus,
+} from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
@@ -19,6 +24,8 @@ import {
 } from "../ui/dialog";
 import CommentSection from "../Comment/CommentSection";
 import PostContentDisplay from "./PostContentDisplay";
+import CreateNestedPost from "./CreateNestedPost";
+import NestedPostItem from "./NestedPostItem";
 
 interface Props {
   postId: number;
@@ -42,6 +49,77 @@ const fetchPostById = async (id: number): Promise<PostType> => {
 
   if (error) throw new Error(error.message);
   return data as PostType;
+};
+
+const fetchNestedPosts = async (parentId: number): Promise<PostType[]> => {
+  const { data, error } = await supabase.rpc("get_posts_with_counts");
+
+  if (error) throw new Error(error.message);
+
+  const postsData = data as PostType[];
+
+  // 指定した親IDの子投稿のみをフィルタリング
+  const childPosts = postsData.filter(
+    (post) => post.parent_post_id === parentId,
+  );
+
+  // ネスト構造を構築
+  const buildNestedStructure = (posts: PostType[]): PostType[] => {
+    const postMap = new Map<number, PostType>();
+    const rootPosts: PostType[] = [];
+
+    // 全ての投稿をMapに追加
+    posts.forEach((post) => {
+      postMap.set(post.id, {
+        ...post,
+        children: [],
+        parent_post_id: post.parent_post_id || null,
+        nest_level: post.nest_level || 0,
+        target_vote_choice: post.target_vote_choice || null,
+      });
+    });
+
+    // 親子関係を構築
+    posts.forEach((post) => {
+      const currentPost = postMap.get(post.id)!;
+
+      if (post.parent_post_id && postMap.has(post.parent_post_id)) {
+        const parentPost = postMap.get(post.parent_post_id)!;
+        parentPost.children = parentPost.children || [];
+        parentPost.children.push(currentPost);
+      } else if (post.parent_post_id === parentId) {
+        // 直接の子投稿
+        rootPosts.push(currentPost);
+      }
+    });
+
+    return rootPosts;
+  };
+
+  return buildNestedStructure([
+    ...childPosts,
+    ...postsData.filter((p) =>
+      childPosts.some((c) => c.id === p.parent_post_id),
+    ),
+  ]);
+};
+
+// ユーザーが親投稿に投票したかどうか、どの選択肢に投票したかを取得
+const fetchUserVoteForPost = async (
+  postId: number,
+  userId: string | undefined,
+): Promise<number | null> => {
+  if (!userId) return null;
+
+  const { data, error } = await supabase
+    .from("votes")
+    .select("vote")
+    .eq("post_id", postId)
+    .eq("user_id", userId)
+    .single();
+
+  if (error || !data) return null;
+  return data.vote;
 };
 
 const fetchCommentById = async (id: number | null): Promise<Comment | null> => {
@@ -97,12 +175,29 @@ const PostDetail = ({ postId }: Props) => {
   const queryClient = useQueryClient();
   const [showPersuasionModal, setShowPersuasionModal] = useState(false);
   const [persuasionContent, setPersuasionContent] = useState("");
+  const [showCreateNested, setShowCreateNested] = useState(false);
 
   const { user } = useAuth();
 
   const { data, error, isPending } = useQuery<PostType, Error>({
     queryKey: ["post", postId],
     queryFn: () => fetchPostById(postId),
+  });
+
+  // ネスト投稿を取得
+  const { data: nestedPosts, refetch: refetchNestedPosts } = useQuery<
+    PostType[],
+    Error
+  >({
+    queryKey: ["nestedPosts", postId],
+    queryFn: () => fetchNestedPosts(postId),
+  });
+
+  // ユーザーの親投稿への投票状況を取得
+  const { data: userVoteChoice } = useQuery<number | null, Error>({
+    queryKey: ["userVote", postId, user?.id],
+    queryFn: () => fetchUserVoteForPost(postId, user?.id),
+    enabled: !!user?.id,
   });
 
   // 投稿者かどうかをチェック
@@ -213,6 +308,11 @@ const PostDetail = ({ postId }: Props) => {
   const handleCloseModal = () => {
     setShowPersuasionModal(false);
     setPersuasionContent("");
+  };
+
+  const handleNestedPostCreate = () => {
+    refetchNestedPosts();
+    setShowCreateNested(false);
   };
 
   if (isPending) return <div>Loading...</div>;
@@ -399,6 +499,94 @@ const PostDetail = ({ postId }: Props) => {
 
       <VoteButton postId={postId} voteDeadline={data.vote_deadline} />
       <CommentSection postId={postId} />
+
+      {/* 派生質問セクション */}
+      {votingExpired && data && (data.nest_level || 0) < 3 && (
+        <div className="mt-8 border-t border-slate-200 pt-6">
+          {/* 派生質問作成ボタン */}
+          {user && (data.nest_level || 0) < 3 && !showCreateNested && (
+            <div className="mb-6">
+              <Button
+                onClick={() => setShowCreateNested(true)}
+                className="flex items-center gap-2 bg-violet-500 hover:bg-violet-600 text-white"
+              >
+                <MessageSquarePlus size={18} />
+                派生質問を作成
+              </Button>
+            </div>
+          )}
+
+          {/* 派生質問の表示（ターゲット投票選択に基づくフィルタリング） */}
+          {nestedPosts && nestedPosts.length > 0 ? (
+            <div className="space-y-4">
+              {nestedPosts
+                .filter((nestedPost) => {
+                  // target_vote_choiceがnullの場合は全員に表示
+                  if (nestedPost.target_vote_choice === null) return true;
+
+                  // ユーザーが投票していない場合は対象外の質問は表示しない
+                  if (userVoteChoice === null) return false;
+
+                  // ユーザーの投票とターゲット投票選択が一致する場合のみ表示
+                  return nestedPost.target_vote_choice === userVoteChoice;
+                })
+                .map((nestedPost) => (
+                  <NestedPostItem
+                    key={nestedPost.id}
+                    post={nestedPost}
+                    level={1}
+                    onNestedPostCreate={handleNestedPostCreate}
+                  />
+                ))}
+
+              {/* 投票していないユーザー向けのメッセージ */}
+              {userVoteChoice === null &&
+                nestedPosts.some((p) => p.target_vote_choice !== null) && (
+                  <div className="text-center py-6 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-blue-700 font-medium">
+                      投票限定の派生質問があります
+                    </p>
+                    <p className="text-blue-600 text-sm mt-1">
+                      この投稿に投票すると、あなたの投票に基づいた派生質問が表示されます
+                    </p>
+                  </div>
+                )}
+            </div>
+          ) : (
+            <div className="text-center py-6 text-slate-500">
+              <p>まだ派生質問はありません</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 派生質問作成ダイアログ */}
+      <Dialog open={showCreateNested} onOpenChange={setShowCreateNested}>
+        <DialogContent className="min-w-4xl max-h-[90vh] overflow-y-auto bg-white border border-gray-200 shadow-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
+              <MessageSquarePlus className="h-5 w-5" />
+              派生投稿を作成
+            </DialogTitle>
+            <DialogDescription className="text-gray-600">
+              元の投稿から派生した新しい質問を作成します
+            </DialogDescription>
+          </DialogHeader>
+          {data && (
+            <CreateNestedPost
+              parentPost={{
+                id: postId,
+                title: data.title,
+                nest_level: data.nest_level || 0,
+              }}
+              onCancel={() => setShowCreateNested(false)}
+              onSuccess={handleNestedPostCreate}
+              isDialog={true}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* 説得コメントモーダル */}
       <Dialog open={showPersuasionModal} onOpenChange={setShowPersuasionModal}>
         <DialogContent className="sm:max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">

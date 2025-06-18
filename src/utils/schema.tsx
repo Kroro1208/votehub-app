@@ -26,4 +26,44 @@ export const createPostSchema = z.object({
       (files) => ["image/jpeg", "image/png"].includes(files?.[0]?.type || ""),
       "対応している画像形式はJPEG、PNGです",
     ),
+  parent_post_id: z.number().int().nullable().optional(),
+});
+
+export const createNestedPostSchema = z.object({
+  title: z
+    .string()
+    .min(1, "タイトルは必須です")
+    .max(100, "タイトルは100文字以内で入力してください"),
+  content: z
+    .string()
+    .min(1, "内容は必須です")
+    .max(1000, "内容は1000文字以内で入力してください"),
+  vote_deadline: z
+    .date({
+      required_error: "投票期限は必須です",
+      invalid_type_error: "投票期限は有効な日時を選択してください",
+    })
+    .refine((date) => date > new Date(), {
+      message: "投票期限は未来の日付を選択してください",
+    }),
+  parent_post_id: z.number().int(),
+  target_vote_choice: z.union([z.literal(1), z.literal(-1)], {
+    errorMap: () => ({
+      message: "賛成（1）または反対（-1）を選択してください",
+    }),
+  }),
+  image: z
+    .instanceof(FileList)
+    .optional()
+    .refine(
+      (files) => !files || files.length === 0 || files.length === 1,
+      "画像は1つまでアップロード可能です",
+    )
+    .refine(
+      (files) =>
+        !files ||
+        files.length === 0 ||
+        ["image/jpeg", "image/png"].includes(files[0]?.type || ""),
+      "対応している画像形式はJPEG、PNGです",
+    ),
 });
