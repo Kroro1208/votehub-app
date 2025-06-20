@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createNestedPostSchema } from "../../utils/schema";
@@ -69,7 +69,9 @@ const CreateNestedPost = ({
     mode: "onChange",
     defaultValues: {
       title: "",
-      content: "",
+      pro_opinion: "",
+      con_opinion: "",
+      detailed_description: "",
       parent_post_id: parentPost.id,
       target_vote_choice: undefined,
       vote_deadline: undefined,
@@ -77,7 +79,9 @@ const CreateNestedPost = ({
   });
 
   const watchImage = watch("image");
-  const watchedContent = watch("content");
+  const watchedProOpinion = watch("pro_opinion");
+  const watchedConOpinion = watch("con_opinion");
+  const watchedDetailedDescription = watch("detailed_description");
   const watchedTargetChoice = watch("target_vote_choice");
 
   useEffect(() => {
@@ -133,10 +137,17 @@ const CreateNestedPost = ({
         imageUrl = publicURL.publicUrl;
       }
 
+      // コンテンツを結合
+      const combinedContent = [
+        `賛成: ${data.pro_opinion}`,
+        `反対: ${data.con_opinion}`,
+        data.detailed_description ? `\n${data.detailed_description}` : "",
+      ].join("\n");
+
       // ネスト投稿作成
       const { error: insertError } = await supabase.from("posts").insert({
         title: data.title,
-        content: data.content,
+        content: combinedContent,
         vote_deadline: data.vote_deadline.toISOString(),
         parent_post_id: data.parent_post_id,
         nest_level: parentPost.nest_level + 1,
@@ -169,29 +180,31 @@ const CreateNestedPost = ({
     setImagePreview(null);
   };
 
-  const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
-    if (isDialog) {
-      return <div className="space-y-6">{children}</div>;
-    }
-    return (
-      <Card className="w-full mx-auto backdrop-blur-sm bg-white/80 border border-gray-200 shadow-xl rounded-2xl">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-3 text-2xl font-bold text-gray-900">
-              <div className="p-2 bg-violet-100 rounded-lg">
-                <MessageSquarePlus className="h-6 w-6 text-violet-600" />
-              </div>
-              派生投稿を作成
-            </CardTitle>
-            <Button variant="ghost" size="sm" onClick={onCancel}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="p-8">{children}</CardContent>
-      </Card>
-    );
-  };
+  const ContentWrapper = useMemo(() => {
+    return ({ children }: { children: React.ReactNode }) => {
+      if (isDialog) {
+        return <div className="space-y-6">{children}</div>;
+      }
+      return (
+        <Card className="w-full mx-auto backdrop-blur-sm bg-white/80 border border-gray-200 shadow-xl rounded-2xl">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-3 text-2xl font-bold text-gray-900">
+                <div className="p-2 bg-violet-100 rounded-lg">
+                  <MessageSquarePlus className="h-6 w-6 text-violet-600" />
+                </div>
+                派生投稿を作成
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={onCancel}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="p-8">{children}</CardContent>
+        </Card>
+      );
+    };
+  }, [isDialog, onCancel]);
 
   return (
     <ContentWrapper>
@@ -252,19 +265,7 @@ const CreateNestedPost = ({
                 <Input
                   placeholder="賛成意見の内容を書いてください"
                   className="text-sm border-green-200 focus:border-green-400"
-                  onChange={(e) => {
-                    const currentContent = watch("content") || "";
-                    const lines = currentContent.split("\n");
-                    const proIndex = lines.findIndex((line) =>
-                      line.startsWith("賛成:"),
-                    );
-                    if (proIndex !== -1) {
-                      lines[proIndex] = `賛成: ${e.target.value}`;
-                    } else {
-                      lines.unshift(`賛成: ${e.target.value}`);
-                    }
-                    setValue("content", lines.join("\n"));
-                  }}
+                  {...register("pro_opinion")}
                 />
               </div>
               <div>
@@ -277,30 +278,7 @@ const CreateNestedPost = ({
                 <Input
                   placeholder="反対意見の内容を書いてください..."
                   className="text-sm border-red-200 focus:border-red-400"
-                  onChange={(e) => {
-                    const currentContent = watch("content") || "";
-                    const lines = currentContent.split("\n");
-                    const conIndex = lines.findIndex((line) =>
-                      line.startsWith("反対:"),
-                    );
-                    if (conIndex !== -1) {
-                      lines[conIndex] = `反対: ${e.target.value}`;
-                    } else {
-                      const proIndex = lines.findIndex((line) =>
-                        line.startsWith("賛成:"),
-                      );
-                      if (proIndex !== -1) {
-                        lines.splice(
-                          proIndex + 1,
-                          0,
-                          `反対: ${e.target.value}`,
-                        );
-                      } else {
-                        lines.push(`反対: ${e.target.value}`);
-                      }
-                    }
-                    setValue("content", lines.join("\n"));
-                  }}
+                  {...register("con_opinion")}
                 />
               </div>
               <div>
@@ -311,37 +289,42 @@ const CreateNestedPost = ({
                   rows={4}
                   placeholder="追加の補足説明があれば記入してください..."
                   className="text-sm resize-none border-gray-200"
-                  onChange={(e) => {
-                    const currentContent = watch("content") || "";
-                    const lines = currentContent.split("\n");
-                    // 賛成・反対以外の行を削除
-                    const filteredLines = lines.filter(
-                      (line) =>
-                        line.startsWith("賛成:") || line.startsWith("反対:"),
-                    );
-                    if (e.target.value.trim()) {
-                      filteredLines.push("", e.target.value);
-                    }
-                    setValue("content", filteredLines.join("\n"));
-                  }}
+                  {...register("detailed_description")}
                 />
               </div>
             </div>
-            {/* Hidden textarea for form submission */}
-            <input type="hidden" {...register("content")} />
           </div>
           <div className="flex justify-between items-center mt-3">
             <span className="text-sm text-gray-500">
               両方の視点を示すことで、より建設的な議論が期待できます
             </span>
             <span className="text-sm text-gray-600 font-medium bg-gray-100 px-3 py-1 rounded-full">
-              {watchedContent?.length || 0} 文字
+              {(watchedProOpinion?.length || 0) +
+                (watchedConOpinion?.length || 0) +
+                (watchedDetailedDescription?.length || 0)}{" "}
+              文字
             </span>
           </div>
-          {errors.content && (
-            <p className="mt-2 text-sm text-red-600">
-              {errors.content.message}
-            </p>
+          {(errors.pro_opinion ||
+            errors.con_opinion ||
+            errors.detailed_description) && (
+            <div className="mt-2 space-y-1">
+              {errors.pro_opinion && (
+                <p className="text-sm text-red-600">
+                  {errors.pro_opinion.message}
+                </p>
+              )}
+              {errors.con_opinion && (
+                <p className="text-sm text-red-600">
+                  {errors.con_opinion.message}
+                </p>
+              )}
+              {errors.detailed_description && (
+                <p className="text-sm text-red-600">
+                  {errors.detailed_description.message}
+                </p>
+              )}
+            </div>
           )}
         </div>
 

@@ -34,10 +34,19 @@ export const createNestedPostSchema = z.object({
     .string()
     .min(1, "タイトルは必須です")
     .max(100, "タイトルは100文字以内で入力してください"),
-  content: z
+  pro_opinion: z
     .string()
-    .min(1, "内容は必須です")
-    .max(1000, "内容は1000文字以内で入力してください"),
+    .min(1, "賛成意見は必須です")
+    .max(300, "賛成意見は300文字以内で入力してください"),
+  con_opinion: z
+    .string()
+    .min(1, "反対意見は必須です")
+    .max(300, "反対意見は300文字以内で入力してください"),
+  detailed_description: z
+    .string()
+    .max(400, "詳細説明は400文字以内で入力してください")
+    .optional(),
+  content: z.string().optional(), // 後方互換性のため保持
   vote_deadline: z
     .date({
       required_error: "投票期限は必須です",
