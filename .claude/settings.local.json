@@ -3,6 +3,13 @@
     "allow": ["Bash(claude doctor --help)", "Bash(npm i:*)"],
     "deny": []
   },
+  "github.copilot.chat.experimental.mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["@upstash/context7-mcp"],
+      "env": {}
+    }
+  },
   "enabledMcpjsonServers": ["supabase"],
   "enableAllProjectMcpServers": true
 }
