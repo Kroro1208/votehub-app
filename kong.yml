@@ -1,0 +1,61 @@
+_format_version: "3.0"
+
+services:
+  - name: auth
+    url: http://supabase:5432/auth/v1/
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Accept-Version
+            - Content-Length
+            - Content-MD5
+            - Content-Type
+            - Date
+            - Authorization
+            - X-Client-Info
+
+  - name: rest
+    url: http://supabase:5432/rest/v1/
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Accept-Version
+            - Content-Length
+            - Content-MD5
+            - Content-Type
+            - Date
+            - Authorization
+            - X-Client-Info
+
+routes:
+  - name: auth
+    service: auth
+    paths:
+      - /auth/v1/
+
+  - name: rest
+    service: rest
+    paths:
+      - /rest/v1/
