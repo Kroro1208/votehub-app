@@ -25,7 +25,7 @@ import {
 import CommentSection from "../Comment/CommentSection";
 import PostContentDisplay from "./PostContentDisplay";
 import CreateNestedPost from "./CreateNestedPost";
-import NestedPostItem from "./NestedPostItem";
+import NestedPostSummary from "./NestedPostSummary";
 
 interface Props {
   postId: number;
@@ -52,62 +52,62 @@ const fetchPostById = async (id: number): Promise<PostType> => {
 };
 
 const fetchNestedPosts = async (parentId: number): Promise<PostType[]> => {
-  const { data, error } = await supabase.rpc("get_posts_with_counts");
+  // get_posts_with_counts 関数の代わりに直接クエリを実行
+  const { data, error } = await supabase
+    .from("posts")
+    .select(`
+      id,
+      title,
+      content,
+      created_at,
+      image_url,
+      avatar_url,
+      vote_deadline,
+      community_id,
+      user_id,
+      parent_post_id,
+      nest_level,
+      target_vote_choice
+    `)
+    .eq("parent_post_id", parentId)
+    .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
 
-  const postsData = data as PostType[];
+  // 各投稿の投票数とコメント数を取得
+  const postsWithCounts = await Promise.all(
+    data.map(async (post) => {
+      // 投票数を取得
+      const { data: voteData } = await supabase
+        .from("votes")
+        .select("id", { count: "exact" })
+        .eq("post_id", post.id);
 
-  // 指定した親IDの子投稿のみをフィルタリング
-  const childPosts = postsData.filter(
-    (post) => post.parent_post_id === parentId,
+      // コメント数を取得
+      const { data: commentData } = await supabase
+        .from("comments")
+        .select("id", { count: "exact" })
+        .eq("post_id", post.id);
+
+      return {
+        ...post,
+        vote_count: voteData?.length || 0,
+        comment_count: commentData?.length || 0,
+        nest_level: post.nest_level || 0,
+        parent_post_id: post.parent_post_id || null,
+        target_vote_choice: post.target_vote_choice || null,
+        children: [] as PostType[],
+      } as PostType;
+    })
   );
 
-  // ネスト構造を構築
-  const buildNestedStructure = (posts: PostType[]): PostType[] => {
-    const postMap = new Map<number, PostType>();
-    const rootPosts: PostType[] = [];
-
-    // 全ての投稿をMapに追加
-    posts.forEach((post) => {
-      postMap.set(post.id, {
-        ...post,
-        children: [],
-        parent_post_id: post.parent_post_id || null,
-        nest_level: post.nest_level || 0,
-        target_vote_choice: post.target_vote_choice || null,
-      });
-    });
-
-    // 親子関係を構築
-    posts.forEach((post) => {
-      const currentPost = postMap.get(post.id)!;
-
-      if (post.parent_post_id && postMap.has(post.parent_post_id)) {
-        const parentPost = postMap.get(post.parent_post_id)!;
-        parentPost.children = parentPost.children || [];
-        parentPost.children.push(currentPost);
-      } else if (post.parent_post_id === parentId) {
-        // 直接の子投稿
-        rootPosts.push(currentPost);
-      }
-    });
-
-    return rootPosts;
-  };
-
-  return buildNestedStructure([
-    ...childPosts,
-    ...postsData.filter((p) =>
-      childPosts.some((c) => c.id === p.parent_post_id),
-    ),
-  ]);
+  return postsWithCounts;
 };
 
 // ユーザーが親投稿に投票したかどうか、どの選択肢に投票したかを取得
 const fetchUserVoteForPost = async (
   postId: number,
-  userId: string | undefined,
+  userId: string | undefined
 ): Promise<number | null> => {
   if (!userId) return null;
 
@@ -116,10 +116,14 @@ const fetchUserVoteForPost = async (
     .select("vote")
     .eq("post_id", postId)
     .eq("user_id", userId)
-    .single();
+    .maybeSingle(); // single() ではなく maybeSingle() を使用
 
-  if (error || !data) return null;
-  return data.vote;
+  if (error) {
+    console.error("投票データ取得エラー:", error);
+    return null;
+  }
+  
+  return data ? data.vote : null;
 };
 
 const fetchCommentById = async (id: number | null): Promise<Comment | null> => {
@@ -138,7 +142,7 @@ const fetchCommentById = async (id: number | null): Promise<Comment | null> => {
 const createPersuasionComment = async (
   postId: number,
   content: string,
-  userId: string,
+  userId: string
 ) => {
   // ユーザーの表示名を取得（CommentSectionと同じロジック）
   const {
@@ -192,6 +196,8 @@ const PostDetail = ({ postId }: Props) => {
     queryKey: ["nestedPosts", postId],
     queryFn: () => fetchNestedPosts(postId),
   });
+
+  console.log("nestedPosts", nestedPosts);
 
   // ユーザーの親投稿への投票状況を取得
   const { data: userVoteChoice } = useQuery<number | null, Error>({
@@ -257,7 +263,7 @@ const PostDetail = ({ postId }: Props) => {
 
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const diffHours = Math.floor(
-      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
     );
     const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
@@ -281,7 +287,7 @@ const PostDetail = ({ postId }: Props) => {
 
   // 最もリアクションの多いコメントを管理する
   const [mostVotedComment, setMostVotedComment] = useState<Comment | null>(
-    null,
+    null
   );
 
   // 最も投票の多いコメントのIDが変わったらコメント情報を取得
@@ -501,7 +507,7 @@ const PostDetail = ({ postId }: Props) => {
       <CommentSection postId={postId} />
 
       {/* 派生質問セクション */}
-      {votingExpired && data && (data.nest_level || 0) < 3 && (
+      {data && (data.nest_level || 0) < 3 && (
         <div className="mt-8 border-t border-slate-200 pt-6">
           {/* 派生質問作成ボタン */}
           {user && (data.nest_level || 0) < 3 && !showCreateNested && (
@@ -516,9 +522,13 @@ const PostDetail = ({ postId }: Props) => {
             </div>
           )}
 
-          {/* 派生質問の表示（ターゲット投票選択に基づくフィルタリング） */}
+          {/* 派生質問の表示（タイトルと概要のみ） */}
           {nestedPosts && nestedPosts.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <MessageSquarePlus size={20} className="text-violet-600" />
+                派生質問
+              </h3>
               {nestedPosts
                 .filter((nestedPost) => {
                   // target_vote_choiceがnullの場合は全員に表示
@@ -531,11 +541,10 @@ const PostDetail = ({ postId }: Props) => {
                   return nestedPost.target_vote_choice === userVoteChoice;
                 })
                 .map((nestedPost) => (
-                  <NestedPostItem
+                  <NestedPostSummary
                     key={nestedPost.id}
                     post={nestedPost}
                     level={1}
-                    onNestedPostCreate={handleNestedPostCreate}
                   />
                 ))}
 

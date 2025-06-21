@@ -42,12 +42,55 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
   const [, setPosts] = useAtom(postsAtom);
 
   const getFilteredPosts = async (): Promise<PostType[]> => {
-    // SQLファンクションを使用して投稿とカウントを取得
-    const { data, error } = await supabase.rpc("get_posts_with_counts");
+    // get_posts_with_counts関数の代わりに直接クエリを実行
+    const { data, error } = await supabase
+      .from("posts")
+      .select(`
+        id,
+        title,
+        content,
+        created_at,
+        image_url,
+        avatar_url,
+        vote_deadline,
+        community_id,
+        user_id,
+        parent_post_id,
+        nest_level,
+        target_vote_choice
+      `)
+      .order("created_at", { ascending: false });
 
     if (error) throw new Error(error.message);
 
-    const postsData = data as PostType[];
+    // 各投稿の投票数とコメント数を取得
+    const postsWithCounts = await Promise.all(
+      data.map(async (post) => {
+        // 投票数を取得
+        const { data: voteData } = await supabase
+          .from("votes")
+          .select("id", { count: "exact" })
+          .eq("post_id", post.id);
+
+        // コメント数を取得
+        const { data: commentData } = await supabase
+          .from("comments")
+          .select("id", { count: "exact" })
+          .eq("post_id", post.id);
+
+        return {
+          ...post,
+          vote_count: voteData?.length || 0,
+          comment_count: commentData?.length || 0,
+          nest_level: post.nest_level || 0,
+          parent_post_id: post.parent_post_id || null,
+          target_vote_choice: post.target_vote_choice || null,
+          children: [] as PostType[],
+        } as PostType;
+      })
+    );
+
+    const postsData = postsWithCounts;
 
     // コミュニティ情報を追加
     const postsWithCommunities = await Promise.all(
@@ -75,7 +118,7 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
           target_vote_choice: post.target_vote_choice || null,
           children: [],
         };
-      }),
+      })
     );
 
     // showNestedがtrueの場合のみネスト構造を構築
@@ -111,9 +154,9 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
 
       filteredPosts = buildNestedStructure(postsWithCommunities);
     } else {
-      // ネスト表示しない場合は、ルート投稿のみ表示
+      // ネスト表示しない場合は、ルート投稿のみ表示（parent_post_idがnullの投稿のみ）
       filteredPosts = postsWithCommunities.filter(
-        (post) => !post.parent_post_id,
+        (post) => post.parent_post_id === null
       );
     }
 
@@ -129,12 +172,12 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
             (post) =>
               post.vote_deadline &&
               new Date(post.vote_deadline) <= tomorrow &&
-              new Date(post.vote_deadline) >= now,
+              new Date(post.vote_deadline) >= now
           )
           .sort(
             (a, b) =>
               new Date(a.vote_deadline!).getTime() -
-              new Date(b.vote_deadline!).getTime(),
+              new Date(b.vote_deadline!).getTime()
           );
         break;
       }
@@ -149,7 +192,7 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
         // 新着順（デフォルト）
         filteredPosts.sort(
           (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
         break;
     }
@@ -224,7 +267,7 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
           />
         ) : (
           <PostItem key={item.id} post={item} />
-        ),
+        )
       )}
     </div>
   );
