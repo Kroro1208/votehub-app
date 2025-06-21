@@ -26,7 +26,6 @@ import CommentSection from "../Comment/CommentSection";
 import PostContentDisplay from "./PostContentDisplay";
 import CreateNestedPost from "./CreateNestedPost";
 import NestedPostSummary from "./NestedPostSummary";
-import { Link } from "react-router";
 
 interface Props {
   postId: number;
@@ -525,8 +524,8 @@ const PostDetail = ({ postId }: Props) => {
 
           {/* 派生質問の表示（タイトルと概要のみ） */}
           {nestedPosts && nestedPosts.length > 0 ? (
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <div className="space-y-3 p-5">
+              <h3 className="text-lg font-semibold dark:text-white mb-4 flex items-center gap-2">
                 <MessageSquarePlus size={20} className="text-violet-600" />
                 派生質問
               </h3>
@@ -545,17 +544,11 @@ const PostDetail = ({ postId }: Props) => {
                   return nestedPost.target_vote_choice === userVoteChoice;
                 })
                 .map((nestedPost) => (
-                  <Link
-                    to={`/post/${nestedPost.id}`}
-                    className="block p-3"
+                  <NestedPostSummary
                     key={nestedPost.id}
-                  >
-                    <NestedPostSummary
-                      key={nestedPost.id}
-                      post={nestedPost}
-                      level={1}
-                    />
-                  </Link>
+                    post={nestedPost}
+                    level={1}
+                  />
                 ))}
 
               {/* 投票していないユーザー向けのメッセージ（投稿者は除外） */}

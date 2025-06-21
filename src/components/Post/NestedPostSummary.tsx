@@ -31,9 +31,28 @@ const NestedPostSummary = ({ post, level = 0 }: NestedPostSummaryProps) => {
   const showPersuasionButton = isPostOwner && isPersuasionTime();
   const timeRemaining = getTimeRemaining();
 
-  // コンテンツから概要を抽出（最初の100文字程度）
+  // コンテンツから賛成・反対意見を抽出
+  const parseOpinions = (content: string) => {
+    const lines = content.split("\n");
+    const opinions = { pro: "", con: "" };
+
+    lines.forEach((line) => {
+      const trimmedLine = line.trim();
+      if (trimmedLine.startsWith("賛成:") || trimmedLine.startsWith("賛成：")) {
+        opinions.pro = trimmedLine.replace(/^賛成[:：]\s*/, "");
+      } else if (
+        trimmedLine.startsWith("反対:") ||
+        trimmedLine.startsWith("反対：")
+      ) {
+        opinions.con = trimmedLine.replace(/^反対[:：]\s*/, "");
+      }
+    });
+
+    return opinions;
+  };
+
+  // 通常のサマリー抽出（賛成・反対形式でない場合）
   const getSummary = (content: string) => {
-    // 改行を取り除き、最初の100文字を取得
     const cleanContent = content.replace(/\n/g, " ");
     return cleanContent.length > 100
       ? cleanContent.substring(0, 100) + "..."
@@ -57,6 +76,8 @@ const NestedPostSummary = ({ post, level = 0 }: NestedPostSummaryProps) => {
   };
 
   const styles = getNestedStyles(level);
+  const opinions = parseOpinions(post.content);
+  const hasOpinions = opinions.pro || opinions.con;
 
   return (
     <div
@@ -127,10 +148,55 @@ const NestedPostSummary = ({ post, level = 0 }: NestedPostSummaryProps) => {
                   {post.title}
                 </h3>
 
-                {/* Summary */}
-                <p className="text-slate-600 text-base leading-relaxed mb-4 line-clamp-3">
-                  {getSummary(post.content)}
-                </p>
+                {/* Opinions or Summary */}
+                {hasOpinions ? (
+                  <div className="space-y-3 mb-4">
+                    {opinions.pro && (
+                      <div className="flex items-start gap-3 p-3 bg-emerald-50/70 rounded-lg border border-emerald-200/50">
+                        <div className="flex-shrink-0 mt-0.5">
+                          <FaArrowAltCircleUp
+                            size={16}
+                            className="text-emerald-600"
+                          />
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold text-emerald-700 mb-1">
+                            賛成意見
+                          </div>
+                          <p className="text-sm text-emerald-800 leading-relaxed">
+                            {opinions.pro.length > 80
+                              ? opinions.pro.substring(0, 80) + "..."
+                              : opinions.pro}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    {opinions.con && (
+                      <div className="flex items-start gap-3 p-3 bg-rose-50/70 rounded-lg border border-rose-200/50">
+                        <div className="flex-shrink-0 mt-0.5">
+                          <FaArrowAltCircleDown
+                            size={16}
+                            className="text-rose-600"
+                          />
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold text-rose-700 mb-1">
+                            反対意見
+                          </div>
+                          <p className="text-sm text-rose-800 leading-relaxed">
+                            {opinions.con.length > 80
+                              ? opinions.con.substring(0, 80) + "..."
+                              : opinions.con}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-slate-600 text-base leading-relaxed mb-4 line-clamp-3">
+                    {getSummary(post.content)}
+                  </p>
+                )}
               </div>
 
               <div className="flex-shrink-0 p-2 rounded-full bg-slate-100 group-hover/link:bg-violet-100 transition-all duration-200">
