@@ -302,10 +302,12 @@ const ContentWrapper = useMemo(() => {
 ### 修正内容の確認
 
 1. **フォームフィールドの分離**: ✅ 完了
+
    - `pro_opinion`, `con_opinion`, `detailed_description` の個別フィールド化
    - 各フィールドが独立した `register()` 関数を使用
 
-2. **ContentWrapper のメモ化**: ✅ 完了  
+2. **ContentWrapper のメモ化**: ✅ 完了
+
    - `useMemo` を使用してコンポーネントの再レンダリングを防止
    - 依存関係 `[isDialog, onCancel]` を適切に設定
 
@@ -316,7 +318,7 @@ const ContentWrapper = useMemo(() => {
 ### 検証結果
 
 - ✅ ビルド成功
-- ✅ 型エラーなし  
+- ✅ 型エラーなし
 - ✅ フォーカス維持機能が正常動作
 - ✅ 個別フィールドでの入力管理が正常動作
 

@@ -7,7 +7,6 @@ import CreateCommunityPage from "./pages/CreateCommunityPage";
 import CommunitiesPage from "./pages/CommunitiesPage";
 import CommyunityDetailPage from "./pages/CommyunityDetailPage";
 import ProfilePage from "./pages/ProfilePage";
-import DebugPosts from "./debug-posts";
 
 function App() {
   return (
@@ -23,7 +22,6 @@ function App() {
           <Route path="/space/:id" element={<CommyunityDetailPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
-          <Route path="/debug" element={<DebugPosts />} />
         </Routes>
       </div>
     </div>

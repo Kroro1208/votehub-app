@@ -1,6 +1,7 @@
 # Supabase データベース修正手順
 
 ## 問題の概要
+
 - `get_posts_with_counts` 関数が `parent_post_id`, `nest_level`, `target_vote_choice` フィールドを返していない
 - `fetchUserVoteForPost` 関数で投票がない場合に406エラーが発生
 
@@ -31,7 +32,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         p.id,
         p.title,
         p.content,
@@ -75,11 +76,13 @@ SELECT * FROM get_posts_with_counts() LIMIT 3;
 ## アプリケーション側の修正
 
 ### 完了した修正：
+
 1. **PostDetail.tsx**: `fetchUserVoteForPost` 関数で `.single()` を `.maybeSingle()` に変更
 2. **PostDetail.tsx**: `fetchNestedPosts` 関数を直接SQLクエリを使用するように修正
 3. **PostList.tsx**: `getFilteredPosts` 関数を直接SQLクエリを使用するように修正
 
 ### 修正の効果：
+
 - 406 (Not Acceptable) エラーの解決
 - ネスト投稿の正しい表示
 - 投票データの正確な取得

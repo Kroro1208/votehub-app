@@ -8,7 +8,7 @@ const getUserVoteForPost = async (postId: number, userId?: string) => {
 
   const { data, error } = await supabase
     .from("votes")
-    .select("vote")
+    .select("*")
     .eq("post_id", postId)
     .eq("user_id", userId)
     .maybeSingle();

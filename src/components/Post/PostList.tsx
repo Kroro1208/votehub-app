@@ -45,7 +45,8 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
     // get_posts_with_counts関数の代わりに直接クエリを実行
     const { data, error } = await supabase
       .from("posts")
-      .select(`
+      .select(
+        `
         id,
         title,
         content,
@@ -58,7 +59,8 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
         parent_post_id,
         nest_level,
         target_vote_choice
-      `)
+      `,
+      )
       .order("created_at", { ascending: false });
 
     if (error) throw new Error(error.message);
@@ -87,7 +89,7 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
           target_vote_choice: post.target_vote_choice || null,
           children: [] as PostType[],
         } as PostType;
-      })
+      }),
     );
 
     const postsData = postsWithCounts;
@@ -118,7 +120,7 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
           target_vote_choice: post.target_vote_choice || null,
           children: [],
         };
-      })
+      }),
     );
 
     // showNestedがtrueの場合のみネスト構造を構築
@@ -156,7 +158,7 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
     } else {
       // ネスト表示しない場合は、ルート投稿のみ表示（parent_post_idがnullの投稿のみ）
       filteredPosts = postsWithCommunities.filter(
-        (post) => post.parent_post_id === null
+        (post) => post.parent_post_id === null,
       );
     }
 
@@ -172,12 +174,12 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
             (post) =>
               post.vote_deadline &&
               new Date(post.vote_deadline) <= tomorrow &&
-              new Date(post.vote_deadline) >= now
+              new Date(post.vote_deadline) >= now,
           )
           .sort(
             (a, b) =>
               new Date(a.vote_deadline!).getTime() -
-              new Date(b.vote_deadline!).getTime()
+              new Date(b.vote_deadline!).getTime(),
           );
         break;
       }
@@ -192,7 +194,7 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
         // 新着順（デフォルト）
         filteredPosts.sort(
           (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
         );
         break;
     }
@@ -267,7 +269,7 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
           />
         ) : (
           <PostItem key={item.id} post={item} />
-        )
+        ),
       )}
     </div>
   );

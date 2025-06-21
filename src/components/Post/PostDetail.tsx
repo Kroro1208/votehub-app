@@ -26,6 +26,7 @@ import CommentSection from "../Comment/CommentSection";
 import PostContentDisplay from "./PostContentDisplay";
 import CreateNestedPost from "./CreateNestedPost";
 import NestedPostSummary from "./NestedPostSummary";
+import { Link } from "react-router";
 
 interface Props {
   postId: number;
@@ -55,7 +56,8 @@ const fetchNestedPosts = async (parentId: number): Promise<PostType[]> => {
   // get_posts_with_counts 関数の代わりに直接クエリを実行
   const { data, error } = await supabase
     .from("posts")
-    .select(`
+    .select(
+      `
       id,
       title,
       content,
@@ -68,7 +70,8 @@ const fetchNestedPosts = async (parentId: number): Promise<PostType[]> => {
       parent_post_id,
       nest_level,
       target_vote_choice
-    `)
+    `,
+    )
     .eq("parent_post_id", parentId)
     .order("created_at", { ascending: false });
 
@@ -98,7 +101,7 @@ const fetchNestedPosts = async (parentId: number): Promise<PostType[]> => {
         target_vote_choice: post.target_vote_choice || null,
         children: [] as PostType[],
       } as PostType;
-    })
+    }),
   );
 
   return postsWithCounts;
@@ -107,13 +110,13 @@ const fetchNestedPosts = async (parentId: number): Promise<PostType[]> => {
 // ユーザーが親投稿に投票したかどうか、どの選択肢に投票したかを取得
 const fetchUserVoteForPost = async (
   postId: number,
-  userId: string | undefined
+  userId: string | undefined,
 ): Promise<number | null> => {
   if (!userId) return null;
 
   const { data, error } = await supabase
     .from("votes")
-    .select("vote")
+    .select("*")
     .eq("post_id", postId)
     .eq("user_id", userId)
     .maybeSingle(); // single() ではなく maybeSingle() を使用
@@ -122,7 +125,7 @@ const fetchUserVoteForPost = async (
     console.error("投票データ取得エラー:", error);
     return null;
   }
-  
+
   return data ? data.vote : null;
 };
 
@@ -142,7 +145,7 @@ const fetchCommentById = async (id: number | null): Promise<Comment | null> => {
 const createPersuasionComment = async (
   postId: number,
   content: string,
-  userId: string
+  userId: string,
 ) => {
   // ユーザーの表示名を取得（CommentSectionと同じロジック）
   const {
@@ -196,8 +199,6 @@ const PostDetail = ({ postId }: Props) => {
     queryKey: ["nestedPosts", postId],
     queryFn: () => fetchNestedPosts(postId),
   });
-
-  console.log("nestedPosts", nestedPosts);
 
   // ユーザーの親投稿への投票状況を取得
   const { data: userVoteChoice } = useQuery<number | null, Error>({
@@ -263,7 +264,7 @@ const PostDetail = ({ postId }: Props) => {
 
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const diffHours = Math.floor(
-      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
     );
     const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
@@ -287,7 +288,7 @@ const PostDetail = ({ postId }: Props) => {
 
   // 最もリアクションの多いコメントを管理する
   const [mostVotedComment, setMostVotedComment] = useState<Comment | null>(
-    null
+    null,
   );
 
   // 最も投票の多いコメントのIDが変わったらコメント情報を取得
@@ -534,6 +535,9 @@ const PostDetail = ({ postId }: Props) => {
                   // target_vote_choiceがnullの場合は全員に表示
                   if (nestedPost.target_vote_choice === null) return true;
 
+                  // 投稿者の場合は投票の有無に関わらず全ての派生質問を表示
+                  if (isPostOwner) return true;
+
                   // ユーザーが投票していない場合は対象外の質問は表示しない
                   if (userVoteChoice === null) return false;
 
@@ -541,22 +545,29 @@ const PostDetail = ({ postId }: Props) => {
                   return nestedPost.target_vote_choice === userVoteChoice;
                 })
                 .map((nestedPost) => (
-                  <NestedPostSummary
+                  <Link
+                    to={`/post/${nestedPost.id}`}
+                    className="block p-3"
                     key={nestedPost.id}
-                    post={nestedPost}
-                    level={1}
-                  />
+                  >
+                    <NestedPostSummary
+                      key={nestedPost.id}
+                      post={nestedPost}
+                      level={1}
+                    />
+                  </Link>
                 ))}
 
-              {/* 投票していないユーザー向けのメッセージ */}
-              {userVoteChoice === null &&
+              {/* 投票していないユーザー向けのメッセージ（投稿者は除外） */}
+              {!isPostOwner &&
+                userVoteChoice === null &&
                 nestedPosts.some((p) => p.target_vote_choice !== null) && (
                   <div className="text-center py-6 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-blue-700 font-medium">
-                      投票限定の派生質問があります
+                    <p className="text-blue-700 font-bold">
+                      投票者限定の派生質問があります
                     </p>
                     <p className="text-blue-600 text-sm mt-1">
-                      この投稿に投票すると、あなたの投票に基づいた派生質問が表示されます
+                      この投票に参加された方はチェックしてください✅
                     </p>
                   </div>
                 )}
