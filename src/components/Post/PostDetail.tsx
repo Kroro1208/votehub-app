@@ -52,58 +52,20 @@ const fetchPostById = async (id: number): Promise<PostType> => {
 };
 
 const fetchNestedPosts = async (parentId: number): Promise<PostType[]> => {
-  // get_posts_with_counts 関数の代わりに直接クエリを実行
   const { data, error } = await supabase
-    .from("posts")
-    .select(
-      `
-      id,
-      title,
-      content,
-      created_at,
-      image_url,
-      avatar_url,
-      vote_deadline,
-      community_id,
-      user_id,
-      parent_post_id,
-      nest_level,
-      target_vote_choice
-    `,
-    )
+    .rpc("get_posts_with_counts")
     .eq("parent_post_id", parentId)
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
 
-  // 各投稿の投票数とコメント数を取得
-  const postsWithCounts = await Promise.all(
-    data.map(async (post) => {
-      // 投票数を取得
-      const { data: voteData } = await supabase
-        .from("votes")
-        .select("id", { count: "exact" })
-        .eq("post_id", post.id);
-
-      // コメント数を取得
-      const { data: commentData } = await supabase
-        .from("comments")
-        .select("id", { count: "exact" })
-        .eq("post_id", post.id);
-
-      return {
-        ...post,
-        vote_count: voteData?.length || 0,
-        comment_count: commentData?.length || 0,
-        nest_level: post.nest_level || 0,
-        parent_post_id: post.parent_post_id || null,
-        target_vote_choice: post.target_vote_choice || null,
-        children: [] as PostType[],
-      } as PostType;
-    }),
-  );
-
-  return postsWithCounts;
+  return data.map((post: PostType) => ({
+    ...post,
+    nest_level: post.nest_level || 0,
+    parent_post_id: post.parent_post_id || null,
+    target_vote_choice: post.target_vote_choice || null,
+    children: [] as PostType[],
+  })) as PostType[];
 };
 
 // ユーザーが親投稿に投票したかどうか、どの選択肢に投票したかを取得
@@ -531,9 +493,6 @@ const PostDetail = ({ postId }: Props) => {
               </h3>
               {nestedPosts
                 .filter((nestedPost) => {
-                  // target_vote_choiceがnullの場合は全員に表示
-                  if (nestedPost.target_vote_choice === null) return true;
-
                   // 投稿者の場合は投票の有無に関わらず全ての派生質問を表示
                   if (isPostOwner) return true;
 
@@ -548,6 +507,8 @@ const PostDetail = ({ postId }: Props) => {
                     key={nestedPost.id}
                     post={nestedPost}
                     level={1}
+                    userVoteChoice={userVoteChoice}
+                    isPostOwner={isPostOwner}
                   />
                 ))}
 

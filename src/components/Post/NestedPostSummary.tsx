@@ -13,23 +13,55 @@ import { useHandleVotes } from "../../hooks/useHandleVotes";
 import { useHandlePost } from "../../hooks/useHandlePost";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import { FaArrowAltCircleUp, FaArrowAltCircleDown } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { supabase } from "../../supabase-client";
 
 interface NestedPostSummaryProps {
   post: PostType;
   level?: number;
+  userVoteChoice?: number | null;
+  isPostOwner?: boolean;
 }
 
-const NestedPostSummary = ({ post, level = 0 }: NestedPostSummaryProps) => {
+const NestedPostSummary = ({
+  post,
+  level = 0,
+  userVoteChoice,
+  isPostOwner: parentIsPostOwner,
+}: NestedPostSummaryProps) => {
   const { user } = useAuth();
   const { totalVotes } = useHandleVotes(post.id);
   const { userVote, isPersuasionTime, isVotingExpired, getTimeRemaining } =
     useHandlePost(post);
+  const [nestedPosts, setNestedPosts] = useState<PostType[]>([]);
 
   const hasUserVoted = userVote !== null && userVote !== undefined;
   const isPostOwner = user?.id === post.user_id;
   const votingExpired = isVotingExpired();
   const showPersuasionButton = isPostOwner && isPersuasionTime();
   const timeRemaining = getTimeRemaining();
+
+  // 派生質問を取得
+  useEffect(() => {
+    const fetchNestedPosts = async () => {
+      if (level >= 3) return; // レベル3では派生質問を表示しない
+
+      const { data, error } = await supabase
+        .from("posts")
+        .select("*")
+        .eq("parent_post_id", post.id)
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching nested posts:", error);
+        return;
+      }
+
+      setNestedPosts(data || []);
+    };
+
+    fetchNestedPosts();
+  }, [post.id, level]);
 
   // コンテンツから賛成・反対意見を抽出
   const parseOpinions = (content: string) => {
@@ -275,6 +307,36 @@ const NestedPostSummary = ({ post, level = 0 }: NestedPostSummaryProps) => {
           </div>
         </div>
       </div>
+
+      {/* 派生質問の表示 (レベル3未満の場合のみ) */}
+      {level < 3 && nestedPosts.length > 0 && (
+        <div className="mt-4">
+          <h4 className="text-lg font-semibold text-slate-700 mb-3 flex items-center gap-2">
+            <ChevronRight size={20} />
+            派生質問
+          </h4>
+          {nestedPosts
+            .filter((nestedPost) => {
+              // 投稿者の場合は投票の有無に関わらず全ての派生質問を表示
+              if (parentIsPostOwner || isPostOwner) return true;
+
+              // ユーザーが投票していない場合は対象外の質問は表示しない
+              if (userVoteChoice === null) return false;
+
+              // ユーザーの投票とターゲット投票選択が一致する場合のみ表示
+              return nestedPost.target_vote_choice === userVoteChoice;
+            })
+            .map((nestedPost) => (
+              <NestedPostSummary
+                key={nestedPost.id}
+                post={nestedPost}
+                level={level + 1}
+                userVoteChoice={userVoteChoice}
+                isPostOwner={parentIsPostOwner}
+              />
+            ))}
+        </div>
+      )}
     </div>
   );
 };
