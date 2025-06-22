@@ -6,8 +6,7 @@ import { useAuth } from "../hooks/useAuth";
 import { VscSignOut } from "react-icons/vsc";
 import { FaRegUser } from "react-icons/fa";
 import { Button } from "./ui/button";
-import { VscBell } from "react-icons/vsc";
-import { VscBellDot } from "react-icons/vsc";
+import NotificationDropdown from "./Notification/NotificationDropdown";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -53,11 +52,8 @@ export default function Navbar() {
             <div className="hidden md:flex items-center flex-shrink-0">
               {user ? (
                 <div className="flex space-x-4 items-center justify-center min-w-0">
-                  {/* TODO: 通知の有無によってアイコンを出し分ける */}
-                  {/* 通知がある場合に表示 */}
-                  <VscBell size={25} />
-                  {/* 通知がない場合に表示 */}
-                  <VscBellDot size={25} />
+                  {/* 通知ドロップダウン */}
+                  <NotificationDropdown />
                   <Link
                     to="/profile"
                     className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
