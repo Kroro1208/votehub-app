@@ -12,16 +12,27 @@ export const getTimeRemaining = (voteDeadline?: string | null) => {
   const now = new Date();
   const diffMs = deadline.getTime() - now.getTime();
 
-  if (diffMs <= 0) return null;
+  if (diffMs <= 0) {
+    return {
+      expired: true,
+      days: 0,
+      hours: 0,
+      minutes: 0,
+    };
+  }
 
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   const diffHours = Math.floor(
     (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
   );
+  const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
-  if (diffDays > 0) return `${diffDays}日`;
-  if (diffHours > 0) return `${diffHours}時間`;
-  return "1時間未満";
+  return {
+    expired: false,
+    days: diffDays,
+    hours: diffHours,
+    minutes: diffMinutes,
+  };
 };
 
 // 説得タイムかどうかを判定する関数

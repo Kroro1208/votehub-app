@@ -5,21 +5,15 @@ import VoteButton from "../Vote/VoteButton";
 import { useAtomValue } from "jotai";
 import { mostVotedCommentAtomFamily } from "../../stores/CommentVoteAtom";
 import { useState, useEffect } from "react";
-import {
-  Calendar,
-  Clock,
-  MessageCircle,
-  MessageSquarePlus,
-} from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { Button } from "../ui/button";
 
 import CommentSection from "../Comment/CommentSection";
 import PostContentDisplay from "./PostContentDisplay";
-import NestedPostSummary from "./NestedPostSummary";
 import CreateNestedPostDialog from "./CreateNestedPostDialog";
 import CreatePersuasionDialog from "./CreatePersuasionDialog";
 import NestedPostSection from "./NestedPostSection";
+import VoteDeadline from "./VoteDeadline";
+import { isPersuasionTime } from "../../utils/formatTime";
 
 interface Props {
   postId: number;
@@ -167,12 +161,6 @@ const PostDetail = ({ postId }: Props) => {
   // 投稿者かどうかをチェック
   const isPostOwner = user?.id === data?.user_id;
 
-  // 投票期限をチェックする
-  const isVotingExpired = () => {
-    if (!data?.vote_deadline) return false;
-    return new Date() > new Date(data.vote_deadline);
-  };
-
   const persuasionCommentMutation = useMutation({
     mutationFn: ({ content }: { content: string }) =>
       createPersuasionComment(postId, content, user?.id || ""),
@@ -200,42 +188,8 @@ const PostDetail = ({ postId }: Props) => {
     persuasionCommentMutation.mutate({ content: persuasionContent });
   };
 
-  // 説得タイム（期限の1時間前）かどうかをチェック
-  const isPersuasionTime = () => {
-    if (!data?.vote_deadline) return false;
-    const deadline = new Date(data.vote_deadline);
-    const now = new Date();
-    const oneHourBeforeDeadline = new Date(deadline.getTime() - 60 * 60 * 1000);
-    return now >= oneHourBeforeDeadline && now < deadline;
-  };
-
-  // 残り時間を計算
-  const getTimeRemaining = () => {
-    if (!data?.vote_deadline) return null;
-
-    const deadline = new Date(data.vote_deadline);
-    const now = new Date();
-    const diffMs = deadline.getTime() - now.getTime();
-
-    if (diffMs < 0) return { expired: true };
-
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const diffHours = Math.floor(
-      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-    );
-    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-    return {
-      expired: false,
-      days: diffDays,
-      hours: diffHours,
-      minutes: diffMinutes,
-    };
-  };
-
-  const timeRemaining = getTimeRemaining();
-  const votingExpired = isVotingExpired();
-  const showPersuasionButton = isPostOwner && isPersuasionTime();
+  const showPersuasionButton =
+    isPostOwner && isPersuasionTime(data?.vote_deadline);
 
   // 最も投票の多いコメント情報を取得
   const mostVotedInfo = useAtomValue(mostVotedCommentAtomFamily)[postId] || {
@@ -289,137 +243,11 @@ const PostDetail = ({ postId }: Props) => {
       </h2>
 
       {/* 投票期限の時計表示 */}
-      {data.vote_deadline && (
-        <div
-          className={`relative p-6 rounded-xl shadow-lg ${
-            votingExpired
-              ? "bg-gradient-to-r from-red-100 to-red-200 border-l-4 border-red-500"
-              : showPersuasionButton
-                ? "bg-gradient-to-r from-orange-100 to-orange-200 border-l-4 border-orange-500"
-                : "bg-gradient-to-r from-blue-100 to-blue-200 border-l-4 border-blue-500"
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            {/* 左側：時計アイコンとタイトル */}
-            <div className="flex items-center gap-4">
-              <div
-                className={`p-3 rounded-full shadow-md ${
-                  votingExpired
-                    ? "bg-red-500"
-                    : showPersuasionButton
-                      ? "bg-orange-500"
-                      : "bg-blue-500"
-                }`}
-              >
-                <Clock size={28} className="text-white" />
-              </div>
-              <div>
-                <h3
-                  className={`text-xl font-bold ${
-                    votingExpired
-                      ? "text-red-800"
-                      : showPersuasionButton
-                        ? "text-orange-800"
-                        : "text-blue-800"
-                  }`}
-                >
-                  {votingExpired
-                    ? "投票終了"
-                    : showPersuasionButton
-                      ? "説得タイム!"
-                      : "投票受付中"}
-                </h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <Calendar size={16} className="text-gray-600" />
-                  <span className="text-sm text-gray-600">
-                    {new Date(data.vote_deadline).toLocaleDateString("ja-JP", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* 右側：カウントダウン */}
-            {!votingExpired && timeRemaining && !timeRemaining.expired && (
-              <div className="flex items-center gap-6">
-                <div className="text-center">
-                  <div
-                    className={`text-3xl font-bold ${showPersuasionButton ? "text-orange-600" : "text-blue-600"} bg-white rounded-lg px-3 py-2 shadow-sm min-w-[60px]`}
-                  >
-                    {timeRemaining.days || 0}
-                  </div>
-                  <div className="text-xs font-medium text-gray-600 mt-1">
-                    日
-                  </div>
-                </div>
-                <div
-                  className={`text-2xl font-bold ${showPersuasionButton ? "text-orange-600" : "text-blue-600"}`}
-                >
-                  :
-                </div>
-                <div className="text-center">
-                  <div
-                    className={`text-3xl font-bold ${showPersuasionButton ? "text-orange-600" : "text-blue-600"} bg-white rounded-lg px-3 py-2 shadow-sm min-w-[60px]`}
-                  >
-                    {timeRemaining.hours}
-                  </div>
-                  <div className="text-xs font-medium text-gray-600 mt-1">
-                    時間
-                  </div>
-                </div>
-                <div
-                  className={`text-2xl font-bold ${showPersuasionButton ? "text-orange-600" : "text-blue-600"}`}
-                >
-                  :
-                </div>
-                <div className="text-center">
-                  <div
-                    className={`text-3xl font-bold ${showPersuasionButton ? "text-orange-600" : "text-blue-600"} bg-white rounded-lg px-3 py-2 shadow-sm min-w-[60px]`}
-                  >
-                    {timeRemaining.minutes}
-                  </div>
-                  <div className="text-xs font-medium text-gray-600 mt-1">
-                    分
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* 期限切れの場合 */}
-            {votingExpired && (
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600 bg-white rounded-lg px-6 py-3 shadow-sm">
-                  期限終了
-                </div>
-                <div className="text-xs font-medium text-gray-600 mt-1">
-                  投票を締め切りました
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 説得コメントボタン */}
-          {showPersuasionButton && (
-            <div className="mt-4 pt-4 border-t border-orange-300">
-              <button
-                onClick={handlePersuasionModal}
-                className="flex items-center gap-3 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-md transition-all duration-200 transform hover:scale-105"
-              >
-                <MessageCircle size={20} />
-                <span>説得コメントを投稿</span>
-              </button>
-              <p className="text-sm text-orange-700 mt-2">
-                投票期限まで残り1時間を切りました。投票者への最後のメッセージを送信できます。
-              </p>
-            </div>
-          )}
-        </div>
-      )}
+      <VoteDeadline
+        data={data}
+        showPersuasionButton={showPersuasionButton}
+        handlePersuasionModal={handlePersuasionModal}
+      />
 
       {/* 画像と投稿内容を横並びに配置 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4 lg:items-center">
@@ -474,70 +302,6 @@ const PostDetail = ({ postId }: Props) => {
         isPostOwner={isPostOwner}
         userVoteChoice={userVoteChoice}
       />
-      {data && (data.nest_level || 0) < 3 && (
-        <div className="mt-8 border-t border-slate-200 pt-6">
-          {/* 派生質問作成ボタン */}
-          {user && (data.nest_level || 0) < 3 && !showCreateNested && (
-            <div className="mb-6">
-              <Button
-                onClick={() => setShowCreateNested(true)}
-                className="flex items-center gap-2 bg-violet-500 hover:bg-violet-600 text-white"
-              >
-                <MessageSquarePlus size={18} />
-                派生質問を作成
-              </Button>
-            </div>
-          )}
-
-          {/* 派生質問の表示（タイトルと概要のみ） */}
-          {nestedPosts && nestedPosts.length > 0 ? (
-            <div className="space-y-3 p-5">
-              <h3 className="text-lg font-semibold dark:text-white mb-4 flex items-center gap-2">
-                <MessageSquarePlus size={20} className="text-violet-600" />
-                派生質問
-              </h3>
-              {nestedPosts
-                .filter((nestedPost) => {
-                  // 投稿者の場合は投票の有無に関わらず全ての派生質問を表示
-                  if (isPostOwner) return true;
-
-                  // ユーザーが投票していない場合は対象外の質問は表示しない
-                  if (userVoteChoice === null) return false;
-
-                  // ユーザーの投票とターゲット投票選択が一致する場合のみ表示
-                  return nestedPost.target_vote_choice === userVoteChoice;
-                })
-                .map((nestedPost) => (
-                  <NestedPostSummary
-                    key={nestedPost.id}
-                    post={nestedPost}
-                    level={1}
-                    userVoteChoice={userVoteChoice}
-                    isPostOwner={isPostOwner}
-                  />
-                ))}
-
-              {/* 投票していないユーザー向けのメッセージ（投稿者は除外） */}
-              {!isPostOwner &&
-                userVoteChoice === null &&
-                nestedPosts.some((p) => p.target_vote_choice !== null) && (
-                  <div className="text-center py-6 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-blue-700 font-bold">
-                      投票者限定の派生質問があります
-                    </p>
-                    <p className="text-blue-600 text-sm mt-1">
-                      この投票に参加された方はチェックしてください✅
-                    </p>
-                  </div>
-                )}
-            </div>
-          ) : (
-            <div className="text-center py-6 text-slate-500">
-              <p>まだ派生質問はありません</p>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* 派生質問作成ダイアログ */}
       <CreateNestedPostDialog
