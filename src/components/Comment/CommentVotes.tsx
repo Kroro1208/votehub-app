@@ -26,7 +26,8 @@ interface VoteResult {
   data: CommentVote | CommentVote[] | null;
 }
 
-const getVotes = async (commentId: number): Promise<CommentVote[]> => {
+// コメントに対しての投票取得
+const getCommentVotes = async (commentId: number): Promise<CommentVote[]> => {
   const { data, error } = await supabase
     .from("comment_votes")
     .select("*")
@@ -49,7 +50,7 @@ const CommentVotes = ({ commentId, postId }: VoteProps) => {
     error,
   } = useQuery<CommentVote[], Error>({
     queryKey: ["comment_votes", commentId],
-    queryFn: () => getVotes(commentId),
+    queryFn: () => getCommentVotes(commentId),
     // 不要な自動リフェッチを無効化（必要に応じて調整）
     refetchInterval: false,
     staleTime: 1000 * 60 * 5, // 5分間はデータを新鮮として扱う

@@ -3,7 +3,7 @@ import { supabase } from "../supabase-client";
 import { useState } from "react";
 import { useAuth } from "./useAuth";
 
-interface Vote {
+export interface Vote {
   id: number;
   post_id: number;
   user_id: string;
@@ -181,5 +181,6 @@ export const useHandleVotes = (postId: number) => {
     totalVotes,
     isPending,
     error,
+    getVotes,
   };
 };

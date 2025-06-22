@@ -48,6 +48,7 @@ const getCommunitityItem = async (
 };
 
 // ユーザーの投票済み投稿IDを取得する関数
+// [{post_id: 1}, {post_id: 3}, {post_id: 5}]）
 const getUserVotedPostIds = async (userId?: string): Promise<Set<number>> => {
   if (!userId) return new Set();
 
@@ -72,7 +73,7 @@ const CommunityItem = ({ communityId }: Props) => {
     queryFn: () => getCommunitityItem(communityId),
   });
 
-  // ユーザーの投票済み投稿IDを取得
+  // ユーザーの投票済み投稿IDを取得（投票済みかどうかを表示するのに使用）
   const { data: votedPostIds } = useQuery({
     queryKey: ["userVotedPosts", user?.id],
     queryFn: () => getUserVotedPostIds(user?.id),

@@ -8,6 +8,22 @@ interface PopularItemProps {
   votedPostIds?: Set<number>;
 }
 
+// 人気度計算: 投票数 + コメント数 * 0.5 + 新規度ボーナス
+const getPopularityScore = (post: CommunityItemType) => {
+  const voteCount = post.vote_count || 0;
+  const commentCount = post.comment_count || 0;
+  const createdAt = new Date(post.created_at);
+  const now = new Date();
+  const hoursOld = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
+
+  // 新規度ボーナス: 24時間以内は1.5倍、48時間以内は1.2倍
+  let recencyBonus = 1;
+  if (hoursOld <= 24) recencyBonus = 1.5;
+  else if (hoursOld <= 48) recencyBonus = 1.2;
+
+  return (voteCount + commentCount * 0.5) * recencyBonus;
+};
+
 const PopularItem = ({ communityItemData, votedPostIds }: PopularItemProps) => {
   // 人気投稿を計算する関数
   const getPopularPosts = (posts: CommunityItemType[], limit = 5) => {
@@ -15,23 +31,6 @@ const PopularItem = ({ communityItemData, votedPostIds }: PopularItemProps) => {
 
     return [...posts]
       .sort((a, b) => {
-        // 人気度計算: 投票数 + コメント数 * 0.5 + 新規度ボーナス
-        const getPopularityScore = (post: CommunityItemType) => {
-          const voteCount = post.vote_count || 0;
-          const commentCount = post.comment_count || 0;
-          const createdAt = new Date(post.created_at);
-          const now = new Date();
-          const hoursOld =
-            (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
-
-          // 新規度ボーナス: 24時間以内は1.5倍、48時間以内は1.2倍
-          let recencyBonus = 1;
-          if (hoursOld <= 24) recencyBonus = 1.5;
-          else if (hoursOld <= 48) recencyBonus = 1.2;
-
-          return (voteCount + commentCount * 0.5) * recencyBonus;
-        };
-
         return getPopularityScore(b) - getPopularityScore(a);
       })
       .slice(0, limit);
