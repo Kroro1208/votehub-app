@@ -12,26 +12,20 @@ import {
   MessageSquarePlus,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
+
 import CommentSection from "../Comment/CommentSection";
 import PostContentDisplay from "./PostContentDisplay";
-import CreateNestedPost from "./CreateNestedPost";
 import NestedPostSummary from "./NestedPostSummary";
+import CreateNestedPostDialog from "./CreateNestedPostDialog";
+import CreatePersuasionDialog from "./CreatePersuasionDialog";
+import NestedPostSection from "./NestedPostSection";
 
 interface Props {
   postId: number;
 }
 
-interface Comment {
+export interface CommentType {
   id: number;
   post_id: number;
   user_id: string;
@@ -80,7 +74,7 @@ const fetchUserVoteForPost = async (
     .select("*")
     .eq("post_id", postId)
     .eq("user_id", userId)
-    .maybeSingle(); // single() ではなく maybeSingle() を使用
+    .maybeSingle();
 
   if (error) {
     console.error("投票データ取得エラー:", error);
@@ -90,7 +84,9 @@ const fetchUserVoteForPost = async (
   return data ? data.vote : null;
 };
 
-const fetchCommentById = async (id: number | null): Promise<Comment | null> => {
+const fetchCommentById = async (
+  id: number | null,
+): Promise<CommentType | null> => {
   if (id === null) return null;
 
   const { data, error } = await supabase
@@ -100,7 +96,7 @@ const fetchCommentById = async (id: number | null): Promise<Comment | null> => {
     .single();
 
   if (error) throw new Error(error.message);
-  return data as Comment;
+  return data as CommentType;
 };
 
 const createPersuasionComment = async (
@@ -136,7 +132,7 @@ const createPersuasionComment = async (
     .single();
 
   if (error) throw new Error(error.message);
-  return data as Comment;
+  return data as CommentType;
 };
 
 const PostDetail = ({ postId }: Props) => {
@@ -248,7 +244,7 @@ const PostDetail = ({ postId }: Props) => {
   };
 
   // 最もリアクションの多いコメントを管理する
-  const [mostVotedComment, setMostVotedComment] = useState<Comment | null>(
+  const [mostVotedComment, setMostVotedComment] = useState<CommentType | null>(
     null,
   );
 
@@ -469,6 +465,15 @@ const PostDetail = ({ postId }: Props) => {
       <CommentSection postId={postId} />
 
       {/* 派生質問セクション */}
+      <NestedPostSection
+        data={data}
+        user={user}
+        showCreateNested={showCreateNested}
+        setShowCreateNested={setShowCreateNested}
+        nestedPosts={nestedPosts}
+        isPostOwner={isPostOwner}
+        userVoteChoice={userVoteChoice}
+      />
       {data && (data.nest_level || 0) < 3 && (
         <div className="mt-8 border-t border-slate-200 pt-6">
           {/* 派生質問作成ボタン */}
@@ -535,88 +540,26 @@ const PostDetail = ({ postId }: Props) => {
       )}
 
       {/* 派生質問作成ダイアログ */}
-      <Dialog open={showCreateNested} onOpenChange={setShowCreateNested}>
-        <DialogContent className="min-w-4xl max-h-[90vh] overflow-y-auto bg-white border border-gray-200 shadow-xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
-              <MessageSquarePlus className="h-5 w-5" />
-              派生投稿を作成
-            </DialogTitle>
-            <DialogDescription className="text-gray-600">
-              元の投稿から派生した新しい質問を作成します
-            </DialogDescription>
-          </DialogHeader>
-          {data && (
-            <CreateNestedPost
-              parentPost={{
-                id: postId,
-                title: data.title,
-                nest_level: data.nest_level || 0,
-              }}
-              onCancel={() => setShowCreateNested(false)}
-              onSuccess={handleNestedPostCreate}
-              isDialog={true}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <CreateNestedPostDialog
+        open={showCreateNested}
+        onOpenChange={setShowCreateNested}
+        setShowCreateNested={setShowCreateNested}
+        data={data}
+        postId={postId}
+        handleNestedPostCreate={handleNestedPostCreate}
+      />
 
       {/* 説得コメントモーダル */}
-      <Dialog open={showPersuasionModal} onOpenChange={setShowPersuasionModal}>
-        <DialogContent className="sm:max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">
-              説得コメント
-            </DialogTitle>
-            <DialogDescription className="text-gray-600 dark:text-gray-400">
-              投票期限まで残り僅かです。投票者への最後のメッセージを送信してください。
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <Textarea
-              value={persuasionContent}
-              onChange={(e) => setPersuasionContent(e.target.value)}
-              placeholder="投票者に向けたメッセージを入力してください..."
-              className="min-h-[120px] resize-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              maxLength={500}
-            />
-            <div className="text-right text-xs text-gray-500 dark:text-gray-400">
-              {persuasionContent.length}/500
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={handleCloseModal}
-              disabled={persuasionCommentMutation.isPending}
-              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
-              キャンセル
-            </Button>
-            <Button
-              onClick={handlePersuasionSubmit}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
-              disabled={
-                persuasionCommentMutation.isPending || !persuasionContent.trim()
-              }
-            >
-              {persuasionCommentMutation.isPending ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  投稿中...
-                </>
-              ) : (
-                <>
-                  <MessageCircle size={16} className="mr-2" />
-                  投稿する
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <CreatePersuasionDialog
+        open={showPersuasionModal}
+        onOpenChange={setShowPersuasionModal}
+        persuasionContent={persuasionContent}
+        setPersuasionContent={setPersuasionContent}
+        handlePersuasionSubmit={handlePersuasionSubmit}
+        handleCloseModal={handleCloseModal}
+        showPersuasionModal={showPersuasionModal}
+        persuasionCommentMutation={persuasionCommentMutation}
+      />
     </div>
   );
 };
