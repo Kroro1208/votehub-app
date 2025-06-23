@@ -5,6 +5,9 @@ import { CheckCircle } from "lucide-react";
 import { Button } from "../ui/button";
 import { useHandleVotes } from "../../hooks/useHandleVotes";
 import VoteGageBar from "./VoteGageBar";
+import VoteConfirmModal from "./VoteConfirmModal";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
 interface PostProps {
   postId: number;
@@ -12,9 +15,11 @@ interface PostProps {
 }
 
 const VoteButton = ({ postId, voteDeadline }: PostProps) => {
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingVote, setPendingVote] = useState<number | null>(null);
+
   const {
     mutate,
-    isVoting,
     hasUserVoted,
     upVotePercentage,
     downVotePercentage,
@@ -24,27 +29,58 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
     totalVotes,
     isPending,
     error,
-  } = useHandleVotes(postId);
+    hasPersuasionVoteChanged,
+    persuasionTime,
+    isVotingDisabled,
+  } = useHandleVotes(postId, voteDeadline);
 
   const isVotingExpired = () => {
     if (!voteDeadline) return false;
     return new Date() > new Date(voteDeadline);
   };
 
-  // 説得タイム（期限の1時間前）かどうかをチェック
-  const isPersuasionTime = () => {
-    if (!voteDeadline) return false;
-    const deadline = new Date(voteDeadline);
-    const now = new Date();
-    const oneHourBeforeDeadline = new Date(deadline.getTime() - 60 * 60 * 1000);
-    return now >= oneHourBeforeDeadline && now < deadline;
+  const votingExpired = isVotingExpired();
+
+  // 投票ハンドラー
+  const handleVoteClick = (voteValue: number) => {
+    // 説得タイム中で既存投票と異なる場合は確認モーダルを表示
+    if (
+      persuasionTime &&
+      hasUserVoted &&
+      userVote !== voteValue &&
+      !hasPersuasionVoteChanged
+    ) {
+      setPendingVote(voteValue);
+      setShowConfirmModal(true);
+      return;
+    }
+
+    // 通常の投票処理
+    mutate(voteValue, {
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    });
   };
 
-  const votingExpired = isVotingExpired();
-  const persuasionTime = isPersuasionTime();
+  // 確認モーダルでの投票実行
+  const handleConfirmVote = () => {
+    if (pendingVote !== null) {
+      mutate(pendingVote, {
+        onError: (error) => {
+          toast.error(error.message);
+        },
+      });
+    }
+    setShowConfirmModal(false);
+    setPendingVote(null);
+  };
 
-  // 説得タイム中は投票済みでもボタンを有効にする
-  const isVotingDisabled = isVoting || (hasUserVoted && !persuasionTime);
+  // モーダルをキャンセル
+  const handleCancelVote = () => {
+    setShowConfirmModal(false);
+    setPendingVote(null);
+  };
   if (isPending) return <div>読み込み中...</div>;
   if (error) return <div>{error.message}</div>;
 
@@ -64,7 +100,7 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
             {/* 賛成ボタン */}
             <Button
               type="button"
-              onClick={() => mutate(1)}
+              onClick={() => handleVoteClick(1)}
               disabled={isVotingDisabled}
               className={`group relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all duration-300 min-w-[140px] h-14 overflow-hidden ${
                 userVote === 1
@@ -89,7 +125,7 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
             {/* 反対ボタン */}
             <Button
               type="button"
-              onClick={() => mutate(-1)}
+              onClick={() => handleVoteClick(-1)}
               disabled={isVotingDisabled}
               className={`group relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all duration-300 min-w-[140px] h-14 overflow-hidden ${
                 userVote === -1
@@ -124,7 +160,9 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
         {persuasionTime && !votingExpired && (
           <div className="w-full text-center py-3 px-4 bg-orange-100 text-orange-700 rounded-lg border border-orange-200">
             <span className="font-semibold">
-              説得タイム中！投票を変更できます
+              {hasPersuasionVoteChanged
+                ? "説得タイム中の投票変更完了"
+                : "説得タイム中！投票を変更できます（1度限り）"}
             </span>
           </div>
         )}
@@ -152,6 +190,15 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
           })}
         </div>
       )}
+
+      {/* 投票確認モーダル */}
+      <VoteConfirmModal
+        isOpen={showConfirmModal}
+        onClose={handleCancelVote}
+        onConfirm={handleConfirmVote}
+        voteType={pendingVote === 1 ? "賛成" : "反対"}
+        currentVote={userVote === 1 ? "賛成" : "反対"}
+      />
     </div>
   );
 };

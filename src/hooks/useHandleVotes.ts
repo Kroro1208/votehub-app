@@ -2,17 +2,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../supabase-client";
 import { useState } from "react";
 import { useAuth } from "./useAuth";
+import { isPersuasionTime } from "../utils/formatTime";
 
 export interface Vote {
   id: number;
   post_id: number;
   user_id: string;
   vote: number;
-}
-
-interface VoteResult {
-  action: "deleted" | "updated" | "inserted";
-  data: Vote | Vote[] | null;
+  persuasion_vote_changed?: boolean;
+  original_vote?: number;
+  changed_at?: string;
 }
 
 const getVotes = async (postId: number): Promise<Vote[]> => {
@@ -25,10 +24,14 @@ const getVotes = async (postId: number): Promise<Vote[]> => {
   return data as Vote[];
 };
 
-export const useHandleVotes = (postId: number) => {
+export const useHandleVotes = (
+  postId: number,
+  voteDeadline?: string | null,
+) => {
   const [isVoting, setIsVoting] = useState(false);
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const persuasionTime = isPersuasionTime(voteDeadline ?? null);
 
   const {
     data: votes,
@@ -42,7 +45,6 @@ export const useHandleVotes = (postId: number) => {
     staleTime: 1000 * 60 * 5, // 5分間はデータを新鮮として扱う
   });
 
-  // vote関数を最適化: 処理結果を返す(useMutation用)
   const vote = async (voteValue: number, postId: number, userId: string) => {
     const { data: existingVote } = await supabase
       .from("votes")
@@ -51,41 +53,38 @@ export const useHandleVotes = (postId: number) => {
       .eq("user_id", userId)
       .maybeSingle();
 
-    // 処理結果を保持する変数
-    let result: VoteResult;
-
-    // すでに投票していた場合
-    if (existingVote) {
-      // 同じ投票(upかdownか)については取り消し
-      if (existingVote.vote === voteValue) {
-        const { data, error } = await supabase
-          .from("votes")
-          .delete()
-          .eq("id", existingVote.id)
-          .select();
-
-        if (error) throw new Error(error.message);
-        result = { action: "deleted", data };
-      } else {
-        // 異なる投票(upかdownか)については更新
-        const { data, error } = await supabase
-          .from("votes")
-          .update({ vote: voteValue })
-          .eq("id", existingVote.id)
-          .select();
-        if (error) throw new Error(error.message);
-        result = { action: "updated", data };
-      }
-    } else {
+    // 新規投票の場合
+    if (!existingVote) {
       const { data, error } = await supabase
         .from("votes")
         .insert({ post_id: postId, user_id: userId, vote: voteValue })
         .select();
       if (error) throw new Error(error.message);
-      result = { action: "inserted", data };
+      return { action: "inserted", data };
     }
 
-    return result;
+    const updateData: {
+      vote: number;
+      persuasion_vote_changed?: boolean;
+      original_vote?: number;
+      changed_at?: string;
+    } = { vote: voteValue };
+
+    if (persuasionTime) {
+      updateData.persuasion_vote_changed = true;
+      updateData.original_vote =
+        existingVote.original_vote || existingVote.vote;
+      updateData.changed_at = new Date().toISOString();
+    }
+
+    const { data, error } = await supabase
+      .from("votes")
+      .update(updateData)
+      .eq("id", existingVote.id)
+      .select();
+
+    if (error) throw new Error(error.message);
+    return { action: "updated", data };
   };
 
   const { mutate } = useMutation({
@@ -135,7 +134,7 @@ export const useHandleVotes = (postId: number) => {
       }
 
       // 楽観的に更新
-      // ["votes", postId]というキーに対応するキャッシュにnewVotesという値がセットして内部で更新
+      // ["votes", postId]というキーに対応するキャッシュにnewVotesという値をセットして内部で更新
       queryClient.setQueryData(["votes", postId], newVotes);
 
       return { previousVotes };
@@ -156,13 +155,17 @@ export const useHandleVotes = (postId: number) => {
   const upVotes = votes?.filter((item) => item.vote === 1).length || 0;
   const downVotes = votes?.filter((item) => item.vote === -1).length || 0;
   const totalVotes = upVotes + downVotes;
-  const userVote = votes?.find((item) => item.user_id === user?.id)?.vote;
+  const userVote = votes?.find((item) => item.user_id === user?.id);
 
   // 投票済みかどうか
   const hasUserVoted = userVote !== undefined;
 
-  // 投票ボタンを無効にする条件を更新
-  // 説得タイム中は投票済みでもボタンを有効にする
+  // 説得タイム中に既に投票変更済みかどうか
+  const hasPersuasionVoteChanged = userVote?.persuasion_vote_changed || false;
+
+  // 説得タイム中でも、既に投票変更済みの場合は無効にする
+  const isVotingDisabled =
+    hasUserVoted && (!persuasionTime || hasPersuasionVoteChanged);
 
   // 投票の割合を計算（0票の場合は0%として表示）
   const upVotePercentage = totalVotes > 0 ? (upVotes / totalVotes) * 100 : 0;
@@ -175,12 +178,15 @@ export const useHandleVotes = (postId: number) => {
     hasUserVoted,
     upVotePercentage,
     downVotePercentage,
-    userVote,
+    userVote: userVote?.vote,
     upVotes,
     downVotes,
     totalVotes,
     isPending,
     error,
     getVotes,
+    hasPersuasionVoteChanged,
+    persuasionTime,
+    isVotingDisabled,
   };
 };

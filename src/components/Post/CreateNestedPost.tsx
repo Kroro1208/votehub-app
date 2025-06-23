@@ -32,12 +32,14 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "react-toastify";
 import { FaArrowAltCircleDown, FaArrowAltCircleUp } from "react-icons/fa";
+import { notifyNestedPostTargets } from "../../utils/notifications";
 
 type CreateNestedPostFormData = z.infer<typeof createNestedPostSchema>;
 
 interface CreateNestedPostProps {
   parentPost: {
     id: number;
+    community_id: number;
     title: string;
     nest_level: number;
   };
@@ -145,21 +147,42 @@ const CreateNestedPost = ({
       ].join("\n");
 
       // ネスト投稿作成
-      const { error: insertError } = await supabase.from("posts").insert({
-        title: data.title,
-        content: combinedContent,
-        vote_deadline: data.vote_deadline.toISOString(),
-        parent_post_id: data.parent_post_id,
-        nest_level: parentPost.nest_level + 1,
-        target_vote_choice: data.target_vote_choice,
-        community_id: null, // ネスト投稿はコミュニティを引き継がない
-        user_id: user.id,
-        image_url: imageUrl,
-        avatar_url: user.user_metadata?.avatar_url || null,
-      });
+      const { data: insertedPost, error: insertError } = await supabase
+        .from("posts")
+        .insert({
+          title: data.title,
+          content: combinedContent,
+          vote_deadline: data.vote_deadline.toISOString(),
+          parent_post_id: data.parent_post_id,
+          nest_level: parentPost.nest_level + 1,
+          target_vote_choice: data.target_vote_choice,
+          community_id: parentPost.community_id,
+          user_id: user.id,
+          image_url: imageUrl,
+          avatar_url: user.user_metadata?.avatar_url || null,
+        })
+        .select("id")
+        .single();
 
       if (insertError) {
         throw new Error(`投稿の作成に失敗しました: ${insertError.message}`);
+      }
+
+      // 派生質問の対象者に通知を送信
+      if (data.target_vote_choice && insertedPost) {
+        try {
+          await notifyNestedPostTargets(
+            data.parent_post_id,
+            insertedPost.id,
+            data.title,
+            data.target_vote_choice,
+            user.id,
+          );
+        } catch (notificationError) {
+          console.error("通知送信エラー:", notificationError);
+          // 通知送信に失敗しても投稿作成は成功とする
+          toast.warn("投稿は作成されましたが、通知の送信に失敗しました");
+        }
       }
 
       toast.success("派生投稿を作成しました！");

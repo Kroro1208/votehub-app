@@ -152,12 +152,12 @@ const NestedPostSummary = ({
                 {post.target_vote_choice === 1 ? (
                   <>
                     <FaArrowAltCircleUp size={16} />
-                    <span>賛成者限定</span>
+                    <span>賛成者限定の追加質問があります</span>
                   </>
                 ) : (
                   <>
                     <FaArrowAltCircleDown size={16} />
-                    <span>反対者限定</span>
+                    <span>反対者限定の追加質問があります</span>
                   </>
                 )}
               </div>
