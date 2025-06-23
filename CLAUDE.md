@@ -5,7 +5,7 @@
 ### ✅ Issue #18: 派生質問作成時に該当者に通知する（解決済み）
 
 - **解決日**: 2025-06-23
-- **実装内容**: 
+- **実装内容**:
   - 派生質問作成時に対象投票者への自動通知機能
   - 通知ユーティリティ関数 (`src/utils/notifications.ts`)
   - CreateNestedPost.tsxへの通知機能統合
@@ -114,14 +114,17 @@
 ### 実装済みの主要コンポーネント
 
 #### 説得タイム関連
+
 - `VoteConfirmModal.tsx` - 投票変更確認モーダル
 - `PersuasionStatsDisplay.tsx` - 説得タイム統計表示
 - `useHandleVotes.ts` - 説得タイム対応投票フック
 
 #### 通知関連
+
 - `notifications.ts` - 通知ユーティリティ関数
 - `NotificationDropdown.tsx` - 通知ドロップダウン
 - `useNotifications.ts` - 通知管理フック
 
 #### データベース関連
+
 - `migration_add_persuasion_tracking.sql` - 説得タイム追跡マイグレーション
