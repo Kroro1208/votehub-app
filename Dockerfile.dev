@@ -1,0 +1,19 @@
+# Dockerfile.dev
+FROM node:20-alpine
+
+WORKDIR /app
+
+# package.jsonとpackage-lock.jsonをコピー
+COPY package*.json ./
+
+# 依存関係をインストール（開発依存関係も含む）
+RUN npm ci
+
+# ソースコードをコピー
+COPY . .
+
+# Viteの開発サーバー用ポートを公開
+EXPOSE 5173
+
+# 開発サーバーを起動（ホットリロード有効）
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
