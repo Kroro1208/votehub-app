@@ -7,6 +7,7 @@ import CreateCommunityPage from "./pages/CreateCommunityPage";
 import CommunitiesPage from "./pages/CommunitiesPage";
 import CommyunityDetailPage from "./pages/CommyunityDetailPage";
 import ProfilePage from "./pages/ProfilePage";
+import PopularVotesPage from "./pages/PopularVotesPage";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <div className="container mx-auto px-4 py6">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/trending" element={<PopularVotesPage />} />
           <Route path="/create" element={<CreatePostPage />} />
           <Route path="/post/:id" element={<PostPage />} />
           <Route path="/space/create" element={<CreateCommunityPage />} />

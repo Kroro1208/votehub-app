@@ -50,7 +50,7 @@ const PersuasionStatsDisplay = ({
       if (error) throw new Error(error.message);
       return data[0] || { total_votes: 0, changed_votes: 0, change_rate: 0 };
     },
-    refetchInterval: 30000, // 30秒ごとに更新
+    refetchInterval: 600000, //60秒ごとに更新
     enabled: !!voteDeadline,
   });
 
