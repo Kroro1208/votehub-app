@@ -8,6 +8,7 @@ import CommunitiesPage from "./pages/CommunitiesPage";
 import CommyunityDetailPage from "./pages/CommyunityDetailPage";
 import ProfilePage from "./pages/ProfilePage";
 import PopularVotesPage from "./pages/PopularVotesPage";
+import VoteResultsPage from "./pages/VoteResultsPage";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/trending" element={<PopularVotesPage />} />
+          <Route path="/results" element={<VoteResultsPage />} />
           <Route path="/create" element={<CreatePostPage />} />
           <Route path="/post/:id" element={<PostPage />} />
           <Route path="/space/create" element={<CreateCommunityPage />} />

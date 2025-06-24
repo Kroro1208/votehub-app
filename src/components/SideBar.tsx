@@ -1,7 +1,6 @@
 import {
   Vote,
   TrendingUp,
-  Clock,
   Trophy,
   BarChart3,
   Users,
@@ -18,7 +17,6 @@ const Sidebar = () => {
   const menuItems = [
     { icon: Vote, label: "投票中", path: "/" },
     { icon: TrendingUp, label: "人気の投票", path: "/trending" },
-    { icon: Clock, label: "期限間近", path: "/urgent" },
     { icon: Trophy, label: "結果発表", path: "/results" },
     { icon: BarChart3, label: "統計", path: "/stats" },
     { icon: Users, label: "スペース", path: "/space" },
