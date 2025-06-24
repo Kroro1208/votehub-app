@@ -12,7 +12,11 @@ interface PostItemType {
 
 const PostItem = ({ post }: PostItemType) => {
   const { user } = useAuth();
-  const { totalVotes } = useHandleVotes(post.id);
+  const { totalVotes } = useHandleVotes(
+    post.id,
+    post.vote_deadline,
+    post.title,
+  );
   const { userVote, isPersuasionTime, isVotingExpired, getTimeRemaining } =
     useHandlePost(post);
 

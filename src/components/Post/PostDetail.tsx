@@ -14,6 +14,7 @@ import CreatePersuasionDialog from "./CreatePersuasionDialog";
 import NestedPostSection from "./NestedPostSection";
 import VoteDeadline from "./VoteDeadline";
 import { isPersuasionTime } from "../../utils/formatTime";
+import { checkAndNotifyVoteDeadlineEnded } from "../../utils/notifications";
 
 interface Props {
   postId: number;
@@ -222,6 +223,31 @@ const PostDetail = ({ postId }: Props) => {
     fetchComment();
   }, [mostVotedInfo.commentId]);
 
+  // 投票期限終了チェック（定期実行）
+  useEffect(() => {
+    if (!data?.vote_deadline) return;
+
+    const checkDeadline = async () => {
+      try {
+        await checkAndNotifyVoteDeadlineEnded(
+          postId,
+          data.title,
+          data.vote_deadline,
+        );
+      } catch (error) {
+        console.error("投票期限終了チェックに失敗:", error);
+      }
+    };
+
+    // 初回実行
+    checkDeadline();
+
+    // 30秒ごとにチェック
+    const interval = setInterval(checkDeadline, 30000);
+
+    return () => clearInterval(interval);
+  }, [postId, data?.title, data?.vote_deadline]);
+
   // モーダルを閉じる
   const handleCloseModal = () => {
     setShowPersuasionModal(false);
@@ -289,7 +315,11 @@ const PostDetail = ({ postId }: Props) => {
         </div>
       )}
 
-      <VoteButton postId={postId} voteDeadline={data.vote_deadline} />
+      <VoteButton
+        postId={postId}
+        voteDeadline={data.vote_deadline}
+        postTitle={data.title}
+      />
       <CommentSection postId={postId} />
 
       {/* 派生質問セクション */}

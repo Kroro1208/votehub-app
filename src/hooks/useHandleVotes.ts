@@ -3,6 +3,7 @@ import { supabase } from "../supabase-client";
 import { useState } from "react";
 import { useAuth } from "./useAuth";
 import { isPersuasionTime } from "../utils/formatTime";
+import { checkAndNotifyPersuasionTimeStarted } from "../utils/notifications";
 
 export interface Vote {
   id: number;
@@ -27,6 +28,7 @@ const getVotes = async (postId: number): Promise<Vote[]> => {
 export const useHandleVotes = (
   postId: number,
   voteDeadline?: string | null,
+  postTitle?: string,
 ) => {
   const [isVoting, setIsVoting] = useState(false);
   const { user } = useAuth();
@@ -121,10 +123,6 @@ export const useHandleVotes = (
           vote: voteValue,
         });
       }
-      // ケース2: 同じ種類の投票がある場合、削除
-      else if (newVotes[userVoteIndex].vote === voteValue) {
-        newVotes.splice(userVoteIndex, 1);
-      }
       // ケース3: 異なる種類の投票がある場合、更新
       else {
         newVotes[userVoteIndex] = {
@@ -146,9 +144,22 @@ export const useHandleVotes = (
       }
       console.error(err);
     },
-    onSettled: () => {
+    onSettled: async () => {
       // 処理完了後にデータを再検証（必要な場合のみ）
       queryClient.invalidateQueries({ queryKey: ["votes", postId] });
+
+      // 説得タイム開始通知をチェック（バックグラウンドで実行）
+      if (postTitle && voteDeadline) {
+        try {
+          await checkAndNotifyPersuasionTimeStarted(
+            postId,
+            postTitle,
+            voteDeadline,
+          );
+        } catch (error) {
+          console.error("説得タイム開始通知チェックに失敗:", error);
+        }
+      }
     },
   });
 

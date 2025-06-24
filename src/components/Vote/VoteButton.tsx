@@ -12,9 +12,10 @@ import { toast } from "react-toastify";
 interface PostProps {
   postId: number;
   voteDeadline?: string | null;
+  postTitle?: string;
 }
 
-const VoteButton = ({ postId, voteDeadline }: PostProps) => {
+const VoteButton = ({ postId, voteDeadline, postTitle }: PostProps) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingVote, setPendingVote] = useState<number | null>(null);
 
@@ -32,7 +33,7 @@ const VoteButton = ({ postId, voteDeadline }: PostProps) => {
     hasPersuasionVoteChanged,
     persuasionTime,
     isVotingDisabled,
-  } = useHandleVotes(postId, voteDeadline);
+  } = useHandleVotes(postId, voteDeadline, postTitle);
 
   const isVotingExpired = () => {
     if (!voteDeadline) return false;

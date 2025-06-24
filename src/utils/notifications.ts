@@ -1,5 +1,6 @@
 import { supabase } from "../supabase-client";
 import { NotificationCreateParams } from "../types/notification";
+import { isPersuasionTime } from "./formatTime";
 
 /**
  * 通知を作成する関数
@@ -81,5 +82,164 @@ export const notifyNestedPostTargets = async (
   } catch (error) {
     console.error("派生質問通知の送信に失敗:", error);
     throw error;
+  }
+};
+
+/**
+ * 説得タイム開始時に投票参加者に通知を送信
+ */
+export const notifyPersuasionTimeStarted = async (
+  postId: number,
+  postTitle: string,
+) => {
+  try {
+    // データベース関数を使用して効率的に通知を作成
+    const { data, error } = await supabase.rpc(
+      "create_persuasion_notifications",
+      {
+        p_post_id: postId,
+        p_post_title: postTitle,
+      },
+    );
+
+    if (error) {
+      throw new Error(
+        `説得タイム開始通知の作成に失敗しました: ${error.message}`,
+      );
+    }
+
+    const notificationCount = data || 0;
+    if (notificationCount > 0) {
+      console.log(
+        `${notificationCount}人のユーザーに説得タイム開始通知を送信しました`,
+      );
+    } else {
+      console.log("説得タイム開始通知: 対象者なしまたは既に送信済み");
+    }
+  } catch (error) {
+    console.error("説得タイム開始通知の送信に失敗:", error);
+    throw error;
+  }
+};
+
+/**
+ * 投票期限終了時に投票参加者に通知を送信
+ */
+export const notifyVoteDeadlineEnded = async (
+  postId: number,
+  postTitle: string,
+) => {
+  try {
+    // データベース関数を使用して効率的に通知を作成
+    const { data, error } = await supabase.rpc(
+      "create_deadline_notifications",
+      {
+        p_post_id: postId,
+        p_post_title: postTitle,
+      },
+    );
+
+    if (error) {
+      throw new Error(`投票期限終了通知の作成に失敗しました: ${error.message}`);
+    }
+
+    const notificationCount = data || 0;
+    if (notificationCount > 0) {
+      console.log(
+        `${notificationCount}人のユーザーに投票期限終了通知を送信しました`,
+      );
+    } else {
+      console.log("投票期限終了通知: 対象者なしまたは既に送信済み");
+    }
+  } catch (error) {
+    console.error("投票期限終了通知の送信に失敗:", error);
+    throw error;
+  }
+};
+
+/**
+ * 説得タイム開始の検出と通知送信
+ * 投票時に呼び出して、初回説得タイム検出時に通知を送信
+ */
+export const checkAndNotifyPersuasionTimeStarted = async (
+  postId: number,
+  postTitle: string,
+  voteDeadline: string | null,
+) => {
+  try {
+    // 説得タイムかどうかを確認
+    if (!isPersuasionTime(voteDeadline)) {
+      return false; // 説得タイムではない
+    }
+
+    // データベース関数を使用して通知未送信かチェック
+    const { data: notSent, error: checkError } = await supabase.rpc(
+      "check_persuasion_notification_not_sent",
+      { p_post_id: postId },
+    );
+
+    if (checkError) {
+      console.error("通知送信状況チェックに失敗:", checkError);
+      return false;
+    }
+
+    // 既に通知済みの場合は送信しない
+    if (!notSent) {
+      return false;
+    }
+
+    // 説得タイム開始通知を送信
+    await notifyPersuasionTimeStarted(postId, postTitle);
+    return true; // 通知送信成功
+  } catch (error) {
+    console.error("説得タイム開始検出・通知に失敗:", error);
+    return false;
+  }
+};
+
+/**
+ * 投票期限終了の検出と通知送信
+ * 定期的に呼び出して期限終了を検出し通知を送信
+ */
+export const checkAndNotifyVoteDeadlineEnded = async (
+  postId: number,
+  postTitle: string,
+  voteDeadline: string | null,
+) => {
+  try {
+    if (!voteDeadline) {
+      return false; // 期限が設定されていない
+    }
+
+    const now = new Date();
+    const deadline = new Date(voteDeadline);
+
+    // まだ期限前の場合
+    if (now < deadline) {
+      return false;
+    }
+
+    // データベース関数を使用して通知未送信かチェック
+    const { data: notSent, error: checkError } = await supabase.rpc(
+      "check_deadline_notification_not_sent",
+      { p_post_id: postId },
+    );
+
+    if (checkError) {
+      console.error("通知送信状況チェックに失敗:", checkError);
+      return false;
+    }
+
+    // 既に通知済みの場合は送信しない
+    if (!notSent) {
+      return false;
+    }
+
+    // 投票期限終了通知を送信
+    await notifyVoteDeadlineEnded(postId, postTitle);
+    return true; // 通知送信成功
+  } catch (error) {
+    console.error("投票期限終了検出・通知に失敗:", error);
+    return false;
   }
 };
