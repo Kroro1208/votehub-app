@@ -73,8 +73,8 @@ const PersuasionStatsDisplay = ({
     enabled: !!voteDeadline && isVotingExpired(voteDeadline), // 投票終了後のみ表示
   });
 
-  const persuasionActive = isPersuasionTime(voteDeadline);
-  const votingEnded = isVotingExpired(voteDeadline);
+  const persuasionActive = isPersuasionTime(voteDeadline ?? null);
+  const votingEnded = isVotingExpired(voteDeadline ?? null);
 
   if (!voteDeadline) return null;
 

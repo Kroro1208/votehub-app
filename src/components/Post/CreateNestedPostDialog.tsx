@@ -9,7 +9,7 @@ import { MessageSquarePlus } from "lucide-react";
 import CreateNestedPost from "./CreateNestedPost";
 
 type CreateNestedPostDialogProps = {
-  data: { title: string; nest_level?: number };
+  data: { title: string; community_id: number | null; nest_level?: number };
   postId: number;
   handleNestedPostCreate: () => void;
   open: boolean;
@@ -42,6 +42,7 @@ const CreateNestedPostDialog = ({
             parentPost={{
               id: postId,
               title: data.title,
+              community_id: data.community_id ?? 0,
               nest_level: data.nest_level || 0,
             }}
             onCancel={() => setShowCreateNested(false)}
