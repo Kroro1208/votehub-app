@@ -251,6 +251,7 @@ const NestedPostItem = ({
             parentPost={{
               id: post.id,
               title: post.title,
+              community_id: post.community_id ?? 0,
               nest_level: level,
             }}
             onCancel={() => setShowCreateNested(false)}
