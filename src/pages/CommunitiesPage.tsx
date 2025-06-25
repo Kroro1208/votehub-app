@@ -1,25 +1,41 @@
 import CommunityList from "../components/Community/CommunityList";
 import Sidebar from "../components/SideBar";
-import { SiMyspace } from "react-icons/si";
+import { Users, Plus } from "lucide-react";
+import { Link } from "react-router";
 
 const CommunitiesPage = () => {
   return (
-    <div className="ml-64 min-h-screen bg-gradient-to-br from-slate-400 to-gray-200">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Sidebar />
-      <div className="px-8 py-12">
-        <div className="max-w-7xl mx-auto">
-          {/* ヘッダーセクション */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-violet-500 to-purple-500 rounded-2xl mb-6 shadow-xl">
-              <SiMyspace size={50} />
+      <div className="ml-64 px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-violet-500 to-purple-500 rounded-lg flex items-center justify-center">
+                  <Users size={24} className="text-white" />
+                </div>
+                <h1 className="text-3xl font-bold text-slate-900">
+                  スペース一覧
+                </h1>
+              </div>
+
+              {/* Create Community Button */}
+              <Link
+                to="/space/create"
+                className="inline-flex items-center space-x-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-violet-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <Plus size={20} />
+                <span className="font-medium">新しいスペース作成</span>
+              </Link>
             </div>
-            <h1 className="text-3xl text-black font-bold mb-4 bg-gradient-to-r bg-clip-text">
-              スペース一覧
-            </h1>
-            <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+
+            <p className="text-slate-600 max-w-3xl">
               興味のあるトピックで仲間と繋がり、意見を交換し、一緒に投票を楽しみましょう
             </p>
           </div>
+
           <CommunityList />
         </div>
       </div>

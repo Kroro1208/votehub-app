@@ -5,7 +5,7 @@ import CreatePostPage from "./pages/CreatePostPage";
 import PostPage from "./pages/PostPage";
 import CreateCommunityPage from "./pages/CreateCommunityPage";
 import CommunitiesPage from "./pages/CommunitiesPage";
-import CommyunityDetailPage from "./pages/CommyunityDetailPage";
+import CommunityDetailPage from "./pages/CommunityDetailPage";
 import ProfilePage from "./pages/ProfilePage";
 import PopularVotesPage from "./pages/PopularVotesPage";
 import VoteResultsPage from "./pages/VoteResultsPage";
@@ -25,7 +25,7 @@ function App() {
           <Route path="/post/:id" element={<PostPage />} />
           <Route path="/space/create" element={<CreateCommunityPage />} />
           <Route path="/space" element={<CommunitiesPage />} />
-          <Route path="/space/:id" element={<CommyunityDetailPage />} />
+          <Route path="/space/:id" element={<CommunityDetailPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
         </Routes>

@@ -1,7 +1,7 @@
 import { useParams } from "react-router";
 import CommunityItem from "../components/Community/CommunityItem";
 
-const CommyunityDetailPage = () => {
+const CommunityDetailPage = () => {
   const { id } = useParams<{ id: string }>();
 
   return (
@@ -11,4 +11,4 @@ const CommyunityDetailPage = () => {
   );
 };
 
-export default CommyunityDetailPage;
+export default CommunityDetailPage;

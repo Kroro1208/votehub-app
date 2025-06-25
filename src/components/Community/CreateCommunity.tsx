@@ -66,17 +66,17 @@ const CreateCommunity = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-400 to-gray-200 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
         {/* ヘッダー */}
         <div className="text-center mb-8">
-          <div className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-            <FaPeopleLine size={50} />
+          <div className="mx-auto h-16 w-16 bg-gradient-to-r from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+            <FaPeopleLine size={40} className="text-white" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          <h2 className="text-3xl font-bold text-slate-900 mb-2">
             新しいスペースを作成
           </h2>
-          <p className="text-gray-600">
+          <p className="text-slate-600">
             コミュニティを作成して、仲間とつながりましょう
           </p>
         </div>

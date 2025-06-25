@@ -84,18 +84,45 @@ const CommunityItem = ({ communityId }: Props) => {
   if (error) return <ErrorMessage error={error} />;
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* ヘッダー */}
-        <div className="mb-8">
-          <div className="rounded-2xl shadow-sm  border-gray-200">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-300 to-purple-500 bg-clip-text text-transparent">
-              {communityItemData?.[0]?.communities?.name ?? "このコミュニティ"}
-              の投稿一覧
-            </h1>
-            <div className="flex items-center gap-2 mt-4 text-sm text-gray-500">
-              <TrendingUp size={16} />
-              <span>{communityItemData?.length || 0}件の投稿</span>
+        <div className="mb-12">
+          <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8 relative overflow-hidden">
+            {/* 背景装飾 */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-full -translate-y-16 translate-x-16" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-500/10 to-teal-500/10 rounded-full translate-y-12 -translate-x-12" />
+
+            <div className="relative">
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-violet-500 via-purple-500 to-blue-500 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-xl">
+                  {(communityItemData?.[0]?.communities?.name ?? "C")
+                    .charAt(0)
+                    .toUpperCase()}
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+                    {communityItemData?.[0]?.communities?.name ??
+                      "このコミュニティ"}
+                  </h1>
+                  <p className="text-slate-600 text-lg mt-1">投稿一覧</p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-100 to-purple-100 rounded-xl">
+                  <TrendingUp size={18} className="text-violet-600" />
+                  <span className="text-violet-700 font-semibold">
+                    {communityItemData?.length || 0}件の投稿
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-teal-100 rounded-xl">
+                  <Users size={18} className="text-blue-600" />
+                  <span className="text-blue-700 font-semibold">
+                    活発な議論中
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -111,17 +138,25 @@ const CommunityItem = ({ communityId }: Props) => {
         />
         {/* 空の状態 */}
         {communityItemData?.length === 0 && (
-          <div className="text-center py-16">
-            <div className="rounded-2xl shadow-sm border border-gray-200 p-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users size={32} className="text-gray-400" />
+          <div className="text-center py-24">
+            <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-16 relative overflow-hidden">
+              {/* 背景装飾 */}
+              <div className="absolute top-0 left-1/2 w-40 h-40 bg-gradient-to-br from-violet-500/5 to-purple-500/5 rounded-full -translate-x-1/2 -translate-y-20" />
+
+              <div className="relative">
+                <div className="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
+                  <Users size={48} className="text-slate-400" />
+                </div>
+                <h3 className="text-3xl font-bold text-slate-800 mb-4">
+                  まだ投稿がありません
+                </h3>
+                <p className="text-slate-500 text-lg mb-8 max-w-md mx-auto">
+                  このコミュニティで最初の投稿をしてみませんか？きっと素晴らしい議論が始まるはずです。
+                </p>
+                <button className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold rounded-2xl hover:from-violet-600 hover:to-purple-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105">
+                  <span className="text-lg">最初の投稿を作成</span>
+                </button>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                まだ投稿がありません
-              </h3>
-              <p className="text-gray-500">
-                このコミュニティで最初の投稿をしてみませんか？
-              </p>
             </div>
           </div>
         )}
