@@ -3,7 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../../supabase-client";
 import { Link } from "react-router";
 import { useState } from "react";
-import { Search, Calendar, ArrowRight, Vote } from "lucide-react";
+import {
+  Search,
+  Calendar,
+  ArrowRight,
+  Vote,
+  TrendingUp,
+  Flame,
+} from "lucide-react";
 import Error from "../Error";
 
 export interface Community {
@@ -52,11 +59,22 @@ const CommunityList = () => {
     queryFn: getCommunitites,
   });
 
-  // フィルタリングされたコミュニティのリスト
+  // 人気のスペースを取得（投稿数でソート）
+  const popularSpaces = data
+    ? [...data]
+        .sort((a, b) => (b.post_count || 0) - (a.post_count || 0))
+        .slice(0, 3)
+    : [];
+
+  // 人気のスペースのIDセットを作成
+  const popularSpaceIds = new Set(popularSpaces.map((space) => space.id));
+
+  // フィルタリングされたコミュニティのリスト（人気のスペースを除外）
   const filteredCommunities = data?.filter(
     (community) =>
-      community.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      community.description.toLowerCase().includes(searchTerm.toLowerCase()),
+      !popularSpaceIds.has(community.id) && // 人気のスペースは除外
+      (community.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        community.description.toLowerCase().includes(searchTerm.toLowerCase())),
   );
 
   if (isPending)
@@ -75,7 +93,10 @@ const CommunityList = () => {
       {/* 検索バー - Zennスタイル */}
       <div className="mb-8">
         <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+          />
           <input
             type="text"
             placeholder="スペースを検索"
@@ -85,6 +106,106 @@ const CommunityList = () => {
           />
         </div>
       </div>
+
+      {/* 人気のスペースセクション */}
+      {popularSpaces.length > 0 && (
+        <div className="mb-12">
+          <div className="bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 rounded-2xl border border-orange-100 overflow-hidden">
+            {/* ヘッダー */}
+            <div className="p-6 pb-4 border-b border-orange-100/50">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl">
+                  <Flame size={20} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                    人気のスペース
+                  </h2>
+                  <p className="text-sm text-orange-700/80">
+                    最もアクティブな議論が行われているスペース
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 人気スペース一覧 */}
+            <div className="p-6 pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {popularSpaces.map((space, index) => (
+                  <Link
+                    key={space.id}
+                    to={`/space/${space.id}`}
+                    className="group relative bg-white rounded-xl border border-orange-200/50 p-4 hover:border-orange-300 hover:shadow-lg transition-all duration-300"
+                  >
+                    {/* ランクバッジ */}
+                    <div className="absolute -top-2 -left-2">
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg ${
+                          index === 0
+                            ? "bg-gradient-to-br from-yellow-400 to-orange-500"
+                            : index === 1
+                              ? "bg-gradient-to-br from-gray-300 to-gray-500"
+                              : index === 2
+                                ? "bg-gradient-to-br from-orange-300 to-orange-600"
+                                : "bg-gradient-to-br from-pink-400 to-red-500"
+                        }`}
+                      >
+                        {index + 1}
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-4">
+                      {/* アバター */}
+                      <div
+                        className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-md"
+                        style={{
+                          backgroundColor: `hsl(${(space.id * 137.508) % 360}, 70%, 50%)`,
+                        }}
+                      >
+                        {space.name.charAt(0).toUpperCase()}
+                      </div>
+
+                      {/* コンテンツ */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-semibold text-gray-900 group-hover:text-orange-600 transition-colors line-clamp-1">
+                            {space.name}
+                          </h3>
+                          <ArrowRight
+                            size={16}
+                            className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5"
+                          />
+                        </div>
+
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                          {space.description}
+                        </p>
+
+                        {/* 統計情報 */}
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-1 text-xs">
+                            <TrendingUp size={12} className="text-orange-500" />
+                            <span className="font-medium text-orange-700">
+                              {space.post_count || 0}件の投稿
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-1 text-xs">
+                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                            <span className="text-gray-500">アクティブ</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ホバー効果 */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* コミュニティグリッド - Zenn風だけど見やすく */}
       {filteredCommunities?.length === 0 ? (
@@ -118,7 +239,10 @@ const CommunityList = () => {
                     <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
                       {community.name}
                     </h3>
-                    <ArrowRight className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5" />
+                    <ArrowRight
+                      size={16}
+                      className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5"
+                    />
                   </div>
 
                   <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
