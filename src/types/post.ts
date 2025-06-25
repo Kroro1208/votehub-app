@@ -20,6 +20,9 @@ export interface BasePost {
     name: string;
     description: string;
   } | null;
+  // ブックマーク関連の追加
+  is_bookmarked?: boolean;
+  bookmark_created_at?: string;
 }
 
 // 人気投票ページ用の型
@@ -27,3 +30,16 @@ export type PopularPost = BasePost;
 
 // 結果発表ページ用の型
 export type CompletedPost = BasePost;
+
+// ブックマーク専用の型
+export interface Bookmark {
+  id: number;
+  user_id: string;
+  post_id: number;
+  created_at: string;
+}
+
+// ブックマーク付き投稿の型
+export interface BookmarkedPost extends BasePost {
+  bookmark_created_at: string;
+}

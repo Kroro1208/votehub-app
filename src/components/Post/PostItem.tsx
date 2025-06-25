@@ -5,6 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useHandleVotes } from "../../hooks/useHandleVotes";
 import { useHandlePost } from "../../hooks/useHandlePost";
 import { FaRegCalendarTimes } from "react-icons/fa";
+import BookmarkButton from "./BookmarkButton";
 
 interface PostItemType {
   post: PostType;
@@ -127,20 +128,26 @@ const PostItem = ({ post }: PostItemType) => {
               </div>
             </div>
 
-            <div
-              className={`text-xs px-3 py-1 rounded-full font-medium ${
-                votingExpired
-                  ? "bg-slate-100 text-slate-600"
+            <div className="flex items-center space-x-2">
+              {/* ブックマークボタン追加 */}
+              <BookmarkButton postId={post.id} size="sm" />
+
+              {/* 既存のstatus badge */}
+              <div
+                className={`text-xs px-3 py-1 rounded-full font-medium ${
+                  votingExpired
+                    ? "bg-slate-100 text-slate-600"
+                    : showPersuasionButton
+                      ? "bg-orange-100 text-orange-700"
+                      : "bg-violet-100 text-violet-700"
+                }`}
+              >
+                {votingExpired
+                  ? "結果発表"
                   : showPersuasionButton
-                    ? "bg-orange-100 text-orange-700"
-                    : "bg-violet-100 text-violet-700"
-              }`}
-            >
-              {votingExpired
-                ? "結果発表"
-                : showPersuasionButton
-                  ? "説得タイム"
-                  : "投票受付中"}
+                    ? "説得タイム"
+                    : "投票受付中"}
+              </div>
             </div>
           </div>
         </div>

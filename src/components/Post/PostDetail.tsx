@@ -13,6 +13,7 @@ import CreateNestedPostDialog from "./CreateNestedPostDialog";
 import CreatePersuasionDialog from "./CreatePersuasionDialog";
 import NestedPostSection from "./NestedPostSection";
 import VoteDeadline from "./VoteDeadline";
+import BookmarkButton from "./BookmarkButton";
 import { isPersuasionTime } from "../../utils/formatTime";
 import { checkAndNotifyVoteDeadlineEnded } from "../../utils/notifications";
 
@@ -264,9 +265,14 @@ const PostDetail = ({ postId }: Props) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-6xl font-bold text-center bg-gradient-to-r from-green-600 to-green-200 bg-clip-text text-transparent">
-        {data.title}
-      </h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-6xl font-bold bg-gradient-to-r from-green-600 to-green-200 bg-clip-text text-transparent">
+          {data.title}
+        </h2>
+
+        {/* ブックマークボタン */}
+        <BookmarkButton postId={postId} size="lg" />
+      </div>
 
       {/* 投票期限の時計表示 */}
       <VoteDeadline
