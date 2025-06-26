@@ -14,11 +14,11 @@ export default function Home() {
     <div className="min-h-screen">
       <Sidebar />
       {/* Main Content */}
-      <div className="ml-64 min-h-screen">
+      <div className="ml-52 min-h-screen bg-slate-300">
         {/* Header with stats */}
-        <div className="bg-blue-100 border-b border-slate-200 px-6 py-4">
-          <div className="max-w-4xl mx-auto xl:mr-80">
-            <h1 className="text-2xl font-bold text-slate-800 mb-4">
+        <div className="border-b border-slate-200 px-6 py-4">
+          <div className="mx-auto xl:mr-80">
+            <h1 className="text-2xl font-bold text-slate-700 mb-4">
               アクティブな投票
             </h1>
 

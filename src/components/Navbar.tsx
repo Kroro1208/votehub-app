@@ -7,10 +7,13 @@ import { VscSignOut } from "react-icons/vsc";
 import { FaRegUser } from "react-icons/fa";
 import { Button } from "./ui/button";
 import NotificationDropdown from "./Notification/NotificationDropdown";
+import { useUserPoints } from "../hooks/useUserPoints";
+import { Coins } from "lucide-react";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { signInWithGoogle, signOut, user } = useAuth();
+  const { points, isLoading: pointsLoading } = useUserPoints();
 
   const displayName = user?.user_metadata.user_name || user?.email;
 
@@ -54,6 +57,14 @@ export default function Navbar() {
                 <div className="flex space-x-4 items-center justify-center min-w-0">
                   {/* 通知ドロップダウン */}
                   <NotificationDropdown />
+
+                  {/* ユーザーポイント表示 */}
+                  <div className="flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full">
+                    <Coins size={16} className="text-white" />
+                    <span className="text-sm font-semibold text-white">
+                      {pointsLoading ? "..." : points.toFixed(1)}
+                    </span>
+                  </div>
                   <Link
                     to="/profile"
                     className="flex items-center space-x-2 hover:opacity-80 transition-opacity"

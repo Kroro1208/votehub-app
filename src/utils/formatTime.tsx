@@ -5,7 +5,7 @@ export const isVotingExpired = (voteDeadline?: string | null) => {
 };
 
 // 残り時間を計算する関数
-export const getTimeRemaining = (voteDeadline?: string | null) => {
+export const getTimeRemainingObject = (voteDeadline?: string | null) => {
   if (!voteDeadline) return null;
 
   const deadline = new Date(voteDeadline);
@@ -33,6 +33,21 @@ export const getTimeRemaining = (voteDeadline?: string | null) => {
     hours: diffHours,
     minutes: diffMinutes,
   };
+};
+
+// 残り時間を文字列で返す関数
+export const getTimeRemaining = (voteDeadline?: string | null) => {
+  const timeObj = getTimeRemainingObject(voteDeadline);
+
+  if (!timeObj || timeObj.expired) return null;
+
+  if (timeObj.days > 0) {
+    return `${timeObj.days}日${timeObj.hours}時間`;
+  } else if (timeObj.hours > 0) {
+    return `${timeObj.hours}時間${timeObj.minutes}分`;
+  } else {
+    return `${timeObj.minutes}分`;
+  }
 };
 
 // 説得タイムかどうかを判定する関数

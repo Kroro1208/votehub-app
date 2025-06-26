@@ -110,7 +110,7 @@ const PersuasionStatsDisplay = ({
                 variant="outline"
                 className="border-orange-300 text-orange-700"
               >
-                残り時間:{" "}
+                残り時間:
                 {Math.ceil(
                   (new Date(voteDeadline).getTime() - new Date().getTime()) /
                     (1000 * 60),
