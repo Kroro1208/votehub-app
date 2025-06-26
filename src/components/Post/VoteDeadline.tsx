@@ -1,5 +1,8 @@
 import { Calendar, Clock, MessageCircle } from "lucide-react";
-import { getTimeRemaining, isVotingExpired } from "../../utils/formatTime";
+import {
+  getTimeRemainingObject,
+  isVotingExpired,
+} from "../../utils/formatTime";
 import { PostType } from "./PostList";
 import { Button } from "../ui/button";
 
@@ -14,7 +17,7 @@ const VoteDeadline = ({
   showPersuasionButton,
   handlePersuasionModal,
 }: VoteDeadlineProps) => {
-  const timeRemaining = getTimeRemaining(data.vote_deadline);
+  const timeRemaining = getTimeRemainingObject(data.vote_deadline);
   const votingExpired = isVotingExpired(data.vote_deadline);
   return (
     <div>
