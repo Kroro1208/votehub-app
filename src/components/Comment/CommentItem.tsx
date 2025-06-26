@@ -219,7 +219,7 @@ const CommentItem = ({ comment, postId }: CommentItemProps) => {
               {comment.children.map((child) => (
                 <CommentItem
                   key={child.id}
-                  comment={{ ...child, children: [] }}
+                  comment={child as Comment & { children: Comment[] }}
                   postId={postId}
                 />
               ))}
