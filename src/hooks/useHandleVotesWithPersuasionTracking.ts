@@ -202,9 +202,16 @@ export const useHandleVotesWithPersuasionTracking = (
       }
       console.error(err);
     },
-    onSettled: () => {
+    onSettled: async () => {
       queryClient.invalidateQueries({ queryKey: ["votes", postId] });
       queryClient.invalidateQueries({ queryKey: ["persuasion-stats", postId] });
+
+      // 自動拡散チェックを実行（バックグラウンドで実行）
+      try {
+        await supabase.rpc("check_and_reward_auto_spread");
+      } catch (error) {
+        console.error("自動拡散チェックに失敗:", error);
+      }
     },
   });
 

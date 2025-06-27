@@ -121,7 +121,13 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- 投票時のポイント付与トリガー関数（各投稿につき1回のみ）
 CREATE OR REPLACE FUNCTION trigger_add_vote_points()
 RETURNS TRIGGER AS $$
+DECLARE
+    post_author_id text;
+    current_vote_count integer;
 BEGIN
+    -- 投稿者のIDを取得
+    SELECT user_id INTO post_author_id FROM posts WHERE id = NEW.post_id;
+    
     -- 同じユーザーが同じ投稿に投票した履歴があるかチェック
     IF NOT EXISTS (
         SELECT 1 FROM point_transactions
@@ -139,6 +145,29 @@ BEGIN
             'posts',
             '投稿への投票（初回）'
         );
+    END IF;
+    
+    -- 現在の投票数を取得
+    SELECT COUNT(*) INTO current_vote_count FROM votes WHERE post_id = NEW.post_id;
+    
+    -- 100票達成時に自動拡散ポイントをチェック
+    IF current_vote_count = 100 THEN
+        -- 投稿者にまだ自動拡散ポイントが付与されていない場合
+        IF NOT EXISTS (
+            SELECT 1 FROM point_transactions
+            WHERE user_id = post_author_id::UUID
+            AND transaction_type = 'auto_spread'
+            AND reference_id = NEW.post_id
+        ) THEN
+            PERFORM add_user_points(
+                post_author_id::UUID,
+                10.0,
+                'auto_spread',
+                NEW.post_id,
+                'posts',
+                '投稿の自動拡散達成（100票）'
+            );
+        END IF;
     END IF;
     
     RETURN NEW;

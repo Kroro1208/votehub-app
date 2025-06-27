@@ -105,7 +105,6 @@ const getTagsForCommunity = async (communityId: number) => {
 // 新しいタグを作成する関数
 const createTag = async (name: string, communityId: number) => {
   try {
-    // Check for duplicate names first (case-insensitive)
     const { data: existingTags, error: checkError } = await supabase
       .from("tags")
       .select("name")
@@ -113,68 +112,38 @@ const createTag = async (name: string, communityId: number) => {
       .ilike("name", name.trim());
 
     if (checkError) {
-      console.error("Error checking existing tags:", checkError);
+      console.error("なんらかのエラーが発生しました:", checkError);
     }
 
     if (existingTags && existingTags.length > 0) {
       throw new Error("このタグ名は既に存在します。");
     }
 
-    // Get the maximum ID to generate a new one (with retry for race conditions)
-    let newId: number;
-    let retryCount = 0;
-    const maxRetries = 3;
+    // 新しいタグを作成
+    const { data, error } = await supabase
+      .from("tags")
+      .insert({
+        name: name.trim(),
+        community_id: communityId,
+      })
+      .select()
+      .single();
 
-    while (retryCount < maxRetries) {
-      const { data: maxIdData, error: maxIdError } = await supabase
-        .from("tags")
-        .select("id")
-        .order("id", { ascending: false })
-        .limit(1);
-
-      if (maxIdError) {
-        console.error("Error getting max tag ID:", maxIdError);
-        throw new Error("タグID取得に失敗しました");
-      }
-
-      // Generate new ID (max + 1 + retryCount to handle race conditions, or 1 if no tags exist)
-      newId = maxIdData && maxIdData.length > 0 ? maxIdData[0].id + 1 + retryCount : 1;
-
-      const { data, error } = await supabase
-        .from("tags")
-        .insert({
-          id: newId,
-          name: name.trim(),
-          community_id: communityId,
-        })
-        .select()
-        .single();
-
-      if (!error) {
-        return data; // Success
-      }
-
+    if (error) {
       // Handle specific errors
-      if (error.code === '42501') {
+      if (error.code === "42501") {
         throw new Error("タグ作成の権限がありません。ログインしてください。");
-      } else if (error.code === '23505' && error.message.includes('id')) {
-        // ID conflict, retry with higher ID
-        retryCount++;
-        if (retryCount >= maxRetries) {
-          throw new Error("ID生成でエラーが発生しました。もう一度お試しください。");
-        }
-        continue;
-      } else if (error.code === '23505') {
+      } else if (error.code === "23505") {
         throw new Error("このタグ名は既に存在します。");
-      } else if (error.code === '23502') {
-        throw new Error("タグ作成でデータベースエラーが発生しました。");
+      } else if (error.code === "23502") {
+        throw new Error("必須フィールドが不足しています。");
       }
 
       console.error("Tag creation error:", error);
       throw new Error(`タグ作成に失敗しました: ${error.message}`);
     }
 
-    throw new Error("タグ作成に失敗しました。もう一度お試しください。");
+    return data;
   } catch (err) {
     console.error("Unexpected error in createTag:", err);
     throw err;
@@ -299,7 +268,11 @@ const CreatePost = () => {
     }
 
     // Check for duplicate tag name in the same community
-    if (tagsData?.some(tag => tag.name.toLowerCase() === newTagName.trim().toLowerCase())) {
+    if (
+      tagsData?.some(
+        (tag) => tag.name.toLowerCase() === newTagName.trim().toLowerCase(),
+      )
+    ) {
       toast.error("このタグ名は既に存在します");
       return;
     }
@@ -311,9 +284,12 @@ const CreatePost = () => {
       setValue("tag_id", newTag.id);
       setNewTagName("");
       toast.success("新しいタグを作成しました");
-    } catch (error: any) {
-      // Show the specific error message from the createTag function
-      toast.error(error.message || "タグの作成に失敗しました");
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message || "タグの作成に失敗しました");
+      } else {
+        toast.error("タグの作成に失敗しました");
+      }
       console.error("タグ作成エラー:", error);
     } finally {
       setIsCreatingTag(false);
@@ -608,7 +584,9 @@ const CreatePost = () => {
                     <div className="flex gap-2">
                       <Input
                         type="text"
-                        placeholder={user ? "新しいカテゴリ名" : "ログインしてタグを作成"}
+                        placeholder={
+                          user ? "新しいカテゴリ名" : "ログインしてタグを作成"
+                        }
                         value={newTagName}
                         onChange={(e) => setNewTagName(e.target.value)}
                         className="flex-1"

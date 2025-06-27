@@ -1,0 +1,21 @@
+{
+  "claude.mcpEnabled": true,
+  "claude.mcpConfigFile": ".mcp.json",
+  "deno.enable": true,
+  "deno.lint": true,
+  "deno.unstable": true,
+  "deno.suggest.imports.hosts": {
+    "https://deno.land": true,
+    "https://cdn.nest.land": true,
+    "https://crux.land": true,
+    "https://esm.sh": true,
+    "jsr:": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "deno.path": "/opt/homebrew/bin/deno"
+}

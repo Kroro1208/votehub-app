@@ -160,6 +160,13 @@ export const useHandleVotes = (
           console.error("説得タイム開始通知チェックに失敗:", error);
         }
       }
+
+      // 自動拡散チェックを実行（バックグラウンドで実行）
+      try {
+        await supabase.rpc("check_and_reward_auto_spread");
+      } catch (error) {
+        console.error("自動拡散チェックに失敗:", error);
+      }
     },
   });
 
