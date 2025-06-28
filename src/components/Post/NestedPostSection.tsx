@@ -28,17 +28,20 @@ const NestedPostSection = ({
       {data && (data.nest_level || 0) < 3 && (
         <div className="mt-8 border-t border-slate-200 pt-6">
           {/* 派生質問作成ボタン */}
-          {user && (data.nest_level || 0) < 3 && !showCreateNested && (
-            <div className="mb-6">
-              <Button
-                onClick={() => setShowCreateNested(true)}
-                className="flex items-center gap-2 bg-violet-500 hover:bg-violet-600 text-white"
-              >
-                <MessageSquarePlus size={18} />
-                派生質問を作成
-              </Button>
-            </div>
-          )}
+          {user &&
+            isPostOwner &&
+            (data.nest_level || 0) < 3 &&
+            !showCreateNested && (
+              <div className="mb-6">
+                <Button
+                  onClick={() => setShowCreateNested(true)}
+                  className="flex items-center gap-2 bg-violet-500 hover:bg-violet-600 text-white"
+                >
+                  <MessageSquarePlus size={18} />
+                  派生質問を作成
+                </Button>
+              </div>
+            )}
 
           {/* 派生質問の表示（タイトルと概要のみ） */}
           {nestedPosts && nestedPosts.length > 0 ? (
