@@ -7,6 +7,7 @@ import {
   AlertCircle,
   Loader2,
   Megaphone,
+  LogIn,
 } from "lucide-react";
 import { supabase } from "../../supabase-client";
 import { useAuth } from "../../hooks/useAuth";
@@ -63,7 +64,7 @@ const getComment = async (postId: number): Promise<Comment[]> => {
 
 const CommentSection = ({ postId }: PostProps) => {
   const [newCommentText, setNewCommentText] = useState<string>("");
-  const { user } = useAuth();
+  const { user, signInWithGoogle } = useAuth();
   const [isFocused, setIsFocused] = useState(false);
 
   const queryClient = useQueryClient();
@@ -269,8 +270,10 @@ const CommentSection = ({ postId }: PostProps) => {
           </p>
           <button
             type="button"
+            onClick={signInWithGoogle}
             className="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white text-sm transition-colors inline-flex items-center gap-2"
           >
+            <LogIn size={16} />
             <span>ログイン</span>
           </button>
         </div>

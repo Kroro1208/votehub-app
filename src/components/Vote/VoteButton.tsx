@@ -1,13 +1,14 @@
 import { TbArrowBigUpLine } from "react-icons/tb";
 import { TbArrowBigDownLine } from "react-icons/tb";
 
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, LogIn } from "lucide-react";
 import { Button } from "../ui/button";
 import { useHandleVotes } from "../../hooks/useHandleVotes";
 import VoteGageBar from "./VoteGageBar";
 import VoteConfirmModal from "./VoteConfirmModal";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { useAuth } from "../../hooks/useAuth";
 
 interface PostProps {
   postId: number;
@@ -18,6 +19,7 @@ interface PostProps {
 const VoteButton = ({ postId, voteDeadline, postTitle }: PostProps) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingVote, setPendingVote] = useState<number | null>(null);
+  const { user, signInWithGoogle } = useAuth();
 
   const {
     mutate,
@@ -42,8 +44,23 @@ const VoteButton = ({ postId, voteDeadline, postTitle }: PostProps) => {
 
   const votingExpired = isVotingExpired();
 
+  // ログインハンドラー
+  const handleLogin = () => {
+    try {
+      signInWithGoogle();
+    } catch {
+      toast.error("ログインに失敗しました");
+    }
+  };
+
   // 投票ハンドラー
   const handleVoteClick = (voteValue: number) => {
+    // ユーザーがログインしていない場合
+    if (!user) {
+      toast.error("投票するにはログインが必要です");
+      return;
+    }
+
     // 説得タイム中で既存投票と異なる場合は確認モーダルを表示
     if (
       persuasionTime &&
@@ -94,9 +111,25 @@ const VoteButton = ({ postId, voteDeadline, postTitle }: PostProps) => {
         </div>
       )}
 
+      {/* ログインしていない場合のログインボタン表示 */}
+      {!user && !votingExpired && (
+        <div className="w-full text-center py-6 px-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-blue-700 mb-3 font-medium">
+            投票するにはログインが必要です
+          </p>
+          <Button
+            onClick={handleLogin}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 mx-auto"
+          >
+            <LogIn size={18} />
+            <span>ログイン</span>
+          </Button>
+        </div>
+      )}
+
       <div className="flex items-center gap-3">
-        {/* 投票期限内の場合の投票ボタン */}
-        {!votingExpired && (
+        {/* 投票期限内かつログイン済みの場合の投票ボタン */}
+        {!votingExpired && user && (
           <>
             {/* 賛成ボタン */}
             <Button
