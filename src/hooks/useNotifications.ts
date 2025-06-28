@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "../supabase-client";
 import { NotificationType } from "../types/notification";
 import { useAuth } from "./useAuth";
@@ -6,6 +7,37 @@ import { useAuth } from "./useAuth";
 export const useNotifications = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // リアルタイム通知更新
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel("notifications")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          // 通知データが変更されたらキャッシュを無効化
+          queryClient.invalidateQueries({
+            queryKey: ["notifications", user.id],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["unread-notifications-count", user.id],
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, queryClient]);
 
   // 通知一覧を取得
   const {
@@ -90,6 +122,16 @@ export const useNotifications = () => {
     return data;
   };
 
+  // 手動でキャッシュを更新する
+  const refetch = () => {
+    if (!user?.id) return;
+
+    queryClient.invalidateQueries({ queryKey: ["notifications", user.id] });
+    queryClient.invalidateQueries({
+      queryKey: ["unread-notifications-count", user.id],
+    });
+  };
+
   return {
     notifications: notifications || [],
     unreadCount: unreadCount || 0,
@@ -97,5 +139,6 @@ export const useNotifications = () => {
     error,
     markAsRead,
     markAllAsRead,
+    refetch,
   };
 };

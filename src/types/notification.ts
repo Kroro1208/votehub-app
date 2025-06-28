@@ -4,7 +4,9 @@ export interface NotificationType {
   type:
     | "nested_post_created"
     | "persuasion_time_started"
-    | "vote_deadline_ended";
+    | "vote_deadline_ended"
+    | "persuasion_comment_posted"
+    | "vote_received";
   title: string;
   message: string;
   post_id: number | null;
