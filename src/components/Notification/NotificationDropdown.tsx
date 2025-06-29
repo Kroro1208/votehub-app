@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { VscBell, VscBellDot } from "react-icons/vsc";
+import { MessageSquare, Reply, Clock, TrendingUp } from "lucide-react";
 import { useNotifications } from "../../hooks/useNotifications";
 import { Button } from "../ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import type { NotificationType } from "../../types/notification";
 
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
   const { notifications, unreadCount, markAsRead, markAllAsRead } =
     useNotifications();
 
@@ -18,14 +21,32 @@ export default function NotificationDropdown() {
     await markAsRead(notificationId);
     setIsOpen(false);
 
-    // 投稿ページにリダイレクト（必要に応じて実装）
+    // 投稿ページにリダイレクト
     if (postId) {
-      // TODO: navigate to post detail page
+      navigate(`/post/${postId}`);
     }
   };
 
   const handleMarkAllAsRead = async () => {
     await markAllAsRead();
+  };
+
+  const getNotificationIcon = (type: NotificationType["type"]) => {
+    switch (type) {
+      case "comment_posted":
+        return <MessageSquare className="w-4 h-4 text-blue-400" />;
+      case "comment_reply_posted":
+        return <Reply className="w-4 h-4 text-green-400" />;
+      case "persuasion_comment_posted":
+        return <MessageSquare className="w-4 h-4 text-orange-400" />;
+      case "nested_post_created":
+        return <TrendingUp className="w-4 h-4 text-purple-400" />;
+      case "vote_deadline_ended":
+      case "persuasion_time_started":
+        return <Clock className="w-4 h-4 text-yellow-400" />;
+      default:
+        return <VscBell className="w-4 h-4 text-gray-400" />;
+    }
   };
 
   return (
@@ -101,15 +122,21 @@ export default function NotificationDropdown() {
                     }
                   >
                     <div className="flex items-start space-x-3">
-                      {/* 未読インジケーター */}
-                      {!notification.read && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
-                      )}
+                      {/* 通知タイプアイコン */}
+                      <div className="mt-1 flex-shrink-0">
+                        {getNotificationIcon(notification.type)}
+                      </div>
 
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-medium text-white mb-1">
-                          {notification.title}
-                        </h4>
+                        {/* 未読インジケーター */}
+                        <div className="flex items-center gap-2 mb-1">
+                          {!notification.read && (
+                            <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                          )}
+                          <h4 className="text-sm font-medium text-white">
+                            {notification.title}
+                          </h4>
+                        </div>
                         <p className="text-sm text-gray-300 line-clamp-2">
                           {notification.message}
                         </p>

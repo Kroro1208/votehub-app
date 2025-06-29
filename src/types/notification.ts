@@ -6,7 +6,9 @@ export interface NotificationType {
     | "persuasion_time_started"
     | "vote_deadline_ended"
     | "persuasion_comment_posted"
-    | "vote_received";
+    | "vote_received"
+    | "comment_posted"
+    | "comment_reply_posted";
   title: string;
   message: string;
   post_id: number | null;

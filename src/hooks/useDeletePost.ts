@@ -160,7 +160,7 @@ export const useDeletePost = () => {
 
   return useMutation({
     mutationFn: deletePost,
-    onSuccess: (result, variables) => {
+    onSuccess: (_, variables) => {
       setTimeout(() => {
         // 投稿が削除されたらキャッシュからすぐ削除
         queryClient.setQueriesData(

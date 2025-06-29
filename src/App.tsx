@@ -10,6 +10,7 @@ import ProfilePage from "./pages/ProfilePage";
 import PopularVotesPage from "./pages/PopularVotesPage";
 import VoteResultsPage from "./pages/VoteResultsPage";
 import BookmarksPage from "./pages/BookmarksPage";
+import NotificationsPage from "./pages/NotificationsPage";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/space/:id" element={<CommunityDetailPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
         </Routes>
       </div>
     </div>
