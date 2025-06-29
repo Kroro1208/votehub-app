@@ -1,11 +1,17 @@
-import { useParams } from "react-router";
+import { useParams, Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../supabase-client";
 import ErrorMessage from "../components/ErrorMessage";
 import Loading from "../components/Loading";
 import type { PostType } from "../components/Post/PostList";
-import { Users, Calendar, TrendingUp, MessageCircle } from "lucide-react";
+import {
+  Users,
+  Calendar,
+  TrendingUp,
+  MessageCircle,
+  Settings,
+} from "lucide-react";
 import PostItem from "../components/Post/PostItem";
 
 interface UserStats {
@@ -149,7 +155,18 @@ const ProfilePage = () => {
               </h1>
 
               {profileUser?.email && (
-                <p className="text-gray-600 mb-4">{profileUser.email}</p>
+                <p className="text-gray-600 mb-2">{profileUser.email}</p>
+              )}
+
+              {/* Settings Link for Own Profile */}
+              {isOwnProfile && (
+                <Link
+                  to="/settings"
+                  className="inline-flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
+                >
+                  <Settings size={14} />
+                  <span>プロフィールを編集</span>
+                </Link>
               )}
 
               {/* 統計情報 */}

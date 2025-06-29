@@ -11,6 +11,7 @@ import PopularVotesPage from "./pages/PopularVotesPage";
 import VoteResultsPage from "./pages/VoteResultsPage";
 import BookmarksPage from "./pages/BookmarksPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import SettingsPage from "./pages/SettingsPage";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </div>
     </div>
