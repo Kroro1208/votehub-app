@@ -13,7 +13,7 @@ DROP CONSTRAINT IF EXISTS notifications_type_check;
 -- 既存のすべての通知タイプを含む制約を作成
 ALTER TABLE notifications
 ADD CONSTRAINT notifications_type_check 
-CHECK (type IN ('nested_post_created', 'persuasion_time_started', 'vote_deadline_ended', 'persuasion_comment_posted', 'vote_received'));
+CHECK (type IN ('nested_post_created', 'persuasion_time_started', 'vote_deadline_ended', 'persuasion_comment_posted', 'vote_received', 'comment_posted', 'comment_reply_posted'));
 
 -- 説得コメント投稿時の通知作成関数
 CREATE OR REPLACE FUNCTION notify_persuasion_comment_posted()

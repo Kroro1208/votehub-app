@@ -27,11 +27,12 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 投稿に参加したユーザーIDのリストを取得する関数
+DROP FUNCTION IF EXISTS get_post_voters(INTEGER);
 CREATE OR REPLACE FUNCTION get_post_voters(p_post_id INTEGER)
-RETURNS TABLE(user_id TEXT) AS $$
+RETURNS TABLE(user_id UUID) AS $$
 BEGIN
   RETURN QUERY
-  SELECT DISTINCT votes.user_id
+  SELECT DISTINCT votes.user_id::UUID
   FROM votes
   WHERE votes.post_id = p_post_id;
 END;

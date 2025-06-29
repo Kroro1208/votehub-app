@@ -32,7 +32,6 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "react-toastify";
 import { FaArrowAltCircleDown, FaArrowAltCircleUp } from "react-icons/fa";
-import { notifyNestedPostTargets } from "../../utils/notifications";
 
 type CreateNestedPostFormData = z.infer<typeof createNestedPostSchema>;
 
@@ -165,25 +164,12 @@ const CreateNestedPost = ({
         .single();
 
       if (insertError) {
-        throw new Error(`投稿の作成に失敗しました: ${insertError.message}`);
+        throw new Error(
+          `投稿の作成に失敗しました:${insertedPost}: ${insertError.message}`,
+        );
       }
 
-      // 派生質問の対象者に通知を送信
-      if (data.target_vote_choice && insertedPost) {
-        try {
-          await notifyNestedPostTargets(
-            data.parent_post_id,
-            insertedPost.id,
-            data.title,
-            data.target_vote_choice,
-            user.id,
-          );
-        } catch (notificationError) {
-          console.error("通知送信エラー:", notificationError);
-          // 通知送信に失敗しても投稿作成は成功とする
-          toast.warn("投稿は作成されましたが、通知の送信に失敗しました");
-        }
-      }
+      // 通知は database trigger (notify_nested_post_created) が自動的に処理
 
       toast.success("派生投稿を作成しました！");
       reset();

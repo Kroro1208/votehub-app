@@ -151,8 +151,6 @@ const PostDetail = ({ postId }: Props) => {
     queryFn: () => fetchPostById(postId),
   });
 
-  console.log(data);
-
   // ネスト投稿を取得
   const { data: nestedPosts, refetch: refetchNestedPosts } = useQuery<
     PostType[],
@@ -237,26 +235,59 @@ const PostDetail = ({ postId }: Props) => {
   useEffect(() => {
     if (!data?.vote_deadline) return;
 
+    // 投稿が作成されてから少なくとも30秒経過してからチェック開始
+    // これにより、新しく作成された投稿（特にネスト投稿）の誤った期限終了通知を防ぐ
+    const postCreatedAt = new Date(data.created_at);
+    const now = new Date();
+    const timeSinceCreation = now.getTime() - postCreatedAt.getTime();
+    const minWaitTime = 30000; // 30秒
+
+    let isComponentMounted = true; // コンポーネントがマウントされているかのフラグ
+
     const checkDeadline = async () => {
+      // コンポーネントがアンマウントされていたら処理を中止
+      if (!isComponentMounted) return;
+      
       try {
-        await checkAndNotifyVoteDeadlineEnded(
+        const result = await checkAndNotifyVoteDeadlineEnded(
           postId,
           data.title,
           data.vote_deadline,
+          data.created_at,
         );
+        
+        // 通知が送信された場合は、それ以上のチェックを停止
+        if (result && isComponentMounted) {
+          console.log(`投票期限終了通知を送信しました: postId=${postId}`);
+          // インターバルをクリアして重複チェックを防ぐ
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
+        }
       } catch (error) {
         console.error("投票期限終了チェックに失敗:", error);
       }
     };
 
-    // 初回実行
-    checkDeadline();
+    // インターバルの参照を保持
+    const intervalRef = { current: null as NodeJS.Timeout | null };
 
-    // 30秒ごとにチェック
-    const interval = setInterval(checkDeadline, 30000);
+    if (timeSinceCreation >= minWaitTime) {
+      // 十分時間が経過している場合は即座にチェック
+      checkDeadline();
+    }
 
-    return () => clearInterval(interval);
-  }, [postId, data?.title, data?.vote_deadline]);
+    // 2分ごとにチェック（頻度を下げて負荷とrace conditionを軽減）
+    intervalRef.current = setInterval(checkDeadline, 120000); // 2分間隔
+
+    return () => {
+      isComponentMounted = false; // クリーンアップ時にフラグを設定
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [postId, data?.title, data?.vote_deadline, data?.created_at]);
 
   // モーダルを閉じる
   const handleCloseModal = () => {
@@ -292,15 +323,7 @@ const PostDetail = ({ postId }: Props) => {
     setShowDeleteConfirm(false);
   };
 
-  const userId = data?.user_id;
-  const isOwnProfile = !userId || userId === user?.id;
-  const profileUser = isOwnProfile ? user : null;
-  const displayName =
-    profileUser?.user_metadata?.full_name ||
-    profileUser?.user_metadata?.user_name ||
-    profileUser?.email ||
-    "ユーザー";
-  const avatarUrl = profileUser?.user_metadata?.avatar_url;
+  const avatarUrl = data?.avatar_url;
 
   if (isPending) return <div>Loading...</div>;
   if (error) return <div>{error.message}</div>;
@@ -308,19 +331,22 @@ const PostDetail = ({ postId }: Props) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        {isPostOwner && data?.avatar_url && (
-          <Link to={`/profile/${userId}`}>
-            <img
-              size={15}
-              src={avatarUrl}
-              alt={displayName}
-              className="w-24 h-24 rounded-full object-cover border-4 border-gray-100"
-            />
-          </Link>
-        )}
-        <h2 className="text-6xl font-bold bg-gradient-to-r from-green-600 to-green-200 bg-clip-text text-transparent">
-          {data.title}
-        </h2>
+        <div className="flex items-center space-x-4">
+          {data?.avatar_url && (
+            <Link to={`/profile/${data.user_id}`}>
+              <img
+                height={48}
+                width={48}
+                src={avatarUrl}
+                alt="投稿者のアバター"
+                className="w-12 h-12 rounded-full object-cover border-2 border-gray-200 hover:border-green-400 transition-colors cursor-pointer"
+              />
+            </Link>
+          )}
+          <h2 className="text-6xl font-bold bg-gradient-to-r from-green-600 to-green-200 bg-clip-text text-transparent">
+            {data.title}
+          </h2>
+        </div>
 
         <div className="flex items-center space-x-3">
           {/* 削除ボタン（投稿者のみ表示） */}

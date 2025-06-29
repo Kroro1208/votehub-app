@@ -37,7 +37,7 @@ export const notifyNestedPostTargets = async (
       .from("votes")
       .select("user_id")
       .eq("post_id", parentPostId)
-      .eq("vote_choice", targetVoteChoice);
+      .eq("vote", targetVoteChoice);
 
     if (votersError) {
       throw new Error(`投票者の取得に失敗しました: ${votersError.message}`);
@@ -197,6 +197,9 @@ export const checkAndNotifyPersuasionTimeStarted = async (
   }
 };
 
+// 進行中の通知チェックを追跡するためのマップ
+const pendingDeadlineChecks = new Map<number, Promise<boolean>>();
+
 /**
  * 投票期限終了の検出と通知送信
  * 定期的に呼び出して期限終了を検出し通知を送信
@@ -205,41 +208,75 @@ export const checkAndNotifyVoteDeadlineEnded = async (
   postId: number,
   postTitle: string,
   voteDeadline: string | null,
+  postCreatedAt?: string,
 ) => {
-  try {
-    if (!voteDeadline) {
-      return false; // 期限が設定されていない
-    }
-
-    const now = new Date();
-    const deadline = new Date(voteDeadline);
-
-    // まだ期限前の場合
-    if (now < deadline) {
-      return false;
-    }
-
-    // データベース関数を使用して通知未送信かチェック
-    const { data: notSent, error: checkError } = await supabase.rpc(
-      "check_deadline_notification_not_sent",
-      { p_post_id: postId },
-    );
-
-    if (checkError) {
-      console.error("通知送信状況チェックに失敗:", checkError);
-      return false;
-    }
-
-    // 既に通知済みの場合は送信しない
-    if (!notSent) {
-      return false;
-    }
-
-    // 投票期限終了通知を送信
-    await notifyVoteDeadlineEnded(postId, postTitle);
-    return true; // 通知送信成功
-  } catch (error) {
-    console.error("投票期限終了検出・通知に失敗:", error);
-    return false;
+  // 既に同じpostIdで処理中の場合は既存のPromiseを返す
+  if (pendingDeadlineChecks.has(postId)) {
+    console.log(`既に処理中のため待機: postId=${postId}`);
+    return pendingDeadlineChecks.get(postId)!;
   }
+
+  const checkPromise = (async (): Promise<boolean> => {
+    try {
+      if (!voteDeadline) {
+        return false; // 期限が設定されていない
+      }
+
+      const now = new Date();
+      const deadline = new Date(voteDeadline);
+
+      // まだ期限前の場合
+      if (now < deadline) {
+        return false;
+      }
+
+      // 投稿作成時刻をチェック - 新しく作成された投稿（特にネスト投稿）の場合は通知を控える
+      if (postCreatedAt) {
+        const createdAt = new Date(postCreatedAt);
+        const timeSinceCreation = now.getTime() - createdAt.getTime();
+        const minWaitTime = 60000; // 1分
+
+        if (timeSinceCreation < minWaitTime) {
+          console.log(
+            `投稿が新しすぎるため期限終了通知をスキップ: postId=${postId}, 作成からの経過時間=${Math.floor(timeSinceCreation / 1000)}秒`,
+          );
+          return false;
+        }
+      }
+
+      // データベース関数を使用して通知未送信かチェック
+      const { data: notSent, error: checkError } = await supabase.rpc(
+        "check_deadline_notification_not_sent",
+        { p_post_id: postId },
+      );
+
+      if (checkError) {
+        console.error("通知送信状況チェックに失敗:", checkError);
+        return false;
+      }
+
+      // 既に通知済みの場合は送信しない
+      if (!notSent) {
+        console.log(`既に通知送信済み: postId=${postId}`);
+        return false;
+      }
+
+      // 投票期限終了通知を送信
+      console.log(`投票期限終了通知を送信開始: postId=${postId}`);
+      await notifyVoteDeadlineEnded(postId, postTitle);
+      console.log(`投票期限終了通知を送信完了: postId=${postId}`);
+      return true; // 通知送信成功
+    } catch (error) {
+      console.error("投票期限終了検出・通知に失敗:", error);
+      return false;
+    } finally {
+      // 処理完了後にマップから削除
+      pendingDeadlineChecks.delete(postId);
+    }
+  })();
+
+  // 進行中の処理としてマップに追加
+  pendingDeadlineChecks.set(postId, checkPromise);
+  
+  return checkPromise;
 };

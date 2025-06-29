@@ -52,9 +52,16 @@ export const createNestedPostSchema = z.object({
       required_error: "投票期限は必須です",
       invalid_type_error: "投票期限は有効な日時を選択してください",
     })
-    .refine((date) => date > new Date(), {
-      message: "投票期限は未来の日付を選択してください",
-    }),
+    .refine(
+      (date) => {
+        const now = new Date();
+        const minDeadline = new Date(now.getTime() + 5 * 60 * 1000); // 5分後
+        return date > minDeadline;
+      },
+      {
+        message: "投票期限は現在時刻から5分以上先を選択してください",
+      },
+    ),
   parent_post_id: z.number().int(),
   target_vote_choice: z.union([z.literal(1), z.literal(-1)], {
     errorMap: () => ({

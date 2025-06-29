@@ -31,6 +31,10 @@ CREATE POLICY "Users can view their own notifications" ON notifications
 CREATE POLICY "Users can update their own notifications" ON notifications
     FOR UPDATE USING (auth.uid() = user_id);
 
+-- Allow authenticated users to insert notifications (needed for system functions)
+CREATE POLICY "Allow authenticated notification creation" ON notifications
+    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
 -- 通知作成用の関数
 CREATE OR REPLACE FUNCTION create_notification(
     p_user_id UUID,
@@ -67,7 +71,7 @@ BEGIN
         
         IF parent_post IS NOT NULL THEN
             -- 通知メッセージの作成
-            notification_title := '派生質問が作成されました';
+            notification_title := '参加した投票に派生質問が投稿されました';
             
             IF NEW.target_vote_choice = 1 THEN
                 notification_message := format('「%s」に賛成したあなた宛に派生質問「%s」が作成されました。', 
@@ -102,6 +106,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- トリガーの作成
+DROP TRIGGER IF EXISTS trigger_notify_nested_post_created ON posts;
 CREATE TRIGGER trigger_notify_nested_post_created
     AFTER INSERT ON posts
     FOR EACH ROW
