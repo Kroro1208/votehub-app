@@ -9,6 +9,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useDeletePost } from "../../hooks/useDeletePost";
 import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router";
+import { Link } from "react-router";
 
 import CommentSection from "../Comment/CommentSection";
 import PostContentDisplay from "./PostContentDisplay";
@@ -150,6 +151,8 @@ const PostDetail = ({ postId }: Props) => {
     queryFn: () => fetchPostById(postId),
   });
 
+  console.log(data);
+
   // ネスト投稿を取得
   const { data: nestedPosts, refetch: refetchNestedPosts } = useQuery<
     PostType[],
@@ -289,12 +292,32 @@ const PostDetail = ({ postId }: Props) => {
     setShowDeleteConfirm(false);
   };
 
+  const userId = data?.user_id;
+  const isOwnProfile = !userId || userId === user?.id;
+  const profileUser = isOwnProfile ? user : null;
+  const displayName =
+    profileUser?.user_metadata?.full_name ||
+    profileUser?.user_metadata?.user_name ||
+    profileUser?.email ||
+    "ユーザー";
+  const avatarUrl = profileUser?.user_metadata?.avatar_url;
+
   if (isPending) return <div>Loading...</div>;
   if (error) return <div>{error.message}</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
+        {isPostOwner && data?.avatar_url && (
+          <Link to={`/profile/${userId}`}>
+            <img
+              size={15}
+              src={avatarUrl}
+              alt={displayName}
+              className="w-24 h-24 rounded-full object-cover border-4 border-gray-100"
+            />
+          </Link>
+        )}
         <h2 className="text-6xl font-bold bg-gradient-to-r from-green-600 to-green-200 bg-clip-text text-transparent">
           {data.title}
         </h2>
