@@ -2,10 +2,13 @@ import CommunityList from "../components/Community/CommunityList";
 import Sidebar from "../components/SideBar";
 import { Users, Plus } from "lucide-react";
 import { Link } from "react-router";
+import { useLanguage } from "../contexts/LanguageContext";
 
 const CommunitiesPage = () => {
+  const { t } = useLanguage();
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 transition-colors">
       <Sidebar />
       <div className="ml-64 px-4 py-8">
         <div className="max-w-6xl mx-auto">
@@ -16,8 +19,8 @@ const CommunitiesPage = () => {
                 <div className="w-10 h-10 bg-gradient-to-r from-violet-500 to-purple-500 rounded-lg flex items-center justify-center">
                   <Users size={24} className="text-white" />
                 </div>
-                <h1 className="text-3xl font-bold text-slate-900">
-                  スペース一覧
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-dark-text">
+                  {t("space.title")}
                 </h1>
               </div>
 
@@ -27,12 +30,12 @@ const CommunitiesPage = () => {
                 className="inline-flex items-center space-x-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-violet-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 <Plus size={20} />
-                <span className="font-medium">新しいスペース作成</span>
+                <span className="font-medium">{t("space.create")}</span>
               </Link>
             </div>
 
-            <p className="text-slate-600 max-w-3xl">
-              興味のあるトピックで仲間と繋がり、意見を交換し、一緒に投票を楽しみましょう
+            <p className="text-slate-600 dark:text-dark-muted max-w-3xl">
+              {t("space.description")}
             </p>
           </div>
 

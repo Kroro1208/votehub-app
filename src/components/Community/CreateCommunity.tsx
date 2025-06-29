@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { FaPeopleLine } from "react-icons/fa6";
 import { IoPricetagsOutline } from "react-icons/io5";
 import { TbFileDescription } from "react-icons/tb";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 const communitySchema = z.object({
   name: z.string().min(1, "スペース名は必須です"),
@@ -35,6 +36,7 @@ const createCommunity = async (community: CommunityFormData) => {
 const CreateCommunity = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
 
   const {
     register,
@@ -73,36 +75,36 @@ const CreateCommunity = () => {
           <div className="mx-auto h-16 w-16 bg-gradient-to-r from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
             <FaPeopleLine size={40} className="text-white" />
           </div>
-          <h2 className="text-3xl font-bold text-slate-900 mb-2">
-            新しいスペースを作成
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-gray-400 mb-2">
+            {t("create.space.title")}
           </h2>
-          <p className="text-slate-600">
+          <p className="text-slate-600 dark:text-dark-muted">
             コミュニティを作成して、仲間とつながりましょう
           </p>
         </div>
 
         {/* フォーム */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <div className="bg-white dark:bg-dark-surface rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-slate-700">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* スペース名 */}
             <div className="space-y-2">
               <Label
                 htmlFor="name"
-                className="text-sm font-semibold text-gray-700 flex items-center"
+                className="text-sm font-semibold text-gray-700 dark:text-dark-text flex items-center"
               >
                 <IoPricetagsOutline size={18} />
-                スペース名
+                {t("create.space.name")}
               </Label>
               <Input
                 type="text"
                 id="name"
                 {...register("name")}
-                className={`w-full px-4 py-3 text-black dark:text-white rounded-xl border-2 transition-all duration-200 bg-gray-50 focus:bg-white ${
+                className={`w-full px-4 py-3 text-black dark:text-white rounded-xl border-2 transition-all duration-200 bg-gray-50 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-600 ${
                   errors.name
                     ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
-                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                    : "border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500/20"
                 } focus:ring-4 outline-none`}
-                placeholder="例：写真愛好家の集い"
+                placeholder={t("create.space.name.placeholder")}
               />
               {errors.name && (
                 <div className="flex items-center mt-2">
@@ -126,21 +128,21 @@ const CreateCommunity = () => {
             <div className="space-y-2">
               <Label
                 htmlFor="description"
-                className="text-sm font-semibold text-gray-700 flex items-center"
+                className="text-sm font-semibold text-gray-700 dark:text-dark-text flex items-center"
               >
                 <TbFileDescription size={20} />
-                スペースの説明
+                {t("create.space.description")}
               </Label>
               <Textarea
                 id="description"
                 {...register("description")}
                 rows={5}
-                className={`w-full px-4 py-3 text-black dark:text-white rounded-xl border-2 transition-all duration-200 bg-gray-50 focus:bg-white resize-none ${
+                className={`w-full px-4 py-3 text-black dark:text-white rounded-xl border-2 transition-all duration-200 bg-gray-50 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-600 resize-none ${
                   errors.description
                     ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
-                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                    : "border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500/20"
                 } focus:ring-4 outline-none`}
-                placeholder="このスペースの目的や内容について詳しく説明してください..."
+                placeholder={t("create.space.description.placeholder")}
               />
               {errors.description && (
                 <div className="flex items-center mt-2">
@@ -195,7 +197,7 @@ const CreateCommunity = () => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       />
                     </svg>
-                    作成中...
+                    {t("create.space.submitting")}
                   </div>
                 ) : (
                   <div className="flex items-center justify-center">
@@ -212,7 +214,7 @@ const CreateCommunity = () => {
                         d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                       />
                     </svg>
-                    スペースを作成
+                    {t("create.space.submit")}
                   </div>
                 )}
               </Button>

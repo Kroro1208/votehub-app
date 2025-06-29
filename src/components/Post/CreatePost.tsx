@@ -35,6 +35,7 @@ import DatePicker from "react-datepicker";
 import { z } from "zod";
 import { toast } from "react-toastify";
 import { createPostSchema } from "../../utils/schema";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 interface PostInput {
   title: string;
@@ -194,6 +195,7 @@ const CreatePost = () => {
 
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const {
     register,
@@ -262,13 +264,13 @@ const CreatePost = () => {
     onError: (error) => {
       setIsSubmitting(false);
       console.error(error.message);
-      toast.error("投稿の作成に失敗しました");
+      toast.error(t("create.post.error.create.failed"));
     },
   });
 
   const onSubmit = (data: CreatePostFormData) => {
     if (!user) {
-      toast.error("ログインが必要です");
+      toast.error(t("create.post.error.login.required"));
       return;
     }
     const imageFile = data.image[0];
@@ -294,12 +296,12 @@ const CreatePost = () => {
   // 新しいタグを作成
   const handleCreateTag = async () => {
     if (!user) {
-      toast.error("タグを作成するにはログインが必要です");
+      toast.error(t("create.post.error.tag.login.required"));
       return;
     }
 
     if (!newTagName.trim() || !watchCommunityId) {
-      toast.error("タグ名とスペースを選択してください");
+      toast.error(t("create.post.error.tag.name.space.required"));
       return;
     }
 
@@ -309,7 +311,7 @@ const CreatePost = () => {
         (tag) => tag.name.toLowerCase() === newTagName.trim().toLowerCase(),
       )
     ) {
-      toast.error("このタグ名は既に存在します");
+      toast.error(t("create.post.error.tag.duplicate"));
       return;
     }
 
@@ -319,12 +321,14 @@ const CreatePost = () => {
       await refetchTags();
       setValue("tag_id", newTag.id);
       setNewTagName("");
-      toast.success("新しいタグを作成しました");
+      toast.success(t("create.post.success.tag.created"));
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "タグの作成に失敗しました";
-      toast.error(errorMessage || "タグの作成に失敗しました");
-      console.error("タグ作成エラー:", error);
+        error instanceof Error
+          ? error.message
+          : t("create.post.error.tag.create.failed");
+      toast.error(errorMessage || t("create.post.error.tag.create.failed"));
+      console.error("Tag creation error:", error);
     } finally {
       setIsCreatingTag(false);
     }
@@ -333,7 +337,7 @@ const CreatePost = () => {
   const watchedContent = watch("content");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-400 to-gray-200 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-400 to-gray-200 dark:from-slate-800 dark:to-gray-900 py-12 px-4 sm:px-6 lg:px-8 transition-colors">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-4 mt-10">
           <div className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -342,11 +346,11 @@ const CreatePost = () => {
         </div>
         {/* Header Section */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            新しい投稿を作成
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-400 mb-2">
+            {t("create.post.title")}
           </h2>
           <p className="text-gray-600 dark:text-gray-300 text-lg">
-            あなたの意見に対しての投票を募りましょう
+            {t("create.post.subtitle")}
           </p>
         </div>
 
@@ -362,13 +366,13 @@ const CreatePost = () => {
                   <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
                     <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
-                  タイトル
+                  {t("create.post.question")}
                 </Label>
                 <Input
                   id="title"
                   type="text"
                   {...register("title")}
-                  placeholder="魅力的なタイトルを入力してください..."
+                  placeholder={t("create.post.question.placeholder")}
                   className="h-14 text-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all duration-300 rounded-xl"
                 />
                 {errors.title && (
@@ -387,7 +391,7 @@ const CreatePost = () => {
                   <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg group-hover:bg-green-200 dark:group-hover:bg-green-800/50 transition-colors">
                     <MessageSquare className="h-5 w-5 text-green-600 dark:text-green-400" />
                   </div>
-                  内容
+                  {t("create.post.content.title")}
                 </Label>
                 <div className="relative border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-xl focus-within:border-green-500 dark:focus-within:border-green-400 focus-within:ring-2 focus-within:ring-green-200 dark:focus-within:ring-green-800 transition-all duration-300">
                   <div className="p-4 space-y-4">
@@ -395,22 +399,23 @@ const CreatePost = () => {
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                         <Label className="text-sm font-semibold text-green-700 dark:text-green-300">
-                          賛成意見
+                          {t("create.post.content.pro")}
                         </Label>
                       </div>
                       <Input
-                        placeholder="賛成意見の内容を書いてください"
+                        placeholder={t("create.post.content.pro.placeholder")}
                         className="text-sm border-green-200 dark:border-green-700 focus:border-green-400 dark:focus:border-green-500"
                         onChange={(e) => {
                           const currentContent = watch("content") || "";
                           const lines = currentContent.split("\n");
+                          const proPrefix = t("create.post.content.pro.prefix");
                           const proIndex = lines.findIndex((line) =>
-                            line.startsWith("賛成:"),
+                            line.startsWith(proPrefix),
                           );
                           if (proIndex !== -1) {
-                            lines[proIndex] = `賛成: ${e.target.value}`;
+                            lines[proIndex] = `${proPrefix} ${e.target.value}`;
                           } else {
-                            lines.unshift(`賛成: ${e.target.value}`);
+                            lines.unshift(`${proPrefix} ${e.target.value}`);
                           }
                           setValue("content", lines.join("\n"));
                         }}
@@ -420,32 +425,34 @@ const CreatePost = () => {
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                         <Label className="text-sm font-semibold text-red-700 dark:text-red-300">
-                          反対意見
+                          {t("create.post.content.con")}
                         </Label>
                       </div>
                       <Input
-                        placeholder="反対意見の内容を書いてください..."
+                        placeholder={t("create.post.content.con.placeholder")}
                         className="text-sm border-red-200 dark:border-red-700 focus:border-red-400 dark:focus:border-red-500"
                         onChange={(e) => {
                           const currentContent = watch("content") || "";
                           const lines = currentContent.split("\n");
+                          const conPrefix = t("create.post.content.con.prefix");
+                          const proPrefix = t("create.post.content.pro.prefix");
                           const conIndex = lines.findIndex((line) =>
-                            line.startsWith("反対:"),
+                            line.startsWith(conPrefix),
                           );
                           if (conIndex !== -1) {
-                            lines[conIndex] = `反対: ${e.target.value}`;
+                            lines[conIndex] = `${conPrefix} ${e.target.value}`;
                           } else {
                             const proIndex = lines.findIndex((line) =>
-                              line.startsWith("賛成:"),
+                              line.startsWith(proPrefix),
                             );
                             if (proIndex !== -1) {
                               lines.splice(
                                 proIndex + 1,
                                 0,
-                                `反対: ${e.target.value}`,
+                                `${conPrefix} ${e.target.value}`,
                               );
                             } else {
-                              lines.push(`反対: ${e.target.value}`);
+                              lines.push(`${conPrefix} ${e.target.value}`);
                             }
                           }
                           setValue("content", lines.join("\n"));
@@ -454,20 +461,24 @@ const CreatePost = () => {
                     </div>
                     <div>
                       <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
-                        詳細説明（任意）
+                        {t("create.post.content.detail")}
                       </Label>
                       <Textarea
                         rows={4}
-                        placeholder="追加の補足説明があれば記入してください..."
+                        placeholder={t(
+                          "create.post.content.detail.placeholder",
+                        )}
                         className="text-sm resize-none border-gray-200 dark:border-gray-600"
                         onChange={(e) => {
                           const currentContent = watch("content") || "";
                           const lines = currentContent.split("\n");
                           // 賛成・反対以外の行を削除
+                          const proPrefix = t("create.post.content.pro.prefix");
+                          const conPrefix = t("create.post.content.con.prefix");
                           const filteredLines = lines.filter(
                             (line) =>
-                              line.startsWith("賛成:") ||
-                              line.startsWith("反対:"),
+                              line.startsWith(proPrefix) ||
+                              line.startsWith(conPrefix),
                           );
                           if (e.target.value.trim()) {
                             filteredLines.push("", e.target.value);
@@ -482,10 +493,11 @@ const CreatePost = () => {
                 </div>
                 <div className="flex justify-between items-center mt-3">
                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                    両方の視点を示すことで、より建設的な議論が期待できます
+                    {t("create.post.content.note")}
                   </span>
                   <span className="text-sm text-gray-600 dark:text-gray-300 font-medium bg-gray-100 dark:bg-gray-600 px-3 py-1 rounded-full">
-                    {watchedContent.length} 文字
+                    {watchedContent.length}{" "}
+                    {t("create.post.content.characters")}
                   </span>
                 </div>
                 {errors.content && (
@@ -503,7 +515,7 @@ const CreatePost = () => {
                     <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-lg group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
                       <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
-                    スペース
+                    {t("create.post.space")}
                   </Label>
                   <Controller
                     name="community_id"
@@ -516,7 +528,9 @@ const CreatePost = () => {
                         value={field.value?.toString() || ""}
                       >
                         <SelectTrigger className="text-sm border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-300 rounded-xl flex items-center">
-                          <SelectValue placeholder="スペースを選択してください" />
+                          <SelectValue
+                            placeholder={t("create.post.space.placeholder")}
+                          />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
                           {communityData?.map((item) => (
@@ -548,7 +562,7 @@ const CreatePost = () => {
                     <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg group-hover:bg-indigo-200 dark:group-hover:bg-indigo-800/50 transition-colors">
                       <Clock className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                     </div>
-                    投票期限
+                    {t("create.post.deadline.title")}
                   </Label>
                   <div className="relative">
                     <Controller
@@ -561,7 +575,9 @@ const CreatePost = () => {
                           showTimeSelect
                           dateFormat="yyyy/MM/dd HH:mm"
                           timeIntervals={15}
-                          placeholderText="投票期限を選択してください"
+                          placeholderText={t(
+                            "create.post.deadline.placeholder",
+                          )}
                           className="h-10 min-w-72 flex items-center border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 transition-all duration-300 rounded-xl dir-rtl text-left pl-3"
                         />
                       )}
@@ -582,7 +598,7 @@ const CreatePost = () => {
                     htmlFor="tag_id"
                     className="text-lg font-semibold text-gray-700 dark:text-gray-200"
                   >
-                    カテゴリ（タグ）
+                    {t("create.post.tag.title")}
                   </Label>
 
                   {/* 既存タグの選択 */}
@@ -599,10 +615,14 @@ const CreatePost = () => {
                         }}
                       >
                         <SelectTrigger className="border-2 border-gray-200 dark:border-gray-600">
-                          <SelectValue placeholder="カテゴリを選択してください" />
+                          <SelectValue
+                            placeholder={t("create.post.tag.select")}
+                          />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="none">カテゴリなし</SelectItem>
+                          <SelectItem value="none">
+                            {t("create.post.tag.none")}
+                          </SelectItem>
                           {tagsData?.map((tag) => (
                             <SelectItem key={tag.id} value={tag.id.toString()}>
                               #{tag.name}
@@ -619,7 +639,9 @@ const CreatePost = () => {
                       <Input
                         type="text"
                         placeholder={
-                          user ? "新しいカテゴリ名" : "ログインしてタグを作成"
+                          user
+                            ? t("create.post.tag.create.placeholder")
+                            : t("create.post.tag.create.placeholder.login")
                         }
                         value={newTagName}
                         onChange={(e) => setNewTagName(e.target.value)}
@@ -635,16 +657,18 @@ const CreatePost = () => {
                         size="sm"
                         className={`${user ? "bg-green-500 text-white hover:bg-green-600" : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
                       >
-                        {isCreatingTag ? "作成中..." : "作成"}
+                        {isCreatingTag
+                          ? t("create.post.tag.create.button.creating")
+                          : t("create.post.tag.create.button")}
                       </Button>
                     </div>
                     {user ? (
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        例: サッカー、筋トレ、ヨガなど（20文字以内）
+                        {t("create.post.tag.example")}
                       </p>
                     ) : (
                       <p className="text-xs text-amber-600 dark:text-amber-400">
-                        新しいカテゴリを作成するにはログインが必要です
+                        {t("create.post.tag.login.required")}
                       </p>
                     )}
                   </div>
@@ -660,7 +684,7 @@ const CreatePost = () => {
                   <div className="p-2 bg-rose-100 dark:bg-rose-900/50 rounded-lg group-hover:bg-rose-200 dark:group-hover:bg-rose-800/50 transition-colors">
                     <ImageIcon className="h-5 w-5 text-rose-600 dark:text-rose-400" />
                   </div>
-                  画像アップロード
+                  {t("create.post.image.title")}
                 </Label>
 
                 <div className="relative">
@@ -668,6 +692,7 @@ const CreatePost = () => {
                     id="image"
                     type="file"
                     accept="image/*"
+                    placeholder={t("create.post.image.placeholder")}
                     {...register("image")}
                   />
                 </div>
@@ -683,7 +708,7 @@ const CreatePost = () => {
                       <div className="relative group/image">
                         <img
                           src={imagePreview}
-                          alt="プレビュー"
+                          alt={t("create.post.image.preview")}
                           className="w-full h-auto rounded-xl object-contain max-h-96 transition-transform duration-300 group-hover/image:scale-[1.02]"
                         />
                         <Button
@@ -727,12 +752,12 @@ const CreatePost = () => {
                   {isSubmitting ? (
                     <div className="flex items-center gap-3">
                       <Loader2 className="h-6 w-6 animate-spin" />
-                      <span>投稿中...</span>
+                      <span>{t("create.post.submitting")}</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-3">
                       <Upload className="h-6 w-6" />
-                      <span>投稿を公開する</span>
+                      <span>{t("create.post.submit")}</span>
                     </div>
                   )}
                 </Button>
