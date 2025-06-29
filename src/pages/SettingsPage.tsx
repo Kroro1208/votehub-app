@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../contexts/ThemeContext";
+import { useLanguage } from "../contexts/LanguageContext";
 import { supabase } from "../supabase-client";
 import { toast } from "react-toastify";
 import {
@@ -29,8 +31,8 @@ import {
 export default function SettingsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [language, setLanguage] = useState("ja");
+  const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileData, setProfileData] = useState({
     fullName: user?.user_metadata?.full_name || "",
@@ -40,23 +42,15 @@ export default function SettingsPage() {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleThemeToggle = () => {
-    setIsDarkMode(!isDarkMode);
-    // TODO: Implement actual theme switching logic
+    toggleTheme();
     toast.success(
-      isDarkMode
-        ? "ライトモードに切り替えました"
-        : "ダークモードに切り替えました",
+      theme === "dark" ? t("message.theme.light") : t("message.theme.dark"),
     );
   };
 
-  const handleLanguageChange = (newLanguage: string) => {
+  const handleLanguageChange = (newLanguage: "ja" | "en") => {
     setLanguage(newLanguage);
-    // TODO: Implement actual language switching logic
-    toast.success(
-      newLanguage === "ja"
-        ? "言語を日本語に設定しました"
-        : "Language set to English",
-    );
+    toast.success(t(`message.language.${newLanguage}`));
   };
 
   const handleProfileUpdate = async () => {
@@ -74,11 +68,11 @@ export default function SettingsPage() {
 
       if (error) throw error;
 
-      toast.success("プロフィールを更新しました");
+      toast.success(t("message.profile.updated"));
       setIsEditingProfile(false);
     } catch (error) {
       console.error("Profile update error:", error);
-      toast.error("プロフィールの更新に失敗しました");
+      toast.error(t("message.profile.update.failed"));
     } finally {
       setIsUpdating(false);
     }
@@ -106,17 +100,17 @@ export default function SettingsPage() {
         .getPublicUrl(filePath);
 
       setProfileData({ ...profileData, avatarUrl: data.publicUrl });
-      toast.success("画像をアップロードしました");
+      toast.success(t("message.image.uploaded"));
     } catch (error) {
       console.error("Avatar upload error:", error);
-      toast.error("画像のアップロードに失敗しました");
+      toast.error(t("message.image.upload.failed"));
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-300">
+    <div className="min-h-screen bg-slate-300 dark:bg-dark-bg transition-colors">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
+      <div className="bg-white dark:bg-dark-surface border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center space-x-4">
             <Button
@@ -128,9 +122,9 @@ export default function SettingsPage() {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="flex items-center space-x-2">
-              <Settings className="w-6 h-6 text-slate-600" />
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-800">
-                設定
+              <Settings className="w-6 h-6 text-slate-600 dark:text-slate-400" />
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-dark-text">
+                {t("settings.title")}
               </h1>
             </div>
           </div>
@@ -140,11 +134,11 @@ export default function SettingsPage() {
       {/* Main content */}
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Profile Settings */}
-        <Card>
+        <Card className="dark:bg-dark-surface dark:border-slate-700">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 dark:text-dark-text">
               <User className="w-5 h-5" />
-              <span>プロフィール設定</span>
+              <span>{t("settings.profile")}</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -166,11 +160,13 @@ export default function SettingsPage() {
                   )}
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-slate-800">
+                  <h3 className="font-semibold text-slate-800 dark:text-dark-text">
                     {profileData.fullName || "未設定"}
                   </h3>
-                  <p className="text-sm text-slate-600 mb-2">{user?.email}</p>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-slate-600 dark:text-dark-muted mb-2">
+                    {user?.email}
+                  </p>
+                  <p className="text-sm text-slate-600 dark:text-dark-muted">
                     {profileData.bio || "自己紹介が設定されていません"}
                   </p>
                 </div>
@@ -178,10 +174,10 @@ export default function SettingsPage() {
                   onClick={() => setIsEditingProfile(true)}
                   variant="outline"
                   size="sm"
-                  className="flex items-center space-x-1"
+                  className="flex items-center space-x-1 dark:border-slate-600 dark:text-dark-text dark:hover:bg-slate-700"
                 >
                   <Edit3 className="w-4 h-4" />
-                  <span>編集</span>
+                  <span>{t("settings.profile.edit")}</span>
                 </Button>
               </div>
             ) : (
@@ -277,17 +273,17 @@ export default function SettingsPage() {
         </Card>
 
         {/* Language Settings */}
-        <Card>
+        <Card className="dark:bg-dark-surface dark:border-slate-700">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 dark:text-dark-text">
               <Globe className="w-5 h-5" />
-              <span>言語設定</span>
+              <span>{t("settings.language")}</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <p className="text-sm text-slate-600">
-                アプリの表示言語を選択してください
+              <p className="text-sm text-slate-600 dark:text-dark-muted">
+                {t("settings.language.description")}
               </p>
               <div className="space-y-2">
                 <label className="flex items-center space-x-3 cursor-pointer">
@@ -296,10 +292,14 @@ export default function SettingsPage() {
                     name="language"
                     value="ja"
                     checked={language === "ja"}
-                    onChange={(e) => handleLanguageChange(e.target.value)}
+                    onChange={(e) =>
+                      handleLanguageChange(e.target.value as "ja" | "en")
+                    }
                     className="w-4 h-4 text-blue-600"
                   />
-                  <span className="text-slate-700">日本語</span>
+                  <span className="text-slate-700 dark:text-dark-text">
+                    日本語
+                  </span>
                 </label>
                 <label className="flex items-center space-x-3 cursor-pointer">
                   <input
@@ -307,10 +307,14 @@ export default function SettingsPage() {
                     name="language"
                     value="en"
                     checked={language === "en"}
-                    onChange={(e) => handleLanguageChange(e.target.value)}
+                    onChange={(e) =>
+                      handleLanguageChange(e.target.value as "ja" | "en")
+                    }
                     className="w-4 h-4 text-blue-600"
                   />
-                  <span className="text-slate-700">English</span>
+                  <span className="text-slate-700 dark:text-dark-text">
+                    English
+                  </span>
                 </label>
               </div>
             </div>
@@ -318,44 +322,46 @@ export default function SettingsPage() {
         </Card>
 
         {/* Theme Settings */}
-        <Card>
+        <Card className="dark:bg-dark-surface dark:border-slate-700">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              {isDarkMode ? (
+            <CardTitle className="flex items-center space-x-2 dark:text-dark-text">
+              {theme === "dark" ? (
                 <Moon className="w-5 h-5" />
               ) : (
                 <Sun className="w-5 h-5" />
               )}
-              <span>テーマ設定</span>
+              <span>{t("settings.theme")}</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-slate-700">
-                  {isDarkMode ? "ダークモード" : "ライトモード"}
+                <p className="font-medium text-slate-700 dark:text-dark-text">
+                  {theme === "dark"
+                    ? t("settings.theme.dark")
+                    : t("settings.theme.light")}
                 </p>
-                <p className="text-sm text-slate-600">
-                  {isDarkMode
-                    ? "暗いテーマで表示されています"
-                    : "明るいテーマで表示されています"}
+                <p className="text-sm text-slate-600 dark:text-dark-muted">
+                  {theme === "dark"
+                    ? t("settings.theme.dark.description")
+                    : t("settings.theme.light.description")}
                 </p>
               </div>
               <Button
                 onClick={handleThemeToggle}
                 variant="outline"
                 size="sm"
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 dark:border-slate-600 dark:text-dark-text dark:hover:bg-slate-700"
               >
-                {isDarkMode ? (
+                {theme === "dark" ? (
                   <>
                     <Sun className="w-4 h-4" />
-                    <span>ライト</span>
+                    <span>{t("settings.theme.light")}</span>
                   </>
                 ) : (
                   <>
                     <Moon className="w-4 h-4" />
-                    <span>ダーク</span>
+                    <span>{t("settings.theme.dark")}</span>
                   </>
                 )}
               </Button>

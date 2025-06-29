@@ -15,7 +15,7 @@ import SettingsPage from "./pages/SettingsPage";
 
 function App() {
   return (
-    <div className="min-h-screen bg-black text-gray-100 transition-opacity duration-700 pt-20">
+    <div className="min-h-screen bg-black dark:bg-dark-bg text-gray-100 dark:text-dark-text transition-all duration-700 pt-20">
       <Navbar />
       <div className="container mx-auto px-4 py6">
         <Routes>

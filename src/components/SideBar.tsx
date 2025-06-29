@@ -9,20 +9,22 @@ import {
 } from "lucide-react";
 import { Link, useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
+import { useLanguage } from "../contexts/LanguageContext";
 import { Button } from "./ui/button";
 
 const Sidebar = () => {
   const location = useLocation();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const menuItems = [
-    { icon: Vote, label: "投票中", path: "/" },
-    { icon: TrendingUp, label: "人気の投票", path: "/trending" },
-    { icon: Trophy, label: "結果発表", path: "/results" },
-    { icon: Bookmark, label: "ブックマーク", path: "/bookmarks" },
-    { icon: BarChart3, label: "統計", path: "/stats" },
-    { icon: Users, label: "スペース", path: "/space" },
-    { icon: Settings, label: "設定", path: "/settings" },
+    { icon: Vote, label: t("nav.home"), path: "/" },
+    { icon: TrendingUp, label: t("nav.trending"), path: "/trending" },
+    { icon: Trophy, label: t("nav.results"), path: "/results" },
+    { icon: Bookmark, label: t("nav.bookmarks"), path: "/bookmarks" },
+    { icon: BarChart3, label: t("nav.stats"), path: "/stats" },
+    { icon: Users, label: t("nav.space"), path: "/space" },
+    { icon: Settings, label: t("nav.settings"), path: "/settings" },
   ];
 
   return (
@@ -64,7 +66,7 @@ const Sidebar = () => {
       {/* Create Vote Button */}
       <Link to="/create" className="block mb-8">
         <Button className="w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center shadow-lg">
-          <span>投票を作成</span>
+          <span>{t("nav.create")}</span>
         </Button>
       </Link>
 

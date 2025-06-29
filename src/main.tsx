@@ -5,6 +5,8 @@ import App from "./App.tsx";
 import { BrowserRouter as Router } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthProvider";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import { ToastContainer } from "react-toastify";
 
 const client = new QueryClient();
@@ -15,10 +17,14 @@ if (rootElement) {
     <StrictMode>
       <QueryClientProvider client={client}>
         <AuthProvider>
-          <Router>
-            <App />
-            <ToastContainer />
-          </Router>
+          <ThemeProvider>
+            <LanguageProvider>
+              <Router>
+                <App />
+                <ToastContainer />
+              </Router>
+            </LanguageProvider>
+          </ThemeProvider>
         </AuthProvider>
       </QueryClientProvider>
     </StrictMode>,
