@@ -19,7 +19,6 @@ import NestedPostSection from "./NestedPostSection";
 import VoteDeadline from "./VoteDeadline";
 import BookmarkButton from "./BookmarkButton";
 import { isPersuasionTime } from "../../utils/formatTime";
-import { checkAndNotifyVoteDeadlineEnded } from "../../utils/notifications";
 
 interface Props {
   postId: number;
@@ -231,63 +230,20 @@ const PostDetail = ({ postId }: Props) => {
     fetchComment();
   }, [mostVotedInfo.commentId]);
 
-  // 投票期限終了チェック（定期実行）
+  // 投票期限終了チェック（完全に無効化）
   useEffect(() => {
-    if (!data?.vote_deadline) return;
+    // 通知システム全体を無効化
+    console.log(
+      `[NOTIFICATION_DISABLED] PostDetail useEffect: 通知チェックが無効化されています (postId=${postId})`,
+    );
 
-    // 投稿が作成されてから少なくとも30秒経過してからチェック開始
-    // これにより、新しく作成された投稿（特にネスト投稿）の誤った期限終了通知を防ぐ
-    const postCreatedAt = new Date(data.created_at);
-    const now = new Date();
-    const timeSinceCreation = now.getTime() - postCreatedAt.getTime();
-    const minWaitTime = 30000; // 30秒
-
-    let isComponentMounted = true; // コンポーネントがマウントされているかのフラグ
-
-    const checkDeadline = async () => {
-      // コンポーネントがアンマウントされていたら処理を中止
-      if (!isComponentMounted) return;
-      
-      try {
-        const result = await checkAndNotifyVoteDeadlineEnded(
-          postId,
-          data.title,
-          data.vote_deadline,
-          data.created_at,
-        );
-        
-        // 通知が送信された場合は、それ以上のチェックを停止
-        if (result && isComponentMounted) {
-          console.log(`投票期限終了通知を送信しました: postId=${postId}`);
-          // インターバルをクリアして重複チェックを防ぐ
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
-        }
-      } catch (error) {
-        console.error("投票期限終了チェックに失敗:", error);
-      }
-    };
-
-    // インターバルの参照を保持
-    const intervalRef = { current: null as NodeJS.Timeout | null };
-
-    if (timeSinceCreation >= minWaitTime) {
-      // 十分時間が経過している場合は即座にチェック
-      checkDeadline();
-    }
-
-    // 2分ごとにチェック（頻度を下げて負荷とrace conditionを軽減）
-    intervalRef.current = setInterval(checkDeadline, 120000); // 2分間隔
-
+    // 何も実行しない - 通知はVoteButtonコンポーネントやuseHandleVotesから行う
     return () => {
-      isComponentMounted = false; // クリーンアップ時にフラグを設定
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      console.log(
+        `[NOTIFICATION_DISABLED] PostDetail cleanup: postId=${postId}`,
+      );
     };
-  }, [postId, data?.title, data?.vote_deadline, data?.created_at]);
+  }, [postId]);
 
   // モーダルを閉じる
   const handleCloseModal = () => {

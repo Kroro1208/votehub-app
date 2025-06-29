@@ -167,8 +167,27 @@ export const checkAndNotifyPersuasionTimeStarted = async (
   voteDeadline: string | null,
 ) => {
   try {
+    // 通知試行をログ記録
+    await logNotificationAttempt(
+      postId,
+      "persuasion_time_started",
+      "useHandleVotes-onSettled",
+    );
+
+    // セッション内で既に送信済みかチェック
+    const sessionKey = getSessionKey(postId, "persuasion_time_started");
+    if (sessionNotificationsSent.has(sessionKey)) {
+      console.log(
+        `[PERSUASION_SESSION_ALREADY_SENT] セッション内で既に送信済み: postId=${postId}`,
+      );
+      return false;
+    }
+
     // 説得タイムかどうかを確認
     if (!isPersuasionTime(voteDeadline)) {
+      console.log(
+        `[PERSUASION_CHECK] 説得タイムではありません: postId=${postId}`,
+      );
       return false; // 説得タイムではない
     }
 
@@ -185,11 +204,22 @@ export const checkAndNotifyPersuasionTimeStarted = async (
 
     // 既に通知済みの場合は送信しない
     if (!notSent) {
+      console.log(
+        `[PERSUASION_ALREADY_SENT] 説得タイム通知は既に送信済み: postId=${postId}`,
+      );
       return false;
     }
 
     // 説得タイム開始通知を送信
+    console.log(`[PERSUASION_SEND] 説得タイム開始通知を送信: postId=${postId}`);
     await notifyPersuasionTimeStarted(postId, postTitle);
+
+    // セッション内送信済みマークに追加
+    sessionNotificationsSent.add(sessionKey);
+
+    console.log(
+      `[PERSUASION_SENT] 説得タイム開始通知を送信完了: postId=${postId}`,
+    );
     return true; // 通知送信成功
   } catch (error) {
     console.error("説得タイム開始検出・通知に失敗:", error);
@@ -199,6 +229,29 @@ export const checkAndNotifyPersuasionTimeStarted = async (
 
 // 進行中の通知チェックを追跡するためのマップ
 const pendingDeadlineChecks = new Map<number, Promise<boolean>>();
+
+// セッション中に送信済みの通知を追跡（重複防止）
+const sessionNotificationsSent = new Set<string>();
+
+// セッションキーを生成する関数
+const getSessionKey = (postId: number, type: string) => `${postId}-${type}`;
+
+// 通知作成試行をログ記録するヘルパー関数
+const logNotificationAttempt = async (
+  postId: number,
+  type: string,
+  source: string = "client-js",
+) => {
+  try {
+    await supabase.rpc("log_notification_attempt", {
+      p_post_id: postId,
+      p_notification_type: type,
+      p_source: source,
+    });
+  } catch (error) {
+    console.warn("通知試行ログの記録に失敗:", error);
+  }
+};
 
 /**
  * 投票期限終了の検出と通知送信
@@ -210,9 +263,27 @@ export const checkAndNotifyVoteDeadlineEnded = async (
   voteDeadline: string | null,
   postCreatedAt?: string,
 ) => {
+  // 通知試行をログ記録
+  await logNotificationAttempt(
+    postId,
+    "vote_deadline_ended",
+    "PostDetail-useEffect",
+  );
+
+  // セッション内で既に送信済みかチェック
+  const sessionKey = getSessionKey(postId, "vote_deadline_ended");
+  if (sessionNotificationsSent.has(sessionKey)) {
+    console.log(
+      `[SESSION_ALREADY_SENT] セッション内で既に送信済み: postId=${postId}`,
+    );
+    return false;
+  }
+
   // 既に同じpostIdで処理中の場合は既存のPromiseを返す
   if (pendingDeadlineChecks.has(postId)) {
-    console.log(`既に処理中のため待機: postId=${postId}`);
+    console.log(
+      `[DUPLICATE_PREVENTION] 既に処理中のため待機: postId=${postId}`,
+    );
     return pendingDeadlineChecks.get(postId)!;
   }
 
@@ -238,7 +309,7 @@ export const checkAndNotifyVoteDeadlineEnded = async (
 
         if (timeSinceCreation < minWaitTime) {
           console.log(
-            `投稿が新しすぎるため期限終了通知をスキップ: postId=${postId}, 作成からの経過時間=${Math.floor(timeSinceCreation / 1000)}秒`,
+            `[NEW_POST_PROTECTION] 投稿が新しすぎるため期限終了通知をスキップ: postId=${postId}, 作成からの経過時間=${Math.floor(timeSinceCreation / 1000)}秒`,
           );
           return false;
         }
@@ -257,14 +328,22 @@ export const checkAndNotifyVoteDeadlineEnded = async (
 
       // 既に通知済みの場合は送信しない
       if (!notSent) {
-        console.log(`既に通知送信済み: postId=${postId}`);
+        console.log(`[ALREADY_SENT] 既に通知送信済み: postId=${postId}`);
         return false;
       }
 
       // 投票期限終了通知を送信
-      console.log(`投票期限終了通知を送信開始: postId=${postId}`);
+      console.log(
+        `[NOTIFICATION_SEND] 投票期限終了通知を送信開始: postId=${postId}`,
+      );
       await notifyVoteDeadlineEnded(postId, postTitle);
-      console.log(`投票期限終了通知を送信完了: postId=${postId}`);
+
+      // セッション内送信済みマークに追加
+      sessionNotificationsSent.add(sessionKey);
+
+      console.log(
+        `[NOTIFICATION_SENT] 投票期限終了通知を送信完了: postId=${postId}`,
+      );
       return true; // 通知送信成功
     } catch (error) {
       console.error("投票期限終了検出・通知に失敗:", error);
@@ -277,6 +356,6 @@ export const checkAndNotifyVoteDeadlineEnded = async (
 
   // 進行中の処理としてマップに追加
   pendingDeadlineChecks.set(postId, checkPromise);
-  
+
   return checkPromise;
 };
