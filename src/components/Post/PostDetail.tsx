@@ -6,6 +6,9 @@ import { useAtomValue } from "jotai";
 import { mostVotedCommentAtomFamily } from "../../stores/CommentVoteAtom";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import { useDeletePost } from "../../hooks/useDeletePost";
+import { Trash2 } from "lucide-react";
+import { useNavigate } from "react-router";
 
 import CommentSection from "../Comment/CommentSection";
 import PostContentDisplay from "./PostContentDisplay";
@@ -133,11 +136,14 @@ const createPersuasionComment = async (
 
 const PostDetail = ({ postId }: Props) => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [showPersuasionModal, setShowPersuasionModal] = useState(false);
   const [persuasionContent, setPersuasionContent] = useState("");
   const [showCreateNested, setShowCreateNested] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const { user } = useAuth();
+  const { mutate: deletePost, isPending: isDeleting } = useDeletePost();
 
   const { data, error, isPending } = useQuery<PostType, Error>({
     queryKey: ["post", postId],
@@ -260,6 +266,29 @@ const PostDetail = ({ postId }: Props) => {
     setShowCreateNested(false);
   };
 
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    deletePost(
+      {
+        postId: postId,
+        imageUrl: data?.image_url,
+      },
+      {
+        onSuccess: () => {
+          setShowDeleteConfirm(false);
+          navigate("/");
+        },
+      },
+    );
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
+  };
+
   if (isPending) return <div>Loading...</div>;
   if (error) return <div>{error.message}</div>;
 
@@ -270,8 +299,46 @@ const PostDetail = ({ postId }: Props) => {
           {data.title}
         </h2>
 
-        {/* ブックマークボタン */}
-        <BookmarkButton postId={postId} size="lg" />
+        <div className="flex items-center space-x-3">
+          {/* 削除ボタン（投稿者のみ表示） */}
+          {isPostOwner && (
+            <div className="relative">
+              {!showDeleteConfirm ? (
+                <button
+                  onClick={handleDeleteClick}
+                  disabled={isDeleting}
+                  className="p-3 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50 border border-red-200"
+                  title="投稿を削除"
+                >
+                  <Trash2 size={20} />
+                </button>
+              ) : (
+                <div className="flex items-center space-x-2 bg-white border border-red-200 rounded-lg p-2">
+                  <span className="text-sm text-red-600">
+                    投稿を削除しますか？
+                  </span>
+                  <button
+                    onClick={handleDeleteConfirm}
+                    disabled={isDeleting}
+                    className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
+                  >
+                    {isDeleting ? "削除中..." : "削除"}
+                  </button>
+                  <button
+                    onClick={handleDeleteCancel}
+                    disabled={isDeleting}
+                    className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 rounded border border-gray-300"
+                  >
+                    キャンセル
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ブックマークボタン */}
+          <BookmarkButton postId={postId} size="lg" />
+        </div>
       </div>
 
       {/* 投票期限の時計表示 */}

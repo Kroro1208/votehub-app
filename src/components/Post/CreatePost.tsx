@@ -165,7 +165,7 @@ const createTag = async (name: string, communityId: number) => {
         retryCount++;
         if (retryCount >= maxRetries) {
           throw new Error(
-            "ID生成でエラーが発生しました。もう一度お試しください。"
+            "ID生成でエラーが発生しました。もう一度お試しください。",
           );
         }
         continue;
@@ -306,7 +306,7 @@ const CreatePost = () => {
     // Check for duplicate tag name in the same community
     if (
       tagsData?.some(
-        (tag) => tag.name.toLowerCase() === newTagName.trim().toLowerCase()
+        (tag) => tag.name.toLowerCase() === newTagName.trim().toLowerCase(),
       )
     ) {
       toast.error("このタグ名は既に存在します");
@@ -405,7 +405,7 @@ const CreatePost = () => {
                           const currentContent = watch("content") || "";
                           const lines = currentContent.split("\n");
                           const proIndex = lines.findIndex((line) =>
-                            line.startsWith("賛成:")
+                            line.startsWith("賛成:"),
                           );
                           if (proIndex !== -1) {
                             lines[proIndex] = `賛成: ${e.target.value}`;
@@ -430,19 +430,19 @@ const CreatePost = () => {
                           const currentContent = watch("content") || "";
                           const lines = currentContent.split("\n");
                           const conIndex = lines.findIndex((line) =>
-                            line.startsWith("反対:")
+                            line.startsWith("反対:"),
                           );
                           if (conIndex !== -1) {
                             lines[conIndex] = `反対: ${e.target.value}`;
                           } else {
                             const proIndex = lines.findIndex((line) =>
-                              line.startsWith("賛成:")
+                              line.startsWith("賛成:"),
                             );
                             if (proIndex !== -1) {
                               lines.splice(
                                 proIndex + 1,
                                 0,
-                                `反対: ${e.target.value}`
+                                `反対: ${e.target.value}`,
                               );
                             } else {
                               lines.push(`反対: ${e.target.value}`);
@@ -467,7 +467,7 @@ const CreatePost = () => {
                           const filteredLines = lines.filter(
                             (line) =>
                               line.startsWith("賛成:") ||
-                              line.startsWith("反対:")
+                              line.startsWith("反対:"),
                           );
                           if (e.target.value.trim()) {
                             filteredLines.push("", e.target.value);
@@ -594,7 +594,7 @@ const CreatePost = () => {
                         value={field.value?.toString() || ""}
                         onValueChange={(value) => {
                           field.onChange(
-                            value === "none" ? null : parseInt(value)
+                            value === "none" ? null : parseInt(value),
                           );
                         }}
                       >

@@ -210,6 +210,8 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
   } = useQuery<PostType[], Error>({
     queryKey: ["posts", filter, showNested],
     queryFn: getFilteredPosts,
+    staleTime: 0, // Always refetch to ensure fresh data
+    refetchOnWindowFocus: true, // Refetch when window gets focus
   });
 
   const handleNestedPostCreate = () => {

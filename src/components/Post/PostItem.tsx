@@ -1,11 +1,13 @@
 import { Link } from "react-router";
 import type { PostType } from "./PostList";
-import { Clock, Users, CheckCircle, AlertTriangle } from "lucide-react";
+import { Clock, Users, CheckCircle, AlertTriangle, Trash2 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useHandleVotes } from "../../hooks/useHandleVotes";
 import { useHandlePost } from "../../hooks/useHandlePost";
+import { useDeletePost } from "../../hooks/useDeletePost";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import BookmarkButton from "./BookmarkButton";
+import { useState } from "react";
 
 interface PostItemType {
   post: PostType;
@@ -20,6 +22,8 @@ const PostItem = ({ post }: PostItemType) => {
   );
   const { userVote, isPersuasionTime, isVotingExpired, getTimeRemaining } =
     useHandlePost(post);
+  const { mutate: deletePost, isPending: isDeleting } = useDeletePost();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const hasUserVoted = userVote !== null && userVote !== undefined;
 
@@ -27,6 +31,34 @@ const PostItem = ({ post }: PostItemType) => {
   const votingExpired = isVotingExpired(); // 投票期限を過ぎているかどうか
   const showPersuasionButton = isPostOwner && isPersuasionTime(); // 投稿者本人で説得タイム中かどうか
   const timeRemaining = getTimeRemaining(); // 残り時間を取得
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    deletePost(
+      {
+        postId: post.id,
+        imageUrl: post.image_url,
+      },
+      {
+        onSuccess: () => {
+          setShowDeleteConfirm(false);
+        },
+      },
+    );
+  };
+
+  const handleDeleteCancel = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowDeleteConfirm(false);
+  };
 
   return (
     <Link to={`/post/${post.id}`} className="block group">
@@ -131,6 +163,39 @@ const PostItem = ({ post }: PostItemType) => {
             <div className="flex items-center space-x-2">
               {/* ブックマークボタン追加 */}
               <BookmarkButton postId={post.id} size="sm" />
+
+              {/* 削除ボタン（投稿者のみ表示） */}
+              {isPostOwner && (
+                <div className="relative">
+                  {!showDeleteConfirm ? (
+                    <button
+                      onClick={handleDeleteClick}
+                      disabled={isDeleting}
+                      className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50"
+                      title="投稿を削除"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  ) : (
+                    <div className="flex items-center space-x-1 bg-white border border-red-200 rounded-lg p-1">
+                      <button
+                        onClick={handleDeleteConfirm}
+                        disabled={isDeleting}
+                        className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
+                      >
+                        {isDeleting ? "削除中..." : "削除"}
+                      </button>
+                      <button
+                        onClick={handleDeleteCancel}
+                        disabled={isDeleting}
+                        className="px-2 py-1 text-xs text-gray-600 hover:text-gray-800 rounded"
+                      >
+                        キャンセル
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* 既存のstatus badge */}
               <div
