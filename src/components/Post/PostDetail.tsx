@@ -293,7 +293,7 @@ const PostDetail = ({ postId }: Props) => {
               <img
                 height={48}
                 width={48}
-                src={avatarUrl}
+                src={avatarUrl || undefined}
                 alt="投稿者のアバター"
                 className="w-12 h-12 rounded-full object-cover border-2 border-gray-200 hover:border-green-400 transition-colors cursor-pointer"
               />
