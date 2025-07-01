@@ -230,20 +230,65 @@ const PostDetail = ({ postId }: Props) => {
     fetchComment();
   }, [mostVotedInfo.commentId]);
 
-  // 投票期限終了チェック（完全に無効化）
+  // 投票期限終了チェック（Edge Function + フロントエンド併用）
   useEffect(() => {
-    // 通知システム全体を無効化
-    console.log(
-      `[NOTIFICATION_DISABLED] PostDetail useEffect: 通知チェックが無効化されています (postId=${postId})`,
-    );
+    if (!data || !data.vote_deadline) {
+      return;
+    }
 
-    // 何も実行しない - 通知はVoteButtonコンポーネントやuseHandleVotesから行う
-    return () => {
+    const checkDeadline = async () => {
       console.log(
-        `[NOTIFICATION_DISABLED] PostDetail cleanup: postId=${postId}`,
+        `[NOTIFICATION_CHECK] Checking deadline for post ${postId}: ${data.vote_deadline}`,
       );
+
+      // 期限が過ぎているかチェック
+      const deadline = new Date(data.vote_deadline);
+      const now = new Date();
+
+      if (now > deadline) {
+        console.log(
+          `[NOTIFICATION_CHECK] Post ${postId} deadline has passed, triggering notification check`,
+        );
+
+        try {
+          // 手動で期限通知をトリガー
+          const { error } = await supabase.rpc(
+            "trigger_deadline_notifications_for_post",
+            {
+              p_post_id: postId,
+            },
+          );
+
+          if (error) {
+            console.error(
+              `[NOTIFICATION_ERROR] Failed to trigger deadline notification for post ${postId}:`,
+              error,
+            );
+          } else {
+            console.log(
+              `[NOTIFICATION_SUCCESS] Successfully triggered deadline notification for post ${postId}`,
+            );
+          }
+        } catch (error) {
+          console.error(
+            `[NOTIFICATION_ERROR] Exception while triggering deadline notification:`,
+            error,
+          );
+        }
+      }
     };
-  }, [postId]);
+
+    // 初回チェック
+    checkDeadline();
+
+    // 30秒ごとにチェック（Edge Functionがデプロイされるまでの一時的措置）
+    const interval = setInterval(checkDeadline, 30000);
+
+    return () => {
+      clearInterval(interval);
+      console.log(`[NOTIFICATION_INFO] PostDetail cleanup: postId=${postId}`);
+    };
+  }, [postId, data?.vote_deadline, data]);
 
   // モーダルを閉じる
   const handleCloseModal = () => {
