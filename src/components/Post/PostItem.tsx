@@ -29,7 +29,7 @@ const PostItem = ({ post }: PostItemType) => {
 
   const isPostOwner = user?.id === post.user_id; // 投稿者本人か
   const votingExpired = isVotingExpired(); // 投票期限を過ぎているかどうか
-  const showPersuasionButton = isPostOwner && isPersuasionTime(); // 投稿者本人で説得タイム中かどうか
+  const inPersuasionTime = isPersuasionTime(); // 説得タイム中かどうか
   const timeRemaining = getTimeRemaining(); // 残り時間を取得
 
   const handleDeleteClick = (e: React.MouseEvent) => {
@@ -68,7 +68,7 @@ const PostItem = ({ post }: PostItemType) => {
           className={`h-1 ${
             votingExpired
               ? "bg-slate-400"
-              : showPersuasionButton
+              : inPersuasionTime
                 ? "bg-orange-500"
                 : "bg-gradient-to-r from-violet-500 to-purple-600"
           }`}
@@ -101,6 +101,12 @@ const PostItem = ({ post }: PostItemType) => {
                       <span>投票済み</span>
                     </span>
                   )}
+                  {inPersuasionTime && !isPostOwner && (
+                    <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full flex items-center space-x-1">
+                      <AlertTriangle size={10} />
+                      <span>説得タイム中</span>
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -109,7 +115,7 @@ const PostItem = ({ post }: PostItemType) => {
             <div className="flex flex-col items-end space-y-1 min-w-0">
               {votingExpired ? (
                 <FaRegCalendarTimes size={20} className="text-slate-400" />
-              ) : showPersuasionButton ? (
+              ) : inPersuasionTime ? (
                 <AlertTriangle size={20} className="text-orange-500" />
               ) : (
                 <Clock size={20} className="text-violet-500" />
@@ -120,7 +126,7 @@ const PostItem = ({ post }: PostItemType) => {
                   className={`text-xs font-medium whitespace-nowrap ${
                     votingExpired
                       ? "text-slate-500"
-                      : showPersuasionButton
+                      : inPersuasionTime
                         ? "text-orange-600"
                         : "text-violet-600"
                   }`}
@@ -202,14 +208,14 @@ const PostItem = ({ post }: PostItemType) => {
                 className={`text-xs px-3 py-1 rounded-full font-medium ${
                   votingExpired
                     ? "bg-slate-100 text-slate-600"
-                    : showPersuasionButton
+                    : inPersuasionTime
                       ? "bg-orange-100 text-orange-700"
                       : "bg-violet-100 text-violet-700"
                 }`}
               >
                 {votingExpired
                   ? "結果発表"
-                  : showPersuasionButton
+                  : inPersuasionTime
                     ? "説得タイム"
                     : "投票受付中"}
               </div>
