@@ -5,8 +5,8 @@ import App from "./App.tsx";
 import { BrowserRouter as Router } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthProvider";
-import { ThemeProvider } from "./contexts/ThemeContext";
-import { LanguageProvider } from "./contexts/LanguageContext";
+import { ThemeProvider } from "./context/ThemeContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import { ToastContainer } from "react-toastify";
 
 const client = new QueryClient();
@@ -27,7 +27,7 @@ if (rootElement) {
           </ThemeProvider>
         </AuthProvider>
       </QueryClientProvider>
-    </StrictMode>,
+    </StrictMode>
   );
 } else {
   console.error("Root element not found");

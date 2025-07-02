@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
-import { useTheme } from "../contexts/ThemeContext";
-import { useLanguage } from "../contexts/LanguageContext";
+import { useTheme } from "../context/ThemeContext";
+import { useLanguage } from "../context/LanguageContext";
 import { supabase } from "../supabase-client";
 import { toast } from "react-toastify";
 import {
@@ -44,7 +44,7 @@ export default function SettingsPage() {
   const handleThemeToggle = () => {
     toggleTheme();
     toast.success(
-      theme === "dark" ? t("message.theme.light") : t("message.theme.dark"),
+      theme === "dark" ? t("message.theme.light") : t("message.theme.dark")
     );
   };
 
@@ -79,7 +79,7 @@ export default function SettingsPage() {
   };
 
   const handleAvatarUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
     if (!file || !user) return;

@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { Link, useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
-import { useLanguage } from "../contexts/LanguageContext";
+import { useLanguage } from "../context/LanguageContext";
 import { Button } from "./ui/button";
 
 const Sidebar = () => {

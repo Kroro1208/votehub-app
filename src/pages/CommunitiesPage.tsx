@@ -2,7 +2,7 @@ import CommunityList from "../components/Community/CommunityList";
 import Sidebar from "../components/SideBar";
 import { Users, Plus } from "lucide-react";
 import { Link } from "react-router";
-import { useLanguage } from "../contexts/LanguageContext";
+import { useLanguage } from "../context/LanguageContext";
 
 const CommunitiesPage = () => {
   const { t } = useLanguage();

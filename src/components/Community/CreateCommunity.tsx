@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import { FaPeopleLine } from "react-icons/fa6";
 import { IoPricetagsOutline } from "react-icons/io5";
 import { TbFileDescription } from "react-icons/tb";
-import { useLanguage } from "../../contexts/LanguageContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 const communitySchema = z.object({
   name: z.string().min(1, "スペース名は必須です"),

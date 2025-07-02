@@ -8,7 +8,7 @@ import {
 } from "../components/ui/tabs";
 import Sidebar from "../components/SideBar";
 import RightPanel from "../components/RightPanel";
-import { useLanguage } from "../contexts/LanguageContext";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Home() {
   const { t } = useLanguage();
