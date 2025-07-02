@@ -18,6 +18,7 @@ export const getTimeRemainingObject = (voteDeadline?: string | null) => {
       days: 0,
       hours: 0,
       minutes: 0,
+      seconds: 0,
     };
   }
 
@@ -26,12 +27,14 @@ export const getTimeRemainingObject = (voteDeadline?: string | null) => {
     (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
   );
   const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  const diffSeconds = Math.floor((diffMs % (1000 * 60)) / 1000);
 
   return {
     expired: false,
     days: diffDays,
     hours: diffHours,
     minutes: diffMinutes,
+    seconds: diffSeconds,
   };
 };
 
@@ -45,8 +48,10 @@ export const getTimeRemaining = (voteDeadline?: string | null) => {
     return `${timeObj.days}日${timeObj.hours}時間`;
   } else if (timeObj.hours > 0) {
     return `${timeObj.hours}時間${timeObj.minutes}分`;
-  } else {
+  } else if (timeObj.minutes > 0) {
     return `${timeObj.minutes}分`;
+  } else {
+    return `${timeObj.seconds}秒`;
   }
 };
 
@@ -56,7 +61,7 @@ export const isPersuasionTime = (voteDeadline?: string | null) => {
 
   const deadline = new Date(voteDeadline);
   const now = new Date();
-  const persuasionStart = new Date(deadline.getTime() - 24 * 60 * 60 * 1000); // 24時間前
+  const persuasionStart = new Date(deadline.getTime() - 60 * 60 * 1000); // 1時間前
 
   return now >= persuasionStart && now < deadline;
 };

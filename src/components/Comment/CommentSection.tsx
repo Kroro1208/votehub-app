@@ -6,7 +6,6 @@ import {
   Send,
   AlertCircle,
   Loader2,
-  Megaphone,
   LogIn,
 } from "lucide-react";
 import { supabase } from "../../supabase-client";
@@ -137,15 +136,12 @@ const CommentSection = ({ postId }: PostProps) => {
     return roots;
   };
 
-  // 説得コメントと通常のコメントを分ける
-  const persuasionComments =
-    comments?.filter((comment) => comment.is_persuasion_comment) || [];
+  // 通常のコメントのみ表示（説得コメントはVoteDeadlineコンポーネントで表示）
   const userComments =
     comments?.filter((comment) => !comment.is_persuasion_comment) || [];
 
   const commentTree = userComments ? createCommentTree(userComments) : [];
-  const commentCount = comments?.length || 0;
-  const regularCommentCount = userComments.length;
+  const commentCount = userComments?.length || 0;
 
   return (
     <div className="mt-10 bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-700">
@@ -155,46 +151,6 @@ const CommentSection = ({ postId }: PostProps) => {
           コメント {commentCount > 0 && `(${commentCount})`}
         </h3>
       </div>
-
-      {/* 説得コメントセクション */}
-      {persuasionComments.length > 0 && (
-        <div className="mb-8 bg-gradient-to-r from-orange-900/30 to-red-900/30 border border-orange-500/50 rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Megaphone className="text-orange-400" size={20} />
-            <h4 className="text-lg font-semibold text-orange-400">
-              投稿者からの説得メッセージ
-            </h4>
-          </div>
-          <div className="space-y-3">
-            {persuasionComments.map((comment) => (
-              <div
-                key={comment.id}
-                className="bg-gray-800/50 border border-orange-500/30 rounded-lg p-4"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 bg-orange-500 text-white text-xs rounded-full font-medium">
-                      投稿者
-                    </span>
-                    <span className="text-orange-300 font-medium text-sm">
-                      {comment.author}
-                    </span>
-                  </div>
-                  <span className="text-xs text-gray-400">
-                    {new Date(comment.created_at).toLocaleDateString("ja-JP", {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-                <p className="text-white leading-relaxed">{comment.content}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* コメント入力セクション */}
       {user ? (
@@ -279,13 +235,13 @@ const CommentSection = ({ postId }: PostProps) => {
         </div>
       )}
 
-      {/* 通常のコメント表示部分 */}
+      {/* コメント表示部分 */}
       <div className="space-y-2">
-        {regularCommentCount > 0 && (
+        {commentCount > 0 && (
           <div className="flex items-center gap-2 mb-4 pt-4 border-t border-gray-600">
             <MessageSquareText className="text-gray-400" size={20} />
             <h4 className="text-lg font-medium text-gray-300">
-              コメント ({regularCommentCount})
+              ユーザーコメント ({commentCount})
             </h4>
           </div>
         )}

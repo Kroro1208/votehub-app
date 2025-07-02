@@ -175,6 +175,9 @@ const PostDetail = ({ postId }: Props) => {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+      queryClient.invalidateQueries({
+        queryKey: ["persuasionComments", postId],
+      });
       setShowPersuasionModal(false);
       setPersuasionContent("");
     },
@@ -383,6 +386,7 @@ const PostDetail = ({ postId }: Props) => {
         data={data}
         showPersuasionButton={showPersuasionButton}
         handlePersuasionModal={handlePersuasionModal}
+        postId={postId}
       />
 
       {/* 画像と投稿内容を横並びに配置 */}

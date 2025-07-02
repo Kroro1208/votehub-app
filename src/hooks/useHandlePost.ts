@@ -2,6 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../supabase-client";
 import { useAuth } from "./useAuth";
 import { PostType } from "../components/Post/PostList";
+import {
+  getTimeRemaining,
+  isVotingExpired as isVotingExpiredUtil,
+  isPersuasionTime as isPersuasionTimeUtil,
+} from "../utils/formatTime";
 
 const getUserVoteForPost = async (postId: number, userId?: string) => {
   if (!userId) return null;
@@ -28,45 +33,24 @@ export const useHandlePost = (post: PostType) => {
 
   // 投票期限をチェックする関数
   const isVotingExpired = () => {
-    if (!post.vote_deadline) return false;
-    return new Date() > new Date(post.vote_deadline);
+    return isVotingExpiredUtil(post.vote_deadline);
   };
 
   // 説得タイム（期限の1時間前）かどうかをチェック
   const isPersuasionTime = () => {
-    if (!post.vote_deadline) return false;
-    const deadline = new Date(post.vote_deadline);
-    const now = new Date();
-    const oneHourBeforeDeadline = new Date(deadline.getTime() - 60 * 60 * 1000);
-    return now >= oneHourBeforeDeadline && now < deadline;
+    return isPersuasionTimeUtil(post.vote_deadline);
   };
 
   // 投票期限に対する残り時間を計算
-  const getTimeRemaining = () => {
-    if (!post.vote_deadline) return null;
-    const now = new Date();
-    const deadline = new Date(post.vote_deadline);
-    const diff = deadline.getTime() - now.getTime();
-
-    if (diff <= 0) return "終了";
-
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-    if (hours > 24) {
-      const days = Math.floor(hours / 24);
-      return `${days}日`;
-    } else if (hours > 0) {
-      return `${hours}時間`;
-    } else {
-      return `${minutes}分`;
-    }
+  const getTimeRemainingString = () => {
+    const timeString = getTimeRemaining(post.vote_deadline);
+    return timeString || "終了";
   };
 
   return {
     userVote,
     isPersuasionTime,
     isVotingExpired,
-    getTimeRemaining,
+    getTimeRemaining: getTimeRemainingString,
   };
 };

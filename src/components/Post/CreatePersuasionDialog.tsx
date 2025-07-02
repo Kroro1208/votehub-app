@@ -56,7 +56,7 @@ const CreatePersuasionDialog = ({
             value={persuasionContent}
             onChange={(e) => setPersuasionContent(e.target.value)}
             placeholder="投票者に向けたメッセージを入力してください..."
-            className="min-h-[120px] resize-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            className="min-h-[120px] max-w-[400px] resize-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             maxLength={500}
           />
           <div className="text-right text-xs text-gray-500 dark:text-gray-400">
