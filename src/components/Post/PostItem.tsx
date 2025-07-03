@@ -7,6 +7,7 @@ import { useHandlePost } from "../../hooks/useHandlePost";
 import { useDeletePost } from "../../hooks/useDeletePost";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import BookmarkButton from "./BookmarkButton";
+import VoteTickets from "../Vote/VoteTickets";
 import { useState } from "react";
 
 interface PostItemType {
@@ -15,7 +16,7 @@ interface PostItemType {
 
 const PostItem = ({ post }: PostItemType) => {
   const { user } = useAuth();
-  const { totalVotes } = useHandleVotes(
+  const { totalVotes, upVotes, downVotes } = useHandleVotes(
     post.id,
     post.vote_deadline,
     post.title,
@@ -101,39 +102,43 @@ const PostItem = ({ post }: PostItemType) => {
                       <span>投票済み</span>
                     </span>
                   )}
-                  {inPersuasionTime && !isPostOwner && (
-                    <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full flex items-center space-x-1">
-                      <AlertTriangle size={10} />
-                      <span>説得タイム中</span>
-                    </span>
-                  )}
+                  {/* Vote Tickets */}
+                  <VoteTickets
+                    upVotes={upVotes ?? 0}
+                    downVotes={downVotes ?? 0}
+                    size="sm"
+                    showLabels={false}
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Status Icon */}
-            <div className="flex flex-col items-end space-y-1 min-w-0">
-              {votingExpired ? (
-                <FaRegCalendarTimes size={20} className="text-slate-400" />
-              ) : inPersuasionTime ? (
-                <AlertTriangle size={20} className="text-orange-500" />
-              ) : (
-                <Clock size={20} className="text-violet-500" />
-              )}
+            {/* Vote Tickets and Status */}
+            <div className="flex flex-col items-end space-y-2 min-w-0">
+              {/* Status Icon and Time */}
+              <div className="flex flex-col items-end space-y-1">
+                {votingExpired ? (
+                  <FaRegCalendarTimes size={20} className="text-slate-400" />
+                ) : inPersuasionTime ? (
+                  <AlertTriangle size={20} className="text-orange-500" />
+                ) : (
+                  <Clock size={20} className="text-violet-500" />
+                )}
 
-              {timeRemaining && (
-                <span
-                  className={`text-xs font-medium whitespace-nowrap ${
-                    votingExpired
-                      ? "text-slate-500"
-                      : inPersuasionTime
-                        ? "text-orange-600"
-                        : "text-violet-600"
-                  }`}
-                >
-                  {votingExpired ? "終了" : `残り${timeRemaining}`}
-                </span>
-              )}
+                {timeRemaining && (
+                  <span
+                    className={`text-xs font-medium whitespace-nowrap ${
+                      votingExpired
+                        ? "text-slate-500"
+                        : inPersuasionTime
+                          ? "text-orange-600"
+                          : "text-violet-600"
+                    }`}
+                  >
+                    {votingExpired ? "終了" : `残り${timeRemaining}`}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>

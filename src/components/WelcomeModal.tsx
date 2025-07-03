@@ -61,7 +61,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose }) => {
 
   const prevSlide = () => {
     setCurrentSlide(
-      (prev) => (prev - 1 + welcomeSlides.length) % welcomeSlides.length
+      (prev) => (prev - 1 + welcomeSlides.length) % welcomeSlides.length,
     );
   };
 
@@ -70,7 +70,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose }) => {
       localStorage.setItem(`onboarding_completed_${user.id}`, "true");
       localStorage.setItem(
         `onboarding_completed_at_${user.id}`,
-        new Date().toISOString()
+        new Date().toISOString(),
       );
     }
     onClose();
