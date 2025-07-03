@@ -1,6 +1,6 @@
+import { useBookmarks } from "../../hooks/useBookmarks.ts";
+import { useAuth } from "../../hooks/useAuth.ts";
 import { Bookmark, BookmarkCheck } from "lucide-react";
-import { useBookmarks } from "../../hooks/useBookmarks";
-import { useAuth } from "../../hooks/useAuth";
 
 interface BookmarkButtonProps {
   postId: number;
@@ -29,6 +29,7 @@ const BookmarkButton = ({
 
   return (
     <button
+      type="button"
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();

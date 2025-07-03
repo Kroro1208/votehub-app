@@ -9,9 +9,20 @@ import {
 import Sidebar from "../components/SideBar";
 import RightPanel from "../components/RightPanel";
 import { useLanguage } from "../context/LanguageContext";
+import WelcomeModal from "../components/WelcomeModal";
+import { useFirstTimeUser } from "../hooks/useFirstTimeUser";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const { t } = useLanguage();
+  const { isFirstTime } = useFirstTimeUser();
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    if (isFirstTime) {
+      setShowWelcome(true);
+    }
+  }, [isFirstTime]);
 
   return (
     <div className="min-h-screen">
@@ -120,6 +131,11 @@ export default function Home() {
         </div>
         <RightPanel />
       </div>
+
+      <WelcomeModal
+        isOpen={showWelcome}
+        onClose={() => setShowWelcome(false)}
+      />
     </div>
   );
 }

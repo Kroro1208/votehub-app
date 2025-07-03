@@ -5,12 +5,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../ui/dialog";
-import { Textarea } from "../ui/textarea";
-import { Button } from "../ui/button";
+} from "../ui/dialog.tsx";
+import { Textarea } from "../ui/textarea.tsx";
+import { Button } from "../ui/button.tsx";
 import { MessageCircle } from "lucide-react";
 import { UseMutationResult } from "@tanstack/react-query";
-import { CommentType } from "./PostDetail";
+import { CommentType } from "./PostDetail.tsx";
+import React from "react";
 
 type PersuationDialogProps = {
   open: boolean;
@@ -54,7 +55,9 @@ const CreatePersuasionDialog = ({
         <div className="space-y-4">
           <Textarea
             value={persuasionContent}
-            onChange={(e) => setPersuasionContent(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setPersuasionContent((e.target as HTMLTextAreaElement).value)
+            }
             placeholder="投票者に向けたメッセージを入力してください..."
             className="min-h-[120px] max-w-[400px] resize-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             maxLength={500}
