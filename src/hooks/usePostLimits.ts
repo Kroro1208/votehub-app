@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabase-client";
 import { useAuth } from "./useAuth";
 
@@ -25,54 +25,55 @@ export const usePostLimits = () => {
   const [error, setError] = useState<string | null>(null);
 
   // 投稿制限状況を取得
-  const checkPostLimit = async (
-    userId?: string,
-  ): Promise<PostLimitStatus | null> => {
-    if (!userId && !user?.id) return null;
+  const checkPostLimit = useCallback(
+    async (userId?: string): Promise<PostLimitStatus | null> => {
+      if (!userId && !user?.id) return null;
 
-    setIsLoading(true);
-    setError(null);
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const targetUserId = userId || user?.id;
+      try {
+        const targetUserId = userId || user?.id;
 
-      const { data, error } = await supabase.rpc("check_user_post_limit", {
-        p_user_id: targetUserId,
-        p_post_date: new Date().toISOString().split("T")[0],
-      });
+        const { data, error } = await supabase.rpc("check_user_post_limit", {
+          p_user_id: targetUserId,
+          p_post_date: new Date().toISOString().split("T")[0],
+        });
 
-      if (error) {
-        console.error("投稿制限チェックエラー:", error);
-        setError(
-          `投稿制限の確認に失敗しました: ${error.message || error.code || "Unknown error"}`,
-        );
+        if (error) {
+          console.error("投稿制限チェックエラー:", error);
+          setError(
+            `投稿制限の確認に失敗しました: ${error.message || error.code || "Unknown error"}`,
+          );
+          return null;
+        }
+
+        if (data && data.length > 0) {
+          const status = data[0] as PostLimitStatus;
+          setPostLimitStatus(status);
+          return status;
+        }
+
+        // データがない場合のデフォルト値
+        const defaultStatus: PostLimitStatus = {
+          can_post: true,
+          current_count: 0,
+          daily_limit: 3,
+          remaining_posts: 3,
+          membership_type: "free",
+        };
+        setPostLimitStatus(defaultStatus);
+        return defaultStatus;
+      } catch (err) {
+        console.error("投稿制限チェック例外:", err);
+        setError("投稿制限の確認中にエラーが発生しました");
         return null;
+      } finally {
+        setIsLoading(false);
       }
-
-      if (data && data.length > 0) {
-        const status = data[0] as PostLimitStatus;
-        setPostLimitStatus(status);
-        return status;
-      }
-
-      // データがない場合のデフォルト値
-      const defaultStatus: PostLimitStatus = {
-        can_post: true,
-        current_count: 0,
-        daily_limit: 3,
-        remaining_posts: 3,
-        membership_type: "free",
-      };
-      setPostLimitStatus(defaultStatus);
-      return defaultStatus;
-    } catch (err) {
-      console.error("投稿制限チェック例外:", err);
-      setError("投稿制限の確認中にエラーが発生しました");
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [user?.id],
+  );
 
   // 投稿数を増加（投稿作成時に呼び出す）
   const incrementPostCount = async (userId?: string): Promise<boolean> => {
