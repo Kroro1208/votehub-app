@@ -13,7 +13,6 @@ import BookmarksPage from "./pages/BookmarksPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import SettingsPage from "./pages/SettingsPage";
 import TestPostLimitsPage from "./pages/TestPostLimitsPage";
-import AdminPostLimitsPage from "./pages/AdminPostLimitsPage";
 
 function App() {
   return (
@@ -35,7 +34,6 @@ function App() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/test-post-limits" element={<TestPostLimitsPage />} />
-          <Route path="/admin/post-limits" element={<AdminPostLimitsPage />} />
         </Routes>
       </div>
     </div>
