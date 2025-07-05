@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../supabase-client";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
+import { usePostLimits } from "../../hooks/usePostLimits";
 import { type Community, getCommunitites } from "../Community/CommunityList";
 import "react-datepicker/dist/react-datepicker.css";
 import { useForm, Controller } from "react-hook-form";
@@ -18,6 +19,7 @@ import {
   Loader2,
   FileText,
   Clock,
+  AlertTriangle,
 } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Label } from "../ui/label";
@@ -36,6 +38,7 @@ import { z } from "zod";
 import { toast } from "react-toastify";
 import { createPostSchema } from "../../utils/schema";
 import { useLanguage } from "../../context/LanguageContext";
+import GradePanel from "./GradePanel";
 
 interface PostInput {
   title: string;
@@ -197,6 +200,14 @@ const CreatePost = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
 
+  // 投稿制限機能
+  const {
+    postLimitStatus,
+    isLoading: isCheckingLimits,
+    incrementPostCount,
+    removePostLimitWithPoints,
+  } = usePostLimits();
+
   const {
     register,
     handleSubmit,
@@ -268,12 +279,29 @@ const CreatePost = () => {
     },
   });
 
-  const onSubmit = (data: CreatePostFormData) => {
+  const onSubmit = async (data: CreatePostFormData) => {
     if (!user) {
       toast.error(t("create.post.error.login.required"));
       return;
     }
+
+    // 投稿制限チェック
+    if (!postLimitStatus?.can_post) {
+      toast.error(
+        "本日の投稿制限に達しています。ポイントを使用して制限を解除するか、明日再度お試しください。",
+      );
+      return;
+    }
+
     const imageFile = data.image[0];
+
+    // 投稿数をインクリメント（投稿作成前）
+    const incrementSuccess = await incrementPostCount();
+    if (!incrementSuccess) {
+      toast.error("投稿制限のため投稿できませんでした。");
+      return;
+    }
+
     mutate({
       post: {
         title: data.title,
@@ -336,6 +364,16 @@ const CreatePost = () => {
 
   const watchedContent = watch("content");
 
+  // 投稿制限解除の処理
+  const handleRemovePostLimit = async () => {
+    const result = await removePostLimitWithPoints(30);
+    if (result?.success) {
+      toast.success(result.message);
+    } else {
+      toast.error(result?.message || "制限解除に失敗しました");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-400 to-gray-200 dark:from-slate-800 dark:to-gray-900 py-12 px-4 sm:px-6 lg:px-8 transition-colors">
       <div className="max-w-4xl mx-auto">
@@ -353,6 +391,11 @@ const CreatePost = () => {
             {t("create.post.subtitle")}
           </p>
         </div>
+
+        <GradePanel
+          postLimitStatus={postLimitStatus}
+          handleRemovePostLimit={handleRemovePostLimit}
+        />
 
         <Card className="backdrop-blur-sm bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 shadow-xl shadow-blue-100/50 dark:shadow-blue-900/50 rounded-2xl">
           <CardContent className="p-8">
@@ -746,13 +789,27 @@ const CreatePost = () => {
               <div className="pt-6">
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={
+                    isSubmitting ||
+                    isCheckingLimits ||
+                    (postLimitStatus ? !postLimitStatus.can_post : false)
+                  }
                   className="w-full h-16 text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 dark:from-blue-500 dark:via-purple-500 dark:to-indigo-500 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 dark:hover:from-blue-600 dark:hover:via-purple-600 dark:hover:to-indigo-600 text-white transition-all duration-500 rounded-2xl shadow-xl shadow-blue-200/50 dark:shadow-blue-900/50 hover:shadow-blue-300/50 dark:hover:shadow-blue-800/50 hover:scale-[1.02] transform disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center gap-3">
                       <Loader2 className="h-6 w-6 animate-spin" />
                       <span>{t("create.post.submitting")}</span>
+                    </div>
+                  ) : isCheckingLimits ? (
+                    <div className="flex items-center gap-3">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                      <span>制限確認中...</span>
+                    </div>
+                  ) : postLimitStatus && !postLimitStatus.can_post ? (
+                    <div className="flex items-center gap-3">
+                      <AlertTriangle className="h-6 w-6" />
+                      <span>投稿制限到達 - ポイントで制限解除してください</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-3">
