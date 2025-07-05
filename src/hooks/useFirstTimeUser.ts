@@ -42,7 +42,7 @@ export const useFirstTimeUser = (): FirstTimeUserStatus => {
       !hasCompletedOnboarding &&
       (!pointsDetail || pointsDetail.total_points === 0)
     );
-  }, [isNewUser, hasCompletedOnboarding, pointsDetail]);
+  }, [isNewUser, hasCompletedOnboarding, pointsDetail, user]);
 
   return {
     isFirstTime,

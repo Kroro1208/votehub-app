@@ -259,7 +259,7 @@ export const usePostLimits = () => {
     if (user?.id) {
       checkPostLimit();
     }
-  }, [user?.id]);
+  }, [user?.id, checkPostLimit]);
 
   return {
     postLimitStatus,
