@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { VscBell, VscBellDot } from "react-icons/vsc";
 import { MessageSquare, Reply, Clock, TrendingUp } from "lucide-react";
 import { useNotifications } from "../../hooks/useNotifications";
@@ -13,6 +13,15 @@ export default function NotificationDropdown() {
   const navigate = useNavigate();
   const { notifications, unreadCount, markAsRead, markAllAsRead } =
     useNotifications();
+
+  // Debug logging for notification bell icon
+  useEffect(() => {
+    console.log("NotificationDropdown render:", {
+      unreadCount,
+      notifications: notifications.length,
+      hasUnreadNotifications: notifications.some((n) => !n.read),
+    });
+  }, [unreadCount, notifications]);
 
   const handleNotificationClick = async (
     notificationId: number,
@@ -87,7 +96,7 @@ export default function NotificationDropdown() {
           />
 
           {/* 通知リスト */}
-          <div className="absolute right-0 top-full mt-2 w-80 bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50 max-h-96 overflow-hidden">
+          <div className="absolute right-0 top-full mt-2 w-80 bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50 max-h-[500px] overflow-visible">
             {/* ヘッダー */}
             <div className="p-4 border-b border-gray-700 flex justify-between items-center">
               <h3 className="text-white font-semibold">通知</h3>
@@ -102,7 +111,7 @@ export default function NotificationDropdown() {
             </div>
 
             {/* 通知リスト */}
-            <div className="max-h-80 overflow-y-auto">
+            <div className="max-h-60 overflow-y-auto">
               {notifications.length === 0 ? (
                 <div className="p-4 text-center text-gray-400">
                   通知はありません
@@ -157,17 +166,15 @@ export default function NotificationDropdown() {
             </div>
 
             {/* フッター */}
-            {notifications.length > 0 && (
-              <div className="p-3 border-t border-gray-700 text-center">
-                <Link
-                  to="/notifications"
-                  className="text-sm text-blue-400 hover:text-blue-300"
-                  onClick={() => setIsOpen(false)}
-                >
-                  すべての通知を見る
-                </Link>
-              </div>
-            )}
+            <div className="p-3 border-t border-gray-700 text-center">
+              <Link
+                to="/notifications"
+                className="text-sm text-blue-400 hover:text-blue-300"
+                onClick={() => setIsOpen(false)}
+              >
+                すべての通知を見る
+              </Link>
+            </div>
           </div>
         </>
       )}

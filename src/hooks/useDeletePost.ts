@@ -120,7 +120,9 @@ export const useDeletePost = () => {
             queryKey[0] === "popular-posts" ||
             queryKey[0] === "completed-posts" ||
             queryKey[0] === "nestedPosts" ||
-            queryKey[0] === "bookmarks"
+            queryKey[0] === "bookmarks" ||
+            queryKey[0] === "notifications" ||
+            queryKey[0] === "unread-notifications-count"
           );
         },
       });

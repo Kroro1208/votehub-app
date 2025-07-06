@@ -67,15 +67,20 @@ export const useNotifications = () => {
     queryFn: async (): Promise<number> => {
       if (!user?.id) return 0;
 
-      const { data, error } = await supabase.rpc(
-        "get_unread_notification_count",
-        {
-          p_user_id: user.id,
-        },
-      );
+      // まずは直接クエリで未読通知数を取得
+      const { count, error } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("read", false);
 
-      if (error) throw error;
-      return data || 0;
+      if (error) {
+        console.error("Error fetching unread count:", error);
+        throw error;
+      }
+
+      console.log("Unread count from direct query:", count);
+      return count || 0;
     },
     enabled: !!user?.id,
   });
@@ -84,10 +89,11 @@ export const useNotifications = () => {
   const markAsRead = async (notificationId: number) => {
     if (!user?.id) return false;
 
-    const { data, error } = await supabase.rpc("mark_notification_as_read", {
-      p_notification_id: notificationId,
-      p_user_id: user.id,
-    });
+    const { data, error } = await supabase
+      .from("notifications")
+      .update({ read: true })
+      .eq("id", notificationId)
+      .eq("user_id", user.id);
 
     if (error) throw error;
 
@@ -104,12 +110,11 @@ export const useNotifications = () => {
   const markAllAsRead = async () => {
     if (!user?.id) return 0;
 
-    const { data, error } = await supabase.rpc(
-      "mark_all_notifications_as_read",
-      {
-        p_user_id: user.id,
-      },
-    );
+    const { data, error } = await supabase
+      .from("notifications")
+      .update({ read: true })
+      .eq("user_id", user.id)
+      .eq("read", false);
 
     if (error) throw error;
 

@@ -246,7 +246,6 @@ const PostDetail = ({ postId }: Props) => {
 
       if (now > deadline) {
         try {
-          // 手動で期限通知をトリガー
           const { error } = await supabase.rpc(
             "trigger_deadline_notifications_for_post",
             {
