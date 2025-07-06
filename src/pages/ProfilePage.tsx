@@ -11,8 +11,11 @@ import {
   TrendingUp,
   MessageCircle,
   Settings,
+  Heart,
+  Award,
 } from "lucide-react";
 import PostItem from "../components/Post/PostItem";
+import { useUserEmpathyPoints } from "../hooks/useEmpathyPoints";
 
 interface UserStats {
   postCount: number;
@@ -95,6 +98,10 @@ const ProfilePage = () => {
     enabled: !!targetUserId,
   });
 
+  // 共感ポイントを取得
+  const { data: empathyData, isPending: empathyLoading } =
+    useUserEmpathyPoints(targetUserId);
+
   if (!targetUserId) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -110,7 +117,7 @@ const ProfilePage = () => {
     );
   }
 
-  if (postsLoading || statsLoading) return <Loading />;
+  if (postsLoading || statsLoading || empathyLoading) return <Loading />;
   if (postsError) return <ErrorMessage error={postsError} />;
   if (statsError) return <ErrorMessage error={statsError} />;
 
@@ -170,7 +177,7 @@ const ProfilePage = () => {
               )}
 
               {/* 統計情報 */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="text-center p-3 bg-gray-100 rounded-lg">
                   <div className="flex items-center justify-center mb-1">
                     <TrendingUp size={16} className="text-blue-500" />
@@ -200,6 +207,30 @@ const ProfilePage = () => {
                   </div>
                   <div className="text-sm text-gray-500">コメント</div>
                 </div>
+
+                {/* 共感ポイント統計 */}
+                <div className="text-center p-3 bg-gradient-to-br from-red-50 to-pink-50 rounded-lg border border-red-100">
+                  <div className="flex items-center justify-center mb-1">
+                    <Heart size={16} className="text-red-500" />
+                  </div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {empathyData?.empathy_points || 0}
+                  </div>
+                  <div className="text-sm text-gray-500">共感pt</div>
+                </div>
+
+                {/* 共感ランキング */}
+                {empathyData?.empathy_rank && (
+                  <div className="text-center p-3 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg border border-yellow-100">
+                    <div className="flex items-center justify-center mb-1">
+                      <Award size={16} className="text-yellow-500" />
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      #{empathyData.empathy_rank}
+                    </div>
+                    <div className="text-sm text-gray-500">共感ランク</div>
+                  </div>
+                )}
 
                 <div className="text-center p-3 bg-gray-100 rounded-lg">
                   <div className="flex items-center justify-center mb-1">

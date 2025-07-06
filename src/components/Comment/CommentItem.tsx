@@ -109,7 +109,11 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
             <span className="text-xs text-gray-400">
               {formatDate(comment.created_at)}
             </span>
-            <CommentVotes commentId={comment.id} postId={postId} />
+            <CommentVotes
+              commentId={comment.id}
+              postId={postId}
+              authorId={comment.user_id}
+            />
           </div>
         </div>
 

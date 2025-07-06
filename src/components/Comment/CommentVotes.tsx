@@ -8,10 +8,12 @@ import {
   mostVotedCommentAtomFamily,
   updateCommentVotes,
 } from "../../stores/CommentVoteAtom";
+import { Heart, Skull } from "lucide-react";
 
 interface VoteProps {
   commentId: number;
   postId: number; // 追加: どのポストに属するコメントかを識別するため
+  authorId?: string; // コメント作者のID（共感ポイント表示用）
 }
 
 interface CommentVote {
@@ -37,10 +39,11 @@ const getCommentVotes = async (commentId: number): Promise<CommentVote[]> => {
   return data as CommentVote[];
 };
 
-const CommentVotes = ({ commentId, postId }: VoteProps) => {
+const CommentVotes = ({ commentId, postId, authorId }: VoteProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isVoting, setIsVoting] = useState(false);
+  const [showEmpathyFeedback, setShowEmpathyFeedback] = useState(false);
   const [, setVotesState] = useAtom(commentVotesAtomFamily); // コメントごとのリアクションを管理するsetter
   const [, setMostVotedState] = useAtom(mostVotedCommentAtomFamily); // postに紐づくコメントの最も多いリアクションのsetter
 
@@ -58,6 +61,8 @@ const CommentVotes = ({ commentId, postId }: VoteProps) => {
 
   const upVotes = votes?.filter((item) => item.vote === 1).length || 0;
   const downVotes = votes?.filter((item) => item.vote === -1).length || 0;
+  const totalReactions = upVotes + downVotes; // ❤️と💀の合計
+  const empathyPoints = totalReactions * 0.5; // 共感ポイント計算（両方とも加算）
 
   // totalVotesが変更されたらJotaiのstateも更新
   useEffect(() => {
@@ -85,6 +90,30 @@ const CommentVotes = ({ commentId, postId }: VoteProps) => {
 
   // vote関数を最適化: 処理結果を返す(useMutation用)
   const vote = async (voteValue: number, commentId: number, userId: string) => {
+    // 処理結果を保持する変数
+    let result: VoteResult;
+
+    // まず削除を試みる（既存投票がある場合）
+    const { data: deletedData, error: deleteError } = await supabase
+      .from("comment_votes")
+      .delete()
+      .eq("comment_id", commentId)
+      .eq("user_id", userId)
+      .eq("vote", voteValue)
+      .select();
+
+    // 削除エラーが404以外の場合のみエラーとして処理
+    if (deleteError && deleteError.code !== "PGRST116") {
+      throw new Error(deleteError.message);
+    }
+
+    // 削除が成功した場合（同じボタンを2回押した = 取り消し）
+    if (deletedData && deletedData.length > 0) {
+      result = { action: "deleted", data: deletedData };
+      return result;
+    }
+
+    // 削除されなかった場合、他の投票があるかチェック
     const { data: existingVote } = await supabase
       .from("comment_votes")
       .select("*")
@@ -92,32 +121,17 @@ const CommentVotes = ({ commentId, postId }: VoteProps) => {
       .eq("user_id", userId)
       .maybeSingle();
 
-    // 処理結果を保持する変数
-    let result: VoteResult;
-
-    // すでに投票していた場合
     if (existingVote) {
-      // 同じ投票(upかdownか)については取り消し
-      if (existingVote.vote === voteValue) {
-        const { data, error } = await supabase
-          .from("comment_votes")
-          .delete()
-          .eq("id", existingVote.id)
-          .select();
-
-        if (error) throw new Error(error.message);
-        result = { action: "deleted", data };
-      } else {
-        // 異なる投票(upかdownか)については更新
-        const { data, error } = await supabase
-          .from("comment_votes")
-          .update({ vote: voteValue })
-          .eq("id", existingVote.id)
-          .select();
-        if (error) throw new Error(error.message);
-        result = { action: "updated", data };
-      }
+      // 異なる投票があった場合は更新
+      const { data, error } = await supabase
+        .from("comment_votes")
+        .update({ vote: voteValue })
+        .eq("id", existingVote.id)
+        .select();
+      if (error) throw new Error(error.message);
+      result = { action: "updated", data };
     } else {
+      // 投票がない場合は新規作成
       const { data, error } = await supabase
         .from("comment_votes")
         .insert({ comment_id: commentId, user_id: userId, vote: voteValue })
@@ -224,6 +238,15 @@ const CommentVotes = ({ commentId, postId }: VoteProps) => {
       console.error(err);
     },
     onSettled: () => {
+      // 共感ポイントのフィードバックを表示
+      if (authorId && authorId !== user?.id) {
+        setShowEmpathyFeedback(true);
+        setTimeout(() => setShowEmpathyFeedback(false), 2000);
+      }
+      // ユーザーポイントも更新
+      queryClient.invalidateQueries({
+        queryKey: ["userEmpathyPoints", authorId],
+      });
       // 処理完了後にデータを再検証（必要な場合のみ）
       queryClient.invalidateQueries({ queryKey: ["comment_votes", commentId] });
     },
@@ -233,28 +256,62 @@ const CommentVotes = ({ commentId, postId }: VoteProps) => {
   if (error) return <div>{error.message}</div>;
 
   return (
-    <div className="flex gap-5">
-      <button
-        type="button"
-        disabled={isVoting}
-        onClick={() => mutate(1)}
-        className={`cursor-pointer px-3 py-1 rounded transition-colors duration-150 flex gap-2
-            ${isVoting ? "opacity-50" : ""}
-            ${userVote === 1 ? "bg-green-500 text-white" : "bg-gray-200 text-black"}`}
-      >
-        ❤️<p>{upVotes}</p>
-      </button>
-      <button
-        type="button"
-        disabled={isVoting}
-        onClick={() => mutate(-1)}
-        className={`cursor-pointer px-3 py-1 rounded transition-colors duration-150 flex gap-2
-            ${isVoting ? "opacity-50" : ""}
-            ${userVote === -1 ? "bg-red-500 text-white" : "bg-gray-200 text-black"}`}
-      >
-        ☠️
-        <p>{downVotes}</p>
-      </button>
+    <div className="relative">
+      <div className="flex gap-3 items-center">
+        <button
+          type="button"
+          disabled={isVoting || !user}
+          onClick={() => mutate(1)}
+          className={`cursor-pointer px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 relative
+              ${isVoting ? "opacity-50" : ""}
+              ${!user ? "cursor-not-allowed opacity-50" : ""}
+              ${
+                userVote === 1
+                  ? "bg-red-500 text-white shadow-lg scale-105"
+                  : "bg-gray-700 text-gray-300 hover:bg-red-600 hover:text-white"
+              }`}
+          title={!user ? "ログインが必要です" : "共感を示す"}
+        >
+          <Heart size={16} className={userVote === 1 ? "fill-current" : ""} />
+          <span className="font-medium">{upVotes}</span>
+        </button>
+
+        <button
+          type="button"
+          disabled={isVoting || !user}
+          onClick={() => mutate(-1)}
+          className={`cursor-pointer px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-2
+              ${isVoting ? "opacity-50" : ""}
+              ${!user ? "cursor-not-allowed opacity-50" : ""}
+              ${
+                userVote === -1
+                  ? "bg-gray-600 text-white shadow-lg scale-105"
+                  : "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white"
+              }`}
+          title={!user ? "ログインが必要です" : "反対意見を示す"}
+        >
+          <Skull size={16} className={userVote === -1 ? "fill-current" : ""} />
+          <span className="font-medium">{downVotes}</span>
+        </button>
+
+        {/* 共感ポイント表示 */}
+        {totalReactions > 0 && (
+          <div className="px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800">
+            +{empathyPoints}pt
+          </div>
+        )}
+      </div>
+
+      {/* 共感ポイント獲得フィードバック */}
+      {showEmpathyFeedback && (
+        <div
+          className="absolute -top-8 left-1/2 transform -translate-x-1/2 
+                        bg-green-500 text-white text-xs px-2 py-1 rounded-md
+                        animate-bounce z-10"
+        >
+          +0.5pt 共感ポイント!
+        </div>
+      )}
     </div>
   );
 };
