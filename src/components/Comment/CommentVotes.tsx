@@ -54,10 +54,36 @@ const CommentVotes = ({ commentId, postId, authorId }: VoteProps) => {
   } = useQuery<CommentVote[], Error>({
     queryKey: ["comment_votes", commentId],
     queryFn: () => getCommentVotes(commentId),
-    // 不要な自動リフェッチを無効化（必要に応じて調整）
+    // リアルタイム更新のため短いstaleTimeに設定
+    staleTime: 1000 * 10, // 10秒間はデータを新鮮として扱う
     refetchInterval: false,
-    staleTime: 1000 * 60 * 5, // 5分間はデータを新鮮として扱う
   });
+
+  // リアルタイム更新のためのSubscription
+  useEffect(() => {
+    const channel = supabase
+      .channel(`comment_votes_${commentId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "comment_votes",
+          filter: `comment_id=eq.${commentId}`,
+        },
+        () => {
+          // comment_votesテーブルに変更があった場合、クエリを無効化してリフェッチ
+          queryClient.invalidateQueries({
+            queryKey: ["comment_votes", commentId],
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [commentId, queryClient]);
 
   const upVotes = votes?.filter((item) => item.vote === 1).length || 0;
   const downVotes = votes?.filter((item) => item.vote === -1).length || 0;
