@@ -13,6 +13,7 @@ import { useAuth } from "../../hooks/useAuth";
 
 interface PostProps {
   postId: number;
+  voteDeadline?: string | null;
 }
 
 interface NewComment {
@@ -61,12 +62,18 @@ const getComment = async (postId: number): Promise<Comment[]> => {
   return data as Comment[];
 };
 
-const CommentSection = ({ postId }: PostProps) => {
+const CommentSection = ({ postId, voteDeadline }: PostProps) => {
   const [newCommentText, setNewCommentText] = useState<string>("");
   const { user, signInWithGoogle } = useAuth();
   const [isFocused, setIsFocused] = useState(false);
 
   const queryClient = useQueryClient();
+
+  // 投票期限が過ぎているかチェックする関数
+  const isDeadlinePassed = () => {
+    if (!voteDeadline) return false;
+    return new Date() > new Date(voteDeadline);
+  };
 
   const {
     data: comments,
@@ -155,68 +162,81 @@ const CommentSection = ({ postId }: PostProps) => {
       {/* コメント入力セクション */}
       {user ? (
         <div className="mb-8">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div
-              className={`relative border ${
-                isFocused ? "border-green-500" : "border-gray-600"
-              } rounded-lg transition-all duration-200 shadow-sm`}
-            >
-              <textarea
-                value={newCommentText}
-                rows={3}
-                placeholder="この投稿についてコメントを書く..."
-                onChange={(e) => setNewCommentText(e.target.value)}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
-                className="w-full bg-gray-700 text-white p-4 rounded-lg resize-none outline-none placeholder-gray-400"
+          {isDeadlinePassed() ? (
+            <div className="py-8 px-6 bg-gray-700/30 rounded-lg border border-gray-600 text-center">
+              <MessageSquareText
+                size={32}
+                className="mx-auto mb-3 text-gray-500"
               />
-
-              <div className="absolute bottom-2 right-3 text-xs text-gray-400">
-                {newCommentText.length}/500
-              </div>
+              <p className="text-gray-300 mb-1">投票期限が終了しています</p>
+              <p className="text-gray-400 text-sm">
+                この投稿の期限が過ぎているため、新しいコメントを投稿することはできません。
+              </p>
             </div>
-
-            <div className="flex justify-between items-center">
-              <div className="text-xs text-gray-400">
-                <span className="text-green-400 font-medium">
-                  {user.email?.split("@")[0] || "匿名ユーザー"}
-                </span>{" "}
-                として投稿します
-              </div>
-
-              <button
-                type="submit"
-                disabled={!newCommentText.trim() || isPending}
-                className={`px-5 py-2 rounded-md font-medium transition-all duration-200 flex items-center gap-2
-                  ${
-                    !newCommentText.trim() || isPending
-                      ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                      : "bg-green-600 hover:bg-green-700 text-white"
-                  }`}
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div
+                className={`relative border ${
+                  isFocused ? "border-green-500" : "border-gray-600"
+                } rounded-lg transition-all duration-200 shadow-sm`}
               >
-                {isPending ? (
-                  <>
-                    <Loader2 className="animate-spin" size={18} />
-                    <span>投稿中</span>
-                  </>
-                ) : (
-                  <>
-                    <Send size={18} />
-                    <span>コメントを投稿</span>
-                  </>
-                )}
-              </button>
-            </div>
+                <textarea
+                  value={newCommentText}
+                  rows={3}
+                  placeholder="この投稿についてコメントを書く..."
+                  onChange={(e) => setNewCommentText(e.target.value)}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
+                  className="w-full bg-gray-700 text-white p-4 rounded-lg resize-none outline-none placeholder-gray-400"
+                />
 
-            {isError && (
-              <div className="p-3 bg-red-900/30 border border-red-700 rounded-md text-red-400 text-sm flex items-center gap-2">
-                <AlertCircle size={16} />
-                <span>
-                  コメント登録中にエラーが発生しました。再度お試しください。
-                </span>
+                <div className="absolute bottom-2 right-3 text-xs text-gray-400">
+                  {newCommentText.length}/500
+                </div>
               </div>
-            )}
-          </form>
+
+              <div className="flex justify-between items-center">
+                <div className="text-xs text-gray-400">
+                  <span className="text-green-400 font-medium">
+                    {user.email?.split("@")[0] || "匿名ユーザー"}
+                  </span>{" "}
+                  として投稿します
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={!newCommentText.trim() || isPending}
+                  className={`px-5 py-2 rounded-md font-medium transition-all duration-200 flex items-center gap-2
+                    ${
+                      !newCommentText.trim() || isPending
+                        ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                        : "bg-green-600 hover:bg-green-700 text-white"
+                    }`}
+                >
+                  {isPending ? (
+                    <>
+                      <Loader2 className="animate-spin" size={18} />
+                      <span>投稿中</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send size={18} />
+                      <span>コメントを投稿</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {isError && (
+                <div className="p-3 bg-red-900/30 border border-red-700 rounded-md text-red-400 text-sm flex items-center gap-2">
+                  <AlertCircle size={16} />
+                  <span>
+                    コメント登録中にエラーが発生しました。再度お試しください。
+                  </span>
+                </div>
+              )}
+            </form>
+          )}
         </div>
       ) : (
         <div className="py-8 px-6 bg-gray-700/30 rounded-lg border border-gray-600 text-center mb-8">
@@ -263,7 +283,12 @@ const CommentSection = ({ postId }: PostProps) => {
           </div>
         ) : (
           commentTree.map((comment) => (
-            <CommentItem key={comment.id} comment={comment} postId={postId} />
+            <CommentItem
+              key={comment.id}
+              comment={comment}
+              postId={postId}
+              voteDeadline={voteDeadline}
+            />
           ))
         )}
       </div>

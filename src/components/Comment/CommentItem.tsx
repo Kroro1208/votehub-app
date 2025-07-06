@@ -11,6 +11,7 @@ interface CommentItemProps {
     children: Comment[];
   };
   postId: number;
+  voteDeadline?: string | null;
 }
 const createReply = async (
   reply: string,
@@ -32,13 +33,19 @@ const createReply = async (
   if (error) throw new Error(error.message);
 };
 
-const CommentItem = ({ comment, postId }: CommentItemProps) => {
+const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
   const [showReply, setShowReply] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { user } = useAuth();
   const [isFocused, setIsFocused] = useState(false);
   const [newReplytText, setNewReplyText] = useState<string>("");
   const queryClient = useQueryClient();
+
+  // 投票期限が過ぎているかチェックする関数
+  const isDeadlinePassed = () => {
+    if (!voteDeadline) return false;
+    return new Date() > new Date(voteDeadline);
+  };
 
   const { mutate, isError, isPending } = useMutation({
     mutationFn: (reply: string) => {
@@ -108,14 +115,18 @@ const CommentItem = ({ comment, postId }: CommentItemProps) => {
 
         {/* アクションボタン */}
         <div className="flex justify-between items-center mt-2">
-          <button
-            type="button"
-            onClick={() => setShowReply((prev) => !prev)}
-            className="flex items-center text-sm font-medium text-blue-400 hover:text-blue-300"
-          >
-            <MessageSquare size={16} className="mr-1" />
-            <span>{showReply ? "キャンセル" : "返信する"}</span>
-          </button>
+          {!isDeadlinePassed() ? (
+            <button
+              type="button"
+              onClick={() => setShowReply((prev) => !prev)}
+              className="flex items-center text-sm font-medium text-blue-400 hover:text-blue-300"
+            >
+              <MessageSquare size={16} className="mr-1" />
+              <span>{showReply ? "キャンセル" : "返信する"}</span>
+            </button>
+          ) : (
+            <span className="text-sm text-gray-500">投票期限終了</span>
+          )}
 
           {comment.children && comment.children.length > 0 && (
             <button
@@ -221,6 +232,7 @@ const CommentItem = ({ comment, postId }: CommentItemProps) => {
                   key={child.id}
                   comment={child as Comment & { children: Comment[] }}
                   postId={postId}
+                  voteDeadline={voteDeadline}
                 />
               ))}
             </div>

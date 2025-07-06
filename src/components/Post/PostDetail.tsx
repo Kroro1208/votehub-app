@@ -434,7 +434,7 @@ const PostDetail = ({ postId }: Props) => {
         voteDeadline={data.vote_deadline}
         postTitle={data.title}
       />
-      <CommentSection postId={postId} />
+      <CommentSection postId={postId} voteDeadline={data.vote_deadline} />
 
       {/* 派生質問セクション */}
       <NestedPostSection
