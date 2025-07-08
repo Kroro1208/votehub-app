@@ -171,7 +171,7 @@ const createTag = async (name: string, communityId: number) => {
         retryCount++;
         if (retryCount >= maxRetries) {
           throw new Error(
-            "ID生成でエラーが発生しました。もう一度お試しください。"
+            "ID生成でエラーが発生しました。もう一度お試しください。",
           );
         }
         continue;
@@ -361,7 +361,7 @@ const CreatePost = () => {
     // 投稿制限チェック
     if (!postLimitStatus?.can_post) {
       toast.error(
-        "本日の投稿制限に達しています。ポイントを使用して制限を解除するか、明日再度お試しください。"
+        "本日の投稿制限に達しています。ポイントを使用して制限を解除するか、明日再度お試しください。",
       );
       return;
     }
@@ -409,7 +409,7 @@ const CreatePost = () => {
     // タグ名の重複チェック
     if (
       tagsData?.some(
-        (tag) => tag.name.toLowerCase() === newTagName.trim().toLowerCase()
+        (tag) => tag.name.toLowerCase() === newTagName.trim().toLowerCase(),
       )
     ) {
       toast.error(t("create.post.error.tag.duplicate"));
@@ -533,7 +533,7 @@ const CreatePost = () => {
                           const lines = currentContent.split("\n");
                           const proPrefix = t("create.post.content.pro.prefix");
                           const proIndex = lines.findIndex((line) =>
-                            line.startsWith(proPrefix)
+                            line.startsWith(proPrefix),
                           );
                           if (proIndex !== -1) {
                             lines[proIndex] = `${proPrefix} ${e.target.value}`;
@@ -560,19 +560,19 @@ const CreatePost = () => {
                           const conPrefix = t("create.post.content.con.prefix");
                           const proPrefix = t("create.post.content.pro.prefix");
                           const conIndex = lines.findIndex((line) =>
-                            line.startsWith(conPrefix)
+                            line.startsWith(conPrefix),
                           );
                           if (conIndex !== -1) {
                             lines[conIndex] = `${conPrefix} ${e.target.value}`;
                           } else {
                             const proIndex = lines.findIndex((line) =>
-                              line.startsWith(proPrefix)
+                              line.startsWith(proPrefix),
                             );
                             if (proIndex !== -1) {
                               lines.splice(
                                 proIndex + 1,
                                 0,
-                                `${conPrefix} ${e.target.value}`
+                                `${conPrefix} ${e.target.value}`,
                               );
                             } else {
                               lines.push(`${conPrefix} ${e.target.value}`);
@@ -589,7 +589,7 @@ const CreatePost = () => {
                       <Textarea
                         rows={4}
                         placeholder={t(
-                          "create.post.content.detail.placeholder"
+                          "create.post.content.detail.placeholder",
                         )}
                         className="text-sm resize-none border-gray-200 dark:border-gray-600"
                         onChange={(e) => {
@@ -601,7 +601,7 @@ const CreatePost = () => {
                           const filteredLines = lines.filter(
                             (line) =>
                               line.startsWith(proPrefix) ||
-                              line.startsWith(conPrefix)
+                              line.startsWith(conPrefix),
                           );
                           if (e.target.value.trim()) {
                             filteredLines.push("", e.target.value);
@@ -699,7 +699,7 @@ const CreatePost = () => {
                           dateFormat="yyyy/MM/dd HH:mm"
                           timeIntervals={15}
                           placeholderText={t(
-                            "create.post.deadline.placeholder"
+                            "create.post.deadline.placeholder",
                           )}
                           className="h-10 min-w-72 flex items-center border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 transition-all duration-300 rounded-xl dir-rtl text-left pl-3"
                         />
@@ -733,7 +733,7 @@ const CreatePost = () => {
                         value={field.value?.toString() || ""}
                         onValueChange={(value) => {
                           field.onChange(
-                            value === "none" ? null : parseInt(value)
+                            value === "none" ? null : parseInt(value),
                           );
                         }}
                       >
