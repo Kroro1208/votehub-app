@@ -2,10 +2,16 @@ import { useAtomValue } from "jotai";
 import { postsAtom } from "../stores/PostAtom";
 import { PostType } from "./Post/PostList";
 import { useHandlePost } from "../hooks/useHandlePost";
+import { useTagRanking } from "../hooks/useTagRanking";
 import { Link } from "react-router";
 
 const RightPanel = () => {
   const posts = useAtomValue(postsAtom);
+  const {
+    data: tagRanking,
+    isPending: isTagLoading,
+    error: tagError,
+  } = useTagRanking(3);
   const urgentPost = posts
     .filter((post) => {
       if (!post.vote_deadline) return false;
@@ -42,16 +48,32 @@ const RightPanel = () => {
         <h3 className="font-semibold text-slate-800 mb-3">
           🔥 トレンドトピック
         </h3>
-        {/* TODO */}
         <div className="space-y-3">
-          {["環境問題", "テクノロジー", "スポーツ"].map((topic, i) => (
-            <div key={i} className="flex items-center justify-between">
-              <span className="text-sm text-slate-600">#{topic}</span>
-              <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">
-                {Math.floor(Math.random() * 50 + 10)}票
-              </span>
+          {isTagLoading ? (
+            <p className="text-sm text-slate-500">読み込み中...</p>
+          ) : tagError ? (
+            <div className="text-sm text-red-500">
+              <p>データ取得エラー</p>
+              <p className="text-xs">{tagError.message}</p>
             </div>
-          ))}
+          ) : tagRanking && tagRanking.length > 0 ? (
+            tagRanking.map((tag) => (
+              <Link
+                key={tag.id}
+                to={`/tags/${tag.id}/posts`}
+                className="flex items-center justify-between hover:bg-slate-50 p-2 rounded-lg transition-colors group"
+              >
+                <span className="text-sm text-slate-600 group-hover:text-slate-800">
+                  #{tag.name}
+                </span>
+                <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full group-hover:bg-orange-100 group-hover:text-orange-600 transition-colors">
+                  {tag.vote_count}票
+                </span>
+              </Link>
+            ))
+          ) : (
+            <p className="text-sm text-slate-500">トレンドタグがありません</p>
+          )}
         </div>
       </div>
 

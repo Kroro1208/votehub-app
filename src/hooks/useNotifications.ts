@@ -79,7 +79,6 @@ export const useNotifications = () => {
         throw error;
       }
 
-      console.log("Unread count from direct query:", count);
       return count || 0;
     },
     enabled: !!user?.id,

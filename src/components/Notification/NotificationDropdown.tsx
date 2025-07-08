@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { VscBell, VscBellDot } from "react-icons/vsc";
 import { MessageSquare, Reply, Clock, TrendingUp } from "lucide-react";
 import { useNotifications } from "../../hooks/useNotifications";
@@ -13,15 +13,6 @@ export default function NotificationDropdown() {
   const navigate = useNavigate();
   const { notifications, unreadCount, markAsRead, markAllAsRead } =
     useNotifications();
-
-  // Debug logging for notification bell icon
-  useEffect(() => {
-    console.log("NotificationDropdown render:", {
-      unreadCount,
-      notifications: notifications.length,
-      hasUnreadNotifications: notifications.some((n) => !n.read),
-    });
-  }, [unreadCount, notifications]);
 
   const handleNotificationClick = async (
     notificationId: number,
