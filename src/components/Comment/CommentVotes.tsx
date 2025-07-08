@@ -43,7 +43,6 @@ const CommentVotes = ({ commentId, postId, authorId }: VoteProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isVoting, setIsVoting] = useState(false);
-  const [showEmpathyFeedback, setShowEmpathyFeedback] = useState(false);
   const [, setVotesState] = useAtom(commentVotesAtomFamily); // コメントごとのリアクションを管理するsetter
   const [, setMostVotedState] = useAtom(mostVotedCommentAtomFamily); // postに紐づくコメントの最も多いリアクションのsetter
 
@@ -264,11 +263,6 @@ const CommentVotes = ({ commentId, postId, authorId }: VoteProps) => {
       console.error(err);
     },
     onSettled: () => {
-      // 共感ポイントのフィードバックを表示
-      if (authorId && authorId !== user?.id) {
-        setShowEmpathyFeedback(true);
-        setTimeout(() => setShowEmpathyFeedback(false), 2000);
-      }
       // ユーザーポイントも更新
       queryClient.invalidateQueries({
         queryKey: ["userEmpathyPoints", authorId],
@@ -320,24 +314,13 @@ const CommentVotes = ({ commentId, postId, authorId }: VoteProps) => {
           <span className="font-medium">{downVotes}</span>
         </button>
 
-        {/* 共感ポイント表示 */}
-        {totalReactions > 0 && (
+        {/* 共感ポイント表示 - コメント主のみに表示 */}
+        {totalReactions > 0 && authorId === user?.id && (
           <div className="px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800">
             +{empathyPoints}pt
           </div>
         )}
       </div>
-
-      {/* 共感ポイント獲得フィードバック */}
-      {showEmpathyFeedback && (
-        <div
-          className="absolute -top-8 left-1/2 transform -translate-x-1/2 
-                        bg-green-500 text-white text-xs px-2 py-1 rounded-md
-                        animate-bounce z-10"
-        >
-          +0.5pt 共感ポイント!
-        </div>
-      )}
     </div>
   );
 };
