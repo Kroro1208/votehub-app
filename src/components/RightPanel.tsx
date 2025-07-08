@@ -11,7 +11,7 @@ const RightPanel = () => {
     data: tagRanking,
     isPending: isTagLoading,
     error: tagError,
-  } = useTagRanking(3);
+  } = useTagRanking(5);
   const urgentPost = posts
     .filter((post) => {
       if (!post.vote_deadline) return false;
@@ -44,11 +44,11 @@ const RightPanel = () => {
 
   return (
     <div className="fixed right-6 top-32 w-72 hidden xl:block">
-      <div className="bg-yellow-100 rounded-xl shadow-sm border border-slate-200 p-4 mb-4">
+      <div className="bg-yellow-100 rounded-xl shadow-sm border border-slate-200 p-4 mb-2">
         <h3 className="font-semibold text-slate-800 mb-3">
           🔥 トレンドトピック
         </h3>
-        <div className="space-y-3">
+        <div>
           {isTagLoading ? (
             <p className="text-sm text-slate-500">読み込み中...</p>
           ) : tagError ? (
