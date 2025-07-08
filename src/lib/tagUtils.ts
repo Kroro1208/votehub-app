@@ -297,17 +297,138 @@ export const getTagRecommendationLevel = (
 
 // タグの関連度を計算（他のタグとの共起関係）
 export const calculateTagRelation = (
-  tagId: number,
-  otherTagId: number,
-  // 実際の実装では、共通の投稿数などを基に計算
-  sharedPostCount: number = 0,
-  totalPostCount: number = 0,
+  sharedPostCount: number,
+  totalUniquePostCount: number,
 ): number => {
-  if (totalPostCount === 0) return 0;
+  if (totalUniquePostCount === 0) return 0;
 
   // Jaccard係数を使用した関連度計算
-  const relationScore = sharedPostCount / totalPostCount;
+  // 関連度 = 共通投稿数 / (タグA投稿数 + タグB投稿数 - 共通投稿数)
+  const relationScore = sharedPostCount / totalUniquePostCount;
   return Math.round(relationScore * 100) / 100;
+};
+
+// タグIDから関連度を計算する関数（Supabaseクエリ用）
+export const calculateTagRelationFromIds = async (
+  tagId: number,
+  otherTagId: number,
+): Promise<number> => {
+  try {
+    // 動的インポートでSupabaseクライアントを取得
+    const { supabase } = await import("../supabase-client");
+
+    // 1. tagIdを持つ投稿数を取得
+    const { data: tagAPosts, error: errorA } = await supabase
+      .from("posts")
+      .select("id")
+      .eq("tag_id", tagId);
+
+    if (errorA) {
+      console.error("タグA投稿取得エラー:", errorA);
+      return 0;
+    }
+
+    // 2. otherTagIdを持つ投稿数を取得
+    const { data: tagBPosts, error: errorB } = await supabase
+      .from("posts")
+      .select("id")
+      .eq("tag_id", otherTagId);
+
+    if (errorB) {
+      console.error("タグB投稿取得エラー:", errorB);
+      return 0;
+    }
+
+    const tagACount = tagAPosts?.length || 0;
+    const tagBCount = tagBPosts?.length || 0;
+
+    // 投稿数が少ない場合は関連度を低く設定
+    if (tagACount < 2 || tagBCount < 2) {
+      return 0;
+    }
+
+    // 3. 同じコミュニティの投稿で共起をチェック（簡易版）
+    // 実際の共起は複雑なので、ここでは投稿数比率で近似
+    const minCount = Math.min(tagACount, tagBCount);
+    const maxCount = Math.max(tagACount, tagBCount);
+
+    // 投稿数の類似度を関連度とする（0-1の範囲）
+    const similarityScore = minCount / maxCount;
+
+    // コミュニティが同じかどうかもチェック
+    const { data: tagAInfo, error: tagAError } = await supabase
+      .from("tags")
+      .select("community_id")
+      .eq("id", tagId)
+      .single();
+
+    const { data: tagBInfo, error: tagBError } = await supabase
+      .from("tags")
+      .select("community_id")
+      .eq("id", otherTagId)
+      .single();
+
+    if (!tagAError && !tagBError && tagAInfo && tagBInfo) {
+      const sameCommunity = tagAInfo.community_id === tagBInfo.community_id;
+      // 同じコミュニティなら関連度を上げる
+      const communityBonus = sameCommunity ? 0.3 : 0;
+      const finalScore = Math.min(similarityScore + communityBonus, 1);
+
+      return Math.round(finalScore * 100) / 100;
+    }
+
+    return Math.round(similarityScore * 100) / 100;
+  } catch (error) {
+    console.error("タグ関連度計算エラー:", error);
+    return 0;
+  }
+};
+
+// 関連タグ推奨機能
+export const getRelatedTags = async (
+  selectedTagId: number,
+  communityId: number,
+  limit: number = 3,
+): Promise<Array<{ id: number; name: string; relationScore: number }>> => {
+  try {
+    const { supabase } = await import("../supabase-client");
+
+    // 同じコミュニティの他のタグを取得
+    const { data: otherTags, error } = await supabase
+      .from("tags")
+      .select("id, name")
+      .eq("community_id", communityId)
+      .neq("id", selectedTagId);
+
+    if (error || !otherTags) {
+      console.error("関連タグ取得エラー:", error);
+      return [];
+    }
+
+    // 各タグとの関連度を計算
+    const relatedTagsPromises = otherTags.map(async (tag) => {
+      const relationScore = await calculateTagRelationFromIds(
+        selectedTagId,
+        tag.id,
+      );
+      return {
+        id: tag.id,
+        name: tag.name,
+        relationScore,
+      };
+    });
+
+    const relatedTags = await Promise.all(relatedTagsPromises);
+
+    // 関連度順にソートして上位を返す
+    return relatedTags
+      .filter((tag) => tag.relationScore > 0.1) // 最低閾値
+      .sort((a, b) => b.relationScore - a.relationScore)
+      .slice(0, limit);
+  } catch (error) {
+    console.error("関連タグ推奨エラー:", error);
+    return [];
+  }
 };
 
 // タグの検索スコア計算
