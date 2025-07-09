@@ -49,7 +49,10 @@ export const calculateAllExistingQualityScores = async () => {
     };
   } catch (error) {
     console.error("Error in calculateAllExistingQualityScores:", error);
-    return { success: false, error: error.message };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 };
 
@@ -111,7 +114,10 @@ export const calculateAllExistingEmpathyPoints = async () => {
     };
   } catch (error) {
     console.error("Error in calculateAllExistingEmpathyPoints:", error);
-    return { success: false, error: error.message };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 };
 
