@@ -247,7 +247,7 @@ React router + Supabaseで以下のAPI Routesを実装します。
 ### 3. テスト戦略
 
 ```typescript
-// TODO: Jest + React Testing LibraryでServer/Client Componentsテスト
+// TODO: vitest+ React Testing LibraryでServer/Client Componentsテスト
 // TODO: Playwright でE2Eテスト
 // TODO: Supabase Realtimeのテスト
 // TODO: Server Actionsのテスト
