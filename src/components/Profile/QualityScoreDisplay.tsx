@@ -166,7 +166,7 @@ const QualityScoreDisplay: React.FC<QualityScoreDisplayProps> = ({
                 </div>
                 <div className="flex-1">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">
+                    <span className="text-sm text-black font-medium">
                       {score.total_quality_score.toFixed(1)}
                     </span>
                     <span className="text-xs text-gray-500">
