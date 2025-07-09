@@ -11,11 +11,21 @@ import {
   TrendingUp,
   MessageCircle,
   Settings,
-  Heart,
   Award,
 } from "lucide-react";
 import PostItem from "../components/Post/PostItem";
 import { useUserEmpathyPoints } from "../hooks/useEmpathyPoints";
+import { useUserQualityScore } from "../hooks/useQualityScore";
+import {
+  useUserEmpathyScore,
+  useEmpathyRanking,
+} from "../hooks/useEmpathyScore";
+import QualityScoreDisplay from "../components/Profile/QualityScoreDisplay";
+import EmpathyPointsDisplay from "../components/Profile/EmpathyPointsDisplay";
+import { calculateAllExistingScores } from "../utils/calculateExistingScores";
+import { Button } from "../components/ui/button";
+import { RefreshCw } from "lucide-react";
+import { toast } from "react-toastify";
 
 interface UserStats {
   postCount: number;
@@ -98,9 +108,39 @@ const ProfilePage = () => {
     enabled: !!targetUserId,
   });
 
-  // 共感ポイントを取得
+  // 共感ポイントを取得（既存）
   const { data: empathyData, isPending: empathyLoading } =
     useUserEmpathyPoints(targetUserId);
+
+  // 品質度スコアを取得
+  const { data: qualityData, isPending: qualityLoading } =
+    useUserQualityScore(targetUserId);
+
+  // 新しい共感ポイントシステムを取得
+  const { data: empathyScoreData, isPending: empathyScoreLoading } =
+    useUserEmpathyScore(targetUserId);
+
+  // 共感ランキングを取得
+  const { data: empathyRankingData, isPending: empathyRankingLoading } =
+    useEmpathyRanking(targetUserId);
+
+  // スコア計算の実行
+  const handleCalculateScores = async () => {
+    toast.info("スコア計算を開始しています...");
+
+    try {
+      const result = await calculateAllExistingScores();
+
+      if (result.qualityResult.success && result.empathyResult.success) {
+        toast.success("スコア計算が完了しました！ページを更新してください。");
+      } else {
+        toast.error("スコア計算中にエラーが発生しました。");
+      }
+    } catch (error) {
+      console.error("Score calculation error:", error);
+      toast.error("スコア計算に失敗しました。");
+    }
+  };
 
   if (!targetUserId) {
     return (
@@ -117,7 +157,14 @@ const ProfilePage = () => {
     );
   }
 
-  if (postsLoading || statsLoading || empathyLoading) return <Loading />;
+  if (
+    postsLoading ||
+    statsLoading ||
+    empathyLoading ||
+    qualityLoading ||
+    empathyScoreLoading
+  )
+    return <Loading />;
   if (postsError) return <ErrorMessage error={postsError} />;
   if (statsError) return <ErrorMessage error={statsError} />;
 
@@ -208,17 +255,6 @@ const ProfilePage = () => {
                   <div className="text-sm text-gray-500">コメント</div>
                 </div>
 
-                {/* 共感ポイント統計 */}
-                <div className="text-center p-3 bg-gradient-to-br from-red-50 to-pink-50 rounded-lg border border-red-100">
-                  <div className="flex items-center justify-center mb-1">
-                    <Heart size={16} className="text-red-500" />
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {empathyData?.empathy_points || 0}
-                  </div>
-                  <div className="text-sm text-gray-500">共感pt</div>
-                </div>
-
                 {/* 共感ランキング */}
                 {empathyData?.empathy_rank && (
                   <div className="text-center p-3 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg border border-yellow-100">
@@ -252,6 +288,36 @@ const ProfilePage = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* スコア計算ボタン（管理者用） */}
+        {isOwnProfile && (
+          <div className="mb-6">
+            <Button
+              onClick={handleCalculateScores}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+            >
+              <RefreshCw size={16} />
+              既存投稿のスコア計算
+            </Button>
+            <p className="text-sm text-gray-500 mt-2">
+              ※ 過去の投稿の品質度スコアと共感ポイントを計算します
+            </p>
+          </div>
+        )}
+
+        {/* 品質度スコアと共感ポイント表示 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <QualityScoreDisplay
+            qualityData={qualityData || null}
+            isLoading={qualityLoading}
+          />
+          <EmpathyPointsDisplay
+            empathyData={empathyScoreData || null}
+            rankingData={empathyRankingData || null}
+            isLoading={empathyScoreLoading}
+            isRankingLoading={empathyRankingLoading}
+          />
         </div>
 
         {/* 投稿一覧 */}
