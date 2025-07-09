@@ -822,3 +822,257 @@ src/
 - リアルタイム機能のコネクション管理
 - モバイル対応の responsive design
 - アクセシビリティの確保
+
+## 🎯 ユーザー評価システム設計 (GitHub Issue #43)
+
+### 📊 品質度スコア (Quality Score) システム
+
+**設計理念**: 投稿の質と議論活性化能力を総合的に評価
+
+#### 1. 基本計算式
+
+```
+品質度スコア = (投票効率係数 × 40%) + (議論活発係数 × 25%) + (説得効果係数 × 20%) + (継続関心係数 × 15%)
+```
+
+#### 2. 各係数の詳細計算
+
+##### **投票効率係数 (40%)**
+
+```javascript
+投票効率係数 = (総投票数 / 投票期間日数) × 調整係数
+
+// 調整係数
+- 基本係数: 1.0
+- 画像添付: +0.1
+- 詳細な内容 (300文字以上): +0.1
+- 派生質問生成: +0.2
+- 自動拡散達成 (100票): +0.5
+```
+
+##### **議論活発係数 (25%)**
+
+```javascript
+議論活発係数 = (コメント数 × 1.0) + (返信数 × 1.5) + (ネスト投稿数 × 2.0)
+
+// 重み付け理由
+- 返信: より深い議論を促進
+- ネスト投稿: 新たな論点を創出
+```
+
+##### **説得効果係数 (20%)**
+
+```javascript
+説得効果係数 = (説得タイム中の投票変更数 / 説得タイム前の投票数) × 10
+
+// 説得タイム機能の価値を反映
+- 投票変更を促した能力を評価
+- 説得コメントの影響力を測定
+```
+
+##### **継続関心係数 (15%)**
+
+```javascript
+継続関心係数 = 投票期間全体での投票分布の均等性
+
+// 計算方法
+- 投票期間を4等分し、各期間の投票数の分散を計算
+- 分散が小さいほど継続的な関心を維持
+- 係数 = 10 - (投票分散 / 平均投票数)
+```
+
+#### 3. 品質度スコアの段階評価
+
+| スコア範囲 | 評価ランク    | 説明               |
+| ---------- | ------------- | ------------------ |
+| 90-100     | S (Excellent) | 極めて高品質な投稿 |
+| 80-89      | A (Great)     | 高品質な投稿       |
+| 70-79      | B (Good)      | 良質な投稿         |
+| 60-69      | C (Fair)      | 標準的な投稿       |
+| 50-59      | D (Poor)      | 改善が必要な投稿   |
+| 0-49       | F (Fail)      | 低品質な投稿       |
+
+### 💝 共感ポイント (Empathy Points) システム
+
+**設計理念**: コミュニティへの総合的な貢献度と他者との関係構築能力を評価
+
+#### 1. 基本計算式
+
+```
+共感ポイント = (投稿評価係数 × 30%) + (コメント評価係数 × 25%) + (参加継続係数 × 20%) + (コミュニティ貢献係数 × 15%) + (相互作用係数 × 10%)
+```
+
+#### 2. 各係数の詳細計算
+
+##### **投稿評価係数 (30%)**
+
+```javascript
+投稿評価係数 = Σ(各投稿の人気度スコア × 品質度重み)
+
+// 人気度スコア計算
+人気度スコア = (投票数 × 1.0) + (コメント数 × 0.7) + (ブックマーク数 × 0.5) + (派生質問数 × 1.5)
+
+// 品質度重み
+- 品質度スコア S: 2.0倍
+- 品質度スコア A: 1.5倍
+- 品質度スコア B: 1.2倍
+- 品質度スコア C: 1.0倍
+- 品質度スコア D: 0.8倍
+- 品質度スコア F: 0.5倍
+```
+
+##### **コメント評価係数 (25%)**
+
+```javascript
+コメント評価係数 = Σ(各コメントのUpvote - Downvote) + 説得成功ボーナス
+
+// 説得成功ボーナス
+- 説得コメントにより投票変更を促した場合: +5ポイント
+- 建設的な議論を促進した場合: +2ポイント
+```
+
+##### **参加継続係数 (20%)**
+
+```javascript
+参加継続係数 = (継続日数 × 0.1) + (投稿頻度安定性 × 0.3) + (投票参加率 × 0.6)
+
+// 投稿頻度安定性
+- 30日間の投稿頻度の分散を計算
+- 安定した投稿頻度を高く評価
+
+// 投票参加率
+- 他者の投稿への投票参加割合
+- コミュニティの活性化に貢献
+```
+
+##### **コミュニティ貢献係数 (15%)**
+
+```javascript
+コミュニティ貢献係数 = (新規ユーザー誘導数 × 2.0) + (コミュニティ作成数 × 5.0) + (モデレーション活動 × 1.5)
+
+// モデレーション活動
+- 建設的なコメントへのUpvote
+- 不適切なコンテンツの報告
+- 新規ユーザーへのサポート
+```
+
+##### **相互作用係数 (10%)**
+
+```javascript
+相互作用係数 = (返信を受けた数 × 0.5) + (返信した数 × 0.3) + (継続的な議論参加 × 0.7)
+
+// 継続的な議論参加
+- 同じ投稿で複数回のやり取り
+- 建設的な議論の維持
+```
+
+#### 3. 共感ポイントの段階評価
+
+| ポイント範囲 | 評価ランク   | バッジ | 説明                     |
+| ------------ | ------------ | ------ | ------------------------ |
+| 10000+       | レジェンド   | 🏆     | コミュニティの中心的存在 |
+| 5000-9999    | マスター     | 💎     | 高い影響力を持つユーザー |
+| 2000-4999    | エキスパート | 🌟     | 経験豊富なユーザー       |
+| 1000-1999    | アクティブ   | ⚡     | 活発なユーザー           |
+| 500-999      | 貢献者       | 🔥     | コミュニティに貢献       |
+| 100-499      | 参加者       | 🌱     | 成長中のユーザー         |
+| 0-99         | 新規         | 👶     | 新規ユーザー             |
+
+### 🎯 実装上の考慮事項
+
+#### 1. スコア更新頻度
+
+- **品質度スコア**: 投稿作成時・投票期限終了時に算出
+- **共感ポイント**: 日次バッチ処理で更新（リアルタイム性とパフォーマンスのバランス）
+
+#### 2. 不正防止機能
+
+- **自己投票防止**: 自分の投稿への投票は除外
+- **スパム対策**: 短時間での大量投稿は減点
+- **操作検知**: 異常な投票パターンの検知
+
+#### 3. プライバシー保護
+
+- **匿名化オプション**: ユーザーが希望すればスコア非表示
+- **詳細情報制限**: 他ユーザーには総合スコアのみ表示
+
+#### 4. 新規ユーザー支援
+
+- **新規ユーザーボーナス**: 最初の30日間は係数を1.2倍
+- **スターターガイド**: スコア向上のためのアドバイス表示
+
+### 📊 データベース設計
+
+#### 新規テーブル: user_quality_scores
+
+```sql
+CREATE TABLE user_quality_scores (
+    id bigserial PRIMARY KEY,
+    user_id text NOT NULL,
+    post_id int8 NOT NULL REFERENCES posts(id),
+    vote_efficiency_score numeric(5,2) DEFAULT 0,
+    discussion_activity_score numeric(5,2) DEFAULT 0,
+    persuasion_effectiveness_score numeric(5,2) DEFAULT 0,
+    sustained_interest_score numeric(5,2) DEFAULT 0,
+    total_quality_score numeric(5,2) DEFAULT 0,
+    quality_rank text DEFAULT 'F',
+    calculated_at timestamptz DEFAULT now(),
+    UNIQUE(user_id, post_id)
+);
+```
+
+#### 新規テーブル: user_empathy_points
+
+```sql
+CREATE TABLE user_empathy_points (
+    id bigserial PRIMARY KEY,
+    user_id text UNIQUE NOT NULL,
+    post_evaluation_score numeric(10,2) DEFAULT 0,
+    comment_evaluation_score numeric(10,2) DEFAULT 0,
+    participation_continuity_score numeric(10,2) DEFAULT 0,
+    community_contribution_score numeric(10,2) DEFAULT 0,
+    interaction_score numeric(10,2) DEFAULT 0,
+    total_empathy_points numeric(10,2) DEFAULT 0,
+    empathy_rank text DEFAULT 'new',
+    badge_icon text DEFAULT '👶',
+    updated_at timestamptz DEFAULT now()
+);
+```
+
+### 🔧 技術実装アプローチ
+
+#### 1. バックエンド (Supabase Functions)
+
+```javascript
+// 品質度スコア計算関数
+create or replace function calculate_quality_score(post_id bigint)
+returns numeric as $$
+// 実装詳細
+$$;
+
+// 共感ポイント計算関数
+create or replace function calculate_empathy_points(user_id text)
+returns numeric as $$
+// 実装詳細
+$$;
+```
+
+#### 2. フロントエンド (React Hooks)
+
+```typescript
+// カスタムフック
+export const useQualityScore = (postId: number) => { ... };
+export const useEmpathyPoints = (userId: string) => { ... };
+export const useUserRanking = () => { ... };
+```
+
+#### 3. UI コンポーネント
+
+```typescript
+// スコア表示コンポーネント
+<QualityScoreDisplay score={score} rank={rank} />
+<EmpathyPointsDisplay points={points} badge={badge} />
+<UserRankingCard user={user} />
+```
+
+この設計により、単純な投票数・コメント数だけでなく、投稿の質、議論の活性化、コミュニティへの貢献度を総合的に評価できる包括的なシステムを構築できます。
