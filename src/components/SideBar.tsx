@@ -72,27 +72,29 @@ const Sidebar = () => {
 
       {/* User Profile */}
       {user && (
-        <div className="absolute bottom-4 left-4 right-4">
-          <div className="flex items-center space-x-3 p-3 rounded-xl bg-slate-700/50 hover:bg-slate-700 transition-colors duration-200 cursor-pointer">
-            {user.user_metadata?.avatar_url ? (
-              <img
-                src={user.user_metadata.avatar_url}
-                alt="Profile"
-                className="w-8 h-8 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tl from-violet-500 to-purple-500" />
-            )}
-            <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-medium truncate">
-                {user.user_metadata?.full_name || "User"}
-              </p>
-              <p className="text-slate-400 text-xs truncate">
-                @{user.user_metadata?.user_name || "username"}
-              </p>
+        <Link to={`/profile/${user.id}`}>
+          <div className="absolute bottom-4 left-4 right-4">
+            <div className="flex items-center space-x-3 p-3 rounded-xl bg-slate-700/50 hover:bg-slate-700 transition-colors duration-200 cursor-pointer">
+              {user.user_metadata?.avatar_url ? (
+                <img
+                  src={user.user_metadata.avatar_url}
+                  alt="Profile"
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tl from-violet-500 to-purple-500" />
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-sm font-medium truncate">
+                  {user.user_metadata?.full_name || "User"}
+                </p>
+                <p className="text-slate-400 text-xs truncate">
+                  @{user.user_metadata?.user_name || "username"}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        </Link>
       )}
     </div>
   );
