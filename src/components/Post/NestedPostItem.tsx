@@ -1,5 +1,7 @@
+import React from "react";
+
 import { Link } from "react-router";
-import type { PostType } from "./PostList";
+import type { PostType } from "./PostList.tsx";
 import {
   Clock,
   Users,
@@ -8,13 +10,13 @@ import {
   MessageSquarePlus,
   ChevronRight,
 } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
-import { useHandleVotes } from "../../hooks/useHandleVotes";
-import { useHandlePost } from "../../hooks/useHandlePost";
+import { useAuth } from "../../hooks/useAuth.ts";
+import { useHandleVotes } from "../../hooks/useHandleVotes.ts";
+import { useHandlePost } from "../../hooks/useHandlePost.ts";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import { useState } from "react";
-import CreateNestedPost from "./CreateNestedPost";
-import { Button } from "../ui/button";
+import CreateNestedPost from "./CreateNestedPost.tsx";
+import { Button } from "../ui/button.tsx";
 import { FaArrowAltCircleUp } from "react-icons/fa";
 import { FaArrowAltCircleDown } from "react-icons/fa";
 

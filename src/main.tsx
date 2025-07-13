@@ -1,13 +1,13 @@
-import { StrictMode } from "react";
+import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 import { BrowserRouter as Router } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "./context/AuthProvider";
-import { ThemeProvider } from "./context/ThemeContext";
-import { LanguageProvider } from "./context/LanguageContext";
+import { AuthProvider } from "./context/AuthProvider.tsx";
+import { ThemeProvider } from "./context/ThemeContext.tsx";
 import { ToastContainer } from "react-toastify";
+import { LanguageProvider } from "./context/LanguageProvider.tsx";
 
 const client = new QueryClient();
 

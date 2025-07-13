@@ -1,10 +1,10 @@
-import { useState } from "react";
-import type { Comment } from "./CommentSection";
+import React, { useState } from "react";
+import type { Comment } from "./CommentSection.tsx";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronsUp, ChevronsUpDown, MessageSquare, Send } from "lucide-react";
-import CommentVotes from "./CommentVotes";
-import { supabase } from "../../supabase-client";
-import { useAuth } from "../../hooks/useAuth";
+import CommentVotes from "./CommentVotes.tsx";
+import { supabase } from "../../supabase-client.ts";
+import { useAuth } from "../../hooks/useAuth.ts";
 
 interface CommentItemProps {
   comment: Comment & {
@@ -161,7 +161,12 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
                 value={newReplytText}
                 rows={2}
                 placeholder="返信を入力..."
-                onChange={(e) => setNewReplyText(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                  const value = (
+                    e.target as HTMLTextAreaElement & { value: string }
+                  ).value;
+                  setNewReplyText(value);
+                }}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 className="w-full bg-gray-700 text-white p-3 rounded-lg resize-none outline-none placeholder-gray-400 text-sm"

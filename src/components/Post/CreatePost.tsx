@@ -1,6 +1,11 @@
+import React from "react";
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { type Community, getCommunitites } from "../Community/CommunityList";
+import {
+  type Community,
+  getCommunitites,
+} from "../Community/CommunityList.tsx";
 import "react-datepicker/dist/react-datepicker.css";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,30 +19,30 @@ import {
   Clock,
   AlertTriangle,
 } from "lucide-react";
-import { Card, CardContent } from "../ui/card";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { Card, CardContent } from "../ui/card.tsx";
+import { Label } from "../ui/label.tsx";
+import { Input } from "../ui/input.tsx";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { Button } from "../ui/button";
+} from "../ui/select.tsx";
+import { Button } from "../ui/button.tsx";
 import DatePicker from "react-datepicker";
 import { z } from "zod";
 import { toast } from "react-toastify";
-import { createPostSchema } from "../../utils/schema";
-import { useLanguage } from "../../context/LanguageContext";
-import { usePostLimits } from "../../hooks/usePostLimits";
-import { useCreatePost } from "../../hooks/useCreatePost";
-import { useImagePreview } from "../../hooks/useImagePreview";
-import { useTagManagement } from "../../hooks/useTagManagement";
-import GradePanel from "./GradePanel";
-import ContentSection from "./ContentSection";
-import ImageUploadSection from "./ImageUploadSection";
-import TagSection from "./TagSection";
+import { createPostSchema } from "../../utils/schema.ts";
+import { useLanguage } from "../../context/LanguageContext.tsx";
+import { usePostLimits } from "../../hooks/usePostLimits.ts";
+import { useCreatePost } from "../../hooks/useCreatePost.ts";
+import { useImagePreview } from "../../hooks/useImagePreview.ts";
+import { useTagManagement } from "../../hooks/useTagManagement.ts";
+import GradePanel from "./GradePanel.tsx";
+import ContentSection from "./ContentSection.tsx";
+import ImageUploadSection from "./ImageUploadSection.tsx";
+import TagSection from "./TagSection.tsx";
 
 type CreatePostFormData = z.infer<typeof createPostSchema>;
 

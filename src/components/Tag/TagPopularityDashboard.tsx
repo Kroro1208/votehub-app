@@ -1,19 +1,19 @@
 import React, { useState } from "react";
-import { useTagStats } from "../../hooks/useTagStats";
+import { useTagStats, TagStats } from "../../hooks/useTagStats.ts";
 import {
   getTopTagsByPopularity,
   PopularityCalculationType,
-} from "../../lib/tagUtils";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
+} from "../../lib/tagUtils.ts";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card.tsx";
+import { Badge } from "../ui/badge.tsx";
+import { Button } from "../ui/button.tsx";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
+} from "../ui/select.tsx";
 import {
   TrendingUp,
   TrendingDown,
@@ -182,7 +182,7 @@ export const TagPopularityDashboard: React.FC<TagPopularityDashboardProps> = ({
           </div>
         ) : (
           <div className="space-y-4">
-            {topTags.map((tag, index) => (
+            {topTags.map((tag: TagStats, index: number) => (
               <div
                 key={tag.id}
                 className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border hover:shadow-md transition-shadow"

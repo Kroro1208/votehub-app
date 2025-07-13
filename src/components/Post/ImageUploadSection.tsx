@@ -1,9 +1,11 @@
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { Card, CardContent } from "../ui/card";
+import React from "react";
+
+import { Label } from "../ui/label.tsx";
+import { Input } from "../ui/input.tsx";
+import { Button } from "../ui/button.tsx";
+import { Card, CardContent } from "../ui/card.tsx";
 import { ImageIcon, X } from "lucide-react";
-import { useLanguage } from "../../context/LanguageContext";
+import { useLanguage } from "../../context/LanguageContext.tsx";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface ImageUploadSectionProps {

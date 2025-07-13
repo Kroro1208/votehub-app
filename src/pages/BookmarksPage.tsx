@@ -1,8 +1,10 @@
-import { useBookmarks } from "../hooks/useBookmarks";
-import { useAuth } from "../hooks/useAuth";
-import Loading from "../components/Loading";
-import ErrorMessage from "../components/ErrorMessage";
-import PostItem from "../components/Post/PostItem";
+import React from "react";
+
+import { useBookmarks } from "../hooks/useBookmarks.ts";
+import { useAuth } from "../hooks/useAuth.ts";
+import Loading from "../components/Loading.tsx";
+import ErrorMessage from "../components/ErrorMessage.tsx";
+import PostItem from "../components/Post/PostItem.tsx";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 
 const BookmarksPage = () => {

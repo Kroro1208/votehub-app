@@ -1,10 +1,12 @@
-import Sidebar from "../components/SideBar";
-import RightPanel from "../components/RightPanel";
-import WelcomeModal from "../components/WelcomeModal";
-import { useFirstTimeUser } from "../hooks/useFirstTimeUser";
+import React from "react";
+
+import Sidebar from "../components/SideBar.tsx";
+import RightPanel from "../components/RightPanel.tsx";
+import WelcomeModal from "../components/WelcomeModal.tsx";
+import { useFirstTimeUser } from "../hooks/useFirstTimeUser.ts";
 import { useState, useEffect } from "react";
-import HeaderStatus from "../components/Home/HeaderStatus";
-import TabSection from "../components/Home/TabSection";
+import HeaderStatus from "../components/Home/HeaderStatus.tsx";
+import TabSection from "../components/Home/TabSection.tsx";
 
 export default function Home() {
   const { isFirstTime } = useFirstTimeUser();

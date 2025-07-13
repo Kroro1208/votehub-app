@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { supabase } from "../supabase-client";
-import { useAuth } from "./useAuth";
-import { useLanguage } from "../context/LanguageContext";
-import { getRelatedTags } from "../lib/tagUtils";
+import { supabase } from "../supabase-client.ts";
+import { useAuth } from "./useAuth.ts";
+import { getRelatedTags } from "../lib/tagUtils.ts";
+import { useLanguage } from "./useLanguage.ts";
 
 // タグを取得する関数
 const getTagsForCommunity = async (communityId: number) => {

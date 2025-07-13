@@ -1,5 +1,7 @@
+import React from "react";
+
 import { useParams } from "react-router";
-import PostDetail from "../components/Post/PostDetail";
+import PostDetail from "../components/Post/PostDetail.tsx";
 
 export default function PostPage() {
   const { id } = useParams<{ id: string }>();

@@ -1,6 +1,6 @@
-import { supabase } from "../supabase-client";
-import { NotificationCreateParams } from "../types/notification";
-import { isPersuasionTime } from "./formatTime";
+import { supabase } from "../supabase-client.ts";
+import { NotificationCreateParams } from "../types/notification.ts";
+import { isPersuasionTime } from "./formatTime.tsx";
 
 /**
  * 通知を作成する関数

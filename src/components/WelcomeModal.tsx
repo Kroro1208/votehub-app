@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/useAuth.ts";
 
 interface WelcomeSlide {
   title: string;
@@ -97,6 +97,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose }) => {
             </h2>
           </div>
           <button
+            type="button"
             onClick={skipOnboarding}
             className="text-gray-500 hover:text-gray-700 transition-colors"
           >
@@ -149,6 +150,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose }) => {
           {/* Navigation */}
           <div className="flex justify-between items-center">
             <button
+              type="button"
               onClick={prevSlide}
               disabled={currentSlide === 0}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
@@ -167,6 +169,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose }) => {
 
             {isLastSlide ? (
               <button
+                type="button"
                 onClick={handleComplete}
                 className="flex items-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300"
               >
@@ -175,6 +178,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose }) => {
               </button>
             ) : (
               <button
+                type="button"
                 onClick={nextSlide}
                 className="flex items-center space-x-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300"
               >

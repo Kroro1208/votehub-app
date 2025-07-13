@@ -1,4 +1,4 @@
-import { supabase } from "../supabase-client";
+import { supabase } from "../supabase-client.ts";
 
 // 既存の全投稿に対して品質度スコアを計算
 export const calculateAllExistingQualityScores = async () => {

@@ -4,7 +4,7 @@ import {
   EmpathyPointsData,
   getEmpathyRankInfo,
   getPointsToNextRank,
-} from "../../hooks/useEmpathyScore";
+} from "../../hooks/useEmpathyScore.ts";
 
 interface EmpathyPointsDisplayProps {
   empathyData: EmpathyPointsData | null;
@@ -13,12 +13,12 @@ interface EmpathyPointsDisplayProps {
   isRankingLoading: boolean;
 }
 
-const EmpathyPointsDisplay: React.FC<EmpathyPointsDisplayProps> = ({
+const EmpathyPointsDisplay = ({
   empathyData,
   rankingData,
   isLoading,
   isRankingLoading,
-}) => {
+}: EmpathyPointsDisplayProps) => {
   if (isLoading) {
     return (
       <div className="bg-gradient-to-br from-pink-50 to-red-50 rounded-xl border border-pink-100 p-6 animate-pulse">

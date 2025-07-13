@@ -1,18 +1,20 @@
+import React from "react";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
-import { supabase } from "../../supabase-client";
+import { supabase } from "../../supabase-client.ts";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Textarea } from "../ui/textarea";
-import { Button } from "../ui/button";
+import { Input } from "../ui/input.tsx";
+import { Label } from "../ui/label.tsx";
+import { Textarea } from "../ui/textarea.tsx";
+import { Button } from "../ui/button.tsx";
 import { toast } from "react-toastify";
 import { FaPeopleLine } from "react-icons/fa6";
 import { IoPricetagsOutline } from "react-icons/io5";
 import { TbFileDescription } from "react-icons/tb";
-import { useLanguage } from "../../context/LanguageContext";
+import { useLanguage } from "../../context/LanguageContext.tsx";
 
 const communitySchema = z.object({
   name: z.string().min(1, "スペース名は必須です"),

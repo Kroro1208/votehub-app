@@ -1,12 +1,14 @@
+import React from "react";
+
 import { useState } from "react";
 import { VscBell, VscBellDot } from "react-icons/vsc";
 import { MessageSquare, Reply, Clock, TrendingUp } from "lucide-react";
-import { useNotifications } from "../../hooks/useNotifications";
-import { Button } from "../ui/button";
+import { useNotifications } from "../../hooks/useNotifications.ts";
+import { Button } from "../ui/button.tsx";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Link, useNavigate } from "react-router";
-import type { NotificationType } from "../../types/notification";
+import type { NotificationType } from "../../types/notification.ts";
 
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);

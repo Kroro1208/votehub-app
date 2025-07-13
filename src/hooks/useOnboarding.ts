@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useAuth } from "./useAuth";
+import { useAuth } from "./useAuth.ts";
 
 export const useOnboarding = () => {
   const { user } = useAuth();

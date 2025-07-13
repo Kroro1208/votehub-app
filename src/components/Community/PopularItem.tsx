@@ -1,7 +1,9 @@
+import React from "react";
+
 import { CheckCircle, Flame, Trophy, Users } from "lucide-react";
-import { CommunityItemType } from "./CommunityItem";
+import { CommunityItemType } from "./CommunityItem.tsx";
 import { Link } from "react-router";
-import { getTimeRemaining, isVotingExpired } from "../../utils/formatTime";
+import { getTimeRemaining, isVotingExpired } from "../../utils/formatTime.tsx";
 
 interface PopularItemProps {
   communityItemData: CommunityItemType[];

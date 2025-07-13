@@ -1,8 +1,10 @@
+import React from "react";
+
 import { useAtomValue } from "jotai";
-import { postsAtom } from "../stores/PostAtom";
-import { PostType } from "./Post/PostList";
-import { useHandlePost } from "../hooks/useHandlePost";
-import { useTagRanking } from "../hooks/useTagRanking";
+import { postsAtom } from "../stores/PostAtom.ts";
+import { PostType } from "./Post/PostList.tsx";
+import { useHandlePost } from "../hooks/useHandlePost.ts";
+import { useTagRanking } from "../hooks/useTagRanking.ts";
 import { Link } from "react-router";
 
 const RightPanel = () => {

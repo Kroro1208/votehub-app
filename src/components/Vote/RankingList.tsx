@@ -1,7 +1,9 @@
+import React from "react";
+
 import { Link } from "react-router";
-import { BasePost } from "../../types/post";
-import { getTimeRemaining, isVotingExpired } from "../../utils/formatTime";
-import { getRankStyling } from "../../utils/getStyle";
+import { BasePost } from "../../types/post.ts";
+import { getTimeRemaining, isVotingExpired } from "../../utils/formatTime.tsx";
+import { getRankStyling } from "../../utils/getStyle.ts";
 import { CheckCircle, TrendingUp, Trophy, Users } from "lucide-react";
 
 type DisplayMode = "active" | "completed";

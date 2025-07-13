@@ -1,3 +1,4 @@
+import React from "react";
 import { BarChart3, CalendarX, Trophy, Users } from "lucide-react";
 
 export const RightPanel = () => {

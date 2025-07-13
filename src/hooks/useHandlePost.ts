@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../supabase-client";
-import { useAuth } from "./useAuth";
-import { PostType } from "../components/Post/PostList";
+import { supabase } from "../supabase-client.ts";
+import { useAuth } from "./useAuth.ts";
+import { PostType } from "../components/Post/PostList.tsx";
 import {
   getTimeRemaining,
   isVotingExpired as isVotingExpiredUtil,
   isPersuasionTime as isPersuasionTimeUtil,
-} from "../utils/formatTime";
+} from "../utils/formatTime.tsx";
 
 const getUserVoteForPost = async (postId: number, userId?: string) => {
   if (!userId) return null;

@@ -1,17 +1,19 @@
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import React from "react";
+
+import { Label } from "../ui/label.tsx";
+import { Input } from "../ui/input.tsx";
+import { Button } from "../ui/button.tsx";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
+} from "../ui/select.tsx";
 import { Hash, Loader2 } from "lucide-react";
-import { useLanguage } from "../../context/LanguageContext";
+import { useLanguage } from "../../context/LanguageContext.tsx";
 import { Controller } from "react-hook-form";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth.ts";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface TagSectionProps {
@@ -68,7 +70,7 @@ const TagSection = ({
         render={({ field }) => (
           <Select
             value={field.value?.toString() || ""}
-            onValueChange={(value) => {
+            onValueChange={(value: string) => {
               field.onChange(value === "none" ? null : parseInt(value));
             }}
           >
@@ -98,7 +100,11 @@ const TagSection = ({
                 : t("create.post.tag.create.placeholder.login")
             }
             value={newTagName}
-            onChange={(e) => setNewTagName(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const value = (e.target as HTMLInputElement & { value: string })
+                .value;
+              setNewTagName(value);
+            }}
             className="flex-1"
             maxLength={20}
             disabled={!user}

@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "../supabase-client";
-import { useAuth } from "./useAuth";
+import { supabase } from "../supabase-client.ts";
+import { useAuth } from "./useAuth.ts";
 import { toast } from "react-toastify";
-import type { BookmarkedPost } from "../types/post";
+import type { BookmarkedPost } from "../types/post.ts";
 
 export const useBookmarks = () => {
   const { user } = useAuth();

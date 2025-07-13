@@ -1,7 +1,9 @@
+import React from "react";
+
 import { AlertTriangle, Crown, Sparkles, Users } from "lucide-react";
-import { Card, CardContent } from "../ui/card";
-import { PostLimitStatus } from "../../hooks/usePostLimits";
-import { Button } from "../ui/button";
+import { Card, CardContent } from "../ui/card.tsx";
+import { PostLimitStatus } from "../../hooks/usePostLimits.ts";
+import { Button } from "../ui/button.tsx";
 
 type Props = {
   postLimitStatus: PostLimitStatus | null;

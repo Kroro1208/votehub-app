@@ -1,24 +1,26 @@
+import React from "react";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "../../supabase-client";
-import type { PostType } from "./PostList";
-import VoteButton from "../Vote/VoteButton";
+import { supabase } from "../../supabase-client.ts";
+import type { PostType } from "./PostList.tsx";
+import VoteButton from "../Vote/VoteButton.tsx";
 import { useAtomValue } from "jotai";
-import { mostVotedCommentAtomFamily } from "../../stores/CommentVoteAtom";
+import { mostVotedCommentAtomFamily } from "../../stores/CommentVoteAtom.ts";
 import { useState, useEffect } from "react";
-import { useAuth } from "../../hooks/useAuth";
-import { useDeletePost } from "../../hooks/useDeletePost";
+import { useAuth } from "../../hooks/useAuth.ts";
+import { useDeletePost } from "../../hooks/useDeletePost.ts";
 import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Link } from "react-router";
 
-import CommentSection from "../Comment/CommentSection";
-import PostContentDisplay from "./PostContentDisplay";
-import CreateNestedPostDialog from "./CreateNestedPostDialog";
-import CreatePersuasionDialog from "./CreatePersuasionDialog";
-import NestedPostSection from "./NestedPostSection";
-import VoteDeadline from "./VoteDeadline";
-import BookmarkButton from "./BookmarkButton";
-import { isPersuasionTime } from "../../utils/formatTime";
+import CommentSection from "../Comment/CommentSection.tsx";
+import PostContentDisplay from "./PostContentDisplay.tsx";
+import CreateNestedPostDialog from "./CreateNestedPostDialog.tsx";
+import CreatePersuasionDialog from "./CreatePersuasionDialog.tsx";
+import NestedPostSection from "./NestedPostSection.tsx";
+import VoteDeadline from "./VoteDeadline.tsx";
+import BookmarkButton from "./BookmarkButton.tsx";
+import { isPersuasionTime } from "../../utils/formatTime.tsx";
 
 interface Props {
   postId: number;

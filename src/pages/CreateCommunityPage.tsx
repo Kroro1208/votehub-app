@@ -1,5 +1,7 @@
-import CreateCommunity from "../components/Community/CreateCommunity";
-import Sidebar from "../components/SideBar";
+import React from "react";
+
+import CreateCommunity from "../components/Community/CreateCommunity.tsx";
+import Sidebar from "../components/SideBar.tsx";
 
 const CreateCommunityPage = () => {
   return (

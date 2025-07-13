@@ -1,8 +1,10 @@
-import CommunityList from "../components/Community/CommunityList";
-import Sidebar from "../components/SideBar";
+import React from "react";
+
+import CommunityList from "../components/Community/CommunityList.tsx";
+import Sidebar from "../components/SideBar.tsx";
 import { Users, Plus } from "lucide-react";
 import { Link } from "react-router";
-import { useLanguage } from "../context/LanguageContext";
+import { useLanguage } from "../context/LanguageContext.tsx";
 
 const CommunitiesPage = () => {
   const { t } = useLanguage();

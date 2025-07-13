@@ -1,6 +1,6 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import CommentItem from "./CommentItem";
+import CommentItem from "./CommentItem.tsx";
 import {
   MessageSquareText,
   Send,
@@ -8,8 +8,8 @@ import {
   Loader2,
   LogIn,
 } from "lucide-react";
-import { supabase } from "../../supabase-client";
-import { useAuth } from "../../hooks/useAuth";
+import { supabase } from "../../supabase-client.ts";
+import { useAuth } from "../../hooks/useAuth.ts";
 
 interface PostProps {
   postId: number;
@@ -184,7 +184,12 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
                   value={newCommentText}
                   rows={3}
                   placeholder="この投稿についてコメントを書く..."
-                  onChange={(e) => setNewCommentText(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                    const value = (
+                      e.target as HTMLTextAreaElement & { value: string }
+                    ).value;
+                    setNewCommentText(value);
+                  }}
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
                   className="w-full bg-gray-700 text-white p-4 rounded-lg resize-none outline-none placeholder-gray-400"

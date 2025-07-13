@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../supabase-client";
+import { supabase } from "../supabase-client.ts";
 
 export interface EmpathyPointsData {
   id: number;

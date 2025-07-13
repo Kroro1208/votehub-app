@@ -1,16 +1,16 @@
 import React from "react";
 import { Award, TrendingUp, BarChart3 } from "lucide-react";
-import { UserQualityScoreStats } from "../../hooks/useQualityScore";
+import { UserQualityScoreStats } from "../../hooks/useQualityScore.ts";
 
 interface QualityScoreDisplayProps {
   qualityData: UserQualityScoreStats | null;
   isLoading: boolean;
 }
 
-const QualityScoreDisplay: React.FC<QualityScoreDisplayProps> = ({
+const QualityScoreDisplay = ({
   qualityData,
   isLoading,
-}) => {
+}: QualityScoreDisplayProps) => {
   if (isLoading) {
     return (
       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-6 animate-pulse">

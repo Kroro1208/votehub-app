@@ -1,3 +1,5 @@
+import React from "react";
+
 import {
   Vote,
   TrendingUp,
@@ -8,9 +10,9 @@ import {
   Settings,
 } from "lucide-react";
 import { Link, useLocation } from "react-router";
-import { useAuth } from "../hooks/useAuth";
-import { useLanguage } from "../context/LanguageContext";
-import { Button } from "./ui/button";
+import { useAuth } from "../hooks/useAuth.ts";
+import { Button } from "./ui/button.tsx";
+import { useLanguage } from "../hooks/useLanguage.ts";
 
 const Sidebar = () => {
   const location = useLocation();

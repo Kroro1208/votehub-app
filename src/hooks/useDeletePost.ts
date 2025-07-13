@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "../supabase-client";
+import { supabase } from "../supabase-client.ts";
 import { toast } from "react-toastify";
 
 interface DeletePostData {

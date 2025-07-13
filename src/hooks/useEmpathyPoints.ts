@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../supabase-client";
+import { supabase } from "../supabase-client.ts";
 
 interface EmpathyScore {
   user_id: string;
@@ -45,7 +45,8 @@ export const useUserEmpathyPoints = (userId?: string) => {
 
       const empathyPoints =
         empathyTransactions?.reduce(
-          (total, transaction) => total + transaction.points_change,
+          (total: number, transaction: { points_change: number }) =>
+            total + transaction.points_change,
           0,
         ) || 0;
 

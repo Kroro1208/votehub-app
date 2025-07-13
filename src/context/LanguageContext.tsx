@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext } from "react";
 
-type Language = "ja" | "en";
+export type Language = "ja" | "en";
 
 interface LanguageContextType {
   language: Language;
@@ -8,20 +8,11 @@ interface LanguageContextType {
   t: (key: string) => string;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(
+export const LanguageContext = createContext<LanguageContextType | undefined>(
   undefined,
 );
 
-export const useLanguage = () => {
-  const context = useContext(LanguageContext);
-  if (context === undefined) {
-    throw new Error("useLanguage must be used within a LanguageProvider");
-  }
-  return context;
-};
-
-// Translation dictionaries
-const translations = {
+export const translations = {
   ja: {
     // Navigation
     "nav.home": "投票中",
@@ -353,51 +344,4 @@ const translations = {
     "common.loading": "Loading...",
     "common.error": "Error",
   },
-};
-
-interface LanguageProviderProps {
-  children: ReactNode;
-}
-
-export const LanguageProvider = ({ children }: LanguageProviderProps) => {
-  const [language, setLanguageState] = useState<Language>(() => {
-    // Check localStorage first, then browser language
-    const savedLanguage = localStorage.getItem("language") as Language;
-    if (savedLanguage && (savedLanguage === "ja" || savedLanguage === "en")) {
-      return savedLanguage;
-    }
-
-    // Check browser language
-    const browserLanguage = navigator.language.toLowerCase();
-    if (browserLanguage.startsWith("ja")) {
-      return "ja";
-    }
-
-    return "en";
-  });
-
-  const setLanguage = (newLanguage: Language) => {
-    setLanguageState(newLanguage);
-    localStorage.setItem("language", newLanguage);
-  };
-
-  const t = (key: string): string => {
-    return (
-      translations[language][
-        key as keyof (typeof translations)[typeof language]
-      ] || key
-    );
-  };
-
-  const value = {
-    language,
-    setLanguage,
-    t,
-  };
-
-  return (
-    <LanguageContext.Provider value={value}>
-      {children}
-    </LanguageContext.Provider>
-  );
 };

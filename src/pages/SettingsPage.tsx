@@ -1,9 +1,9 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router";
-import { useAuth } from "../hooks/useAuth";
-import { useTheme } from "../context/ThemeContext";
-import { useLanguage } from "../context/LanguageContext";
-import { supabase } from "../supabase-client";
+import { useAuth } from "../hooks/useAuth.ts";
+import { useTheme } from "../context/ThemeContext.tsx";
+import { useLanguage } from "../context/LanguageContext.tsx";
+import { supabase } from "../supabase-client.ts";
 import { toast } from "react-toastify";
 import {
   ArrowLeft,
@@ -20,13 +20,13 @@ import {
   Calendar,
   Settings,
 } from "lucide-react";
-import { Button } from "../components/ui/button";
+import { Button } from "../components/ui/button.tsx";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
+} from "../components/ui/card.tsx";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -221,12 +221,15 @@ export default function SettingsPage() {
                   <input
                     type="text"
                     value={profileData.fullName}
-                    onChange={(e) =>
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const value = (
+                        e.target as HTMLInputElement & { value: string }
+                      ).value;
                       setProfileData({
                         ...profileData,
-                        fullName: e.target.value,
-                      })
-                    }
+                        fullName: value,
+                      });
+                    }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="あなたの名前"
                   />
@@ -239,9 +242,12 @@ export default function SettingsPage() {
                   </label>
                   <textarea
                     value={profileData.bio}
-                    onChange={(e) =>
-                      setProfileData({ ...profileData, bio: e.target.value })
-                    }
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                      const value = (
+                        e.target as HTMLTextAreaElement & { value: string }
+                      ).value;
+                      setProfileData({ ...profileData, bio: value });
+                    }}
                     rows={3}
                     className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="あなたについて教えてください..."
@@ -292,9 +298,12 @@ export default function SettingsPage() {
                     name="language"
                     value="ja"
                     checked={language === "ja"}
-                    onChange={(e) =>
-                      handleLanguageChange(e.target.value as "ja" | "en")
-                    }
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const value = (
+                        e.target as HTMLInputElement & { value: string }
+                      ).value;
+                      handleLanguageChange(value as "ja" | "en");
+                    }}
                     className="w-4 h-4 text-blue-600"
                   />
                   <span className="text-slate-700 dark:text-dark-text">
@@ -307,9 +316,12 @@ export default function SettingsPage() {
                     name="language"
                     value="en"
                     checked={language === "en"}
-                    onChange={(e) =>
-                      handleLanguageChange(e.target.value as "ja" | "en")
-                    }
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const value = (
+                        e.target as HTMLInputElement & { value: string }
+                      ).value;
+                      handleLanguageChange(value as "ja" | "en");
+                    }}
                     className="w-4 h-4 text-blue-600"
                   />
                   <span className="text-slate-700 dark:text-dark-text">

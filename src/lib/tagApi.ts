@@ -1,5 +1,5 @@
-import { supabase } from "../supabase-client";
-import type { TagStats } from "../hooks/useTagStats";
+import { supabase } from "../supabase-client.ts";
+import type { TagStats } from "../hooks/useTagStats.ts";
 
 export interface CreateTagParams {
   name: string;

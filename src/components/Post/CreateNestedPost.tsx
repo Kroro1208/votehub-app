@@ -1,10 +1,12 @@
+import React from "react";
+
 import { useEffect, useState, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createNestedPostSchema } from "../../utils/schema";
+import { createNestedPostSchema } from "../../utils/schema.tsx";
 import { z } from "zod";
-import { supabase } from "../../supabase-client";
-import { useAuth } from "../../hooks/useAuth";
+import { supabase } from "../../supabase-client.ts";
+import { useAuth } from "../../hooks/useAuth.ts";
 import {
   Upload,
   X,
@@ -16,22 +18,36 @@ import {
   MessageSquarePlus,
   Target,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card.tsx";
+import { Label } from "../ui/label.tsx";
+import { Input } from "../ui/input.tsx";
+import { Textarea } from "../ui/textarea.tsx";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { Button } from "../ui/button";
+} from "../ui/select.tsx";
+import { Button } from "../ui/button.tsx";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+
 import { toast } from "react-toastify";
 import { FaArrowAltCircleDown, FaArrowAltCircleUp } from "react-icons/fa";
+
+interface DatePickerProps {
+  selected: Date | null;
+  onChange: (date: Date | null) => void;
+  showTimeSelect?: boolean;
+  dateFormat?: string;
+  timeIntervals?: number;
+  placeholderText?: string;
+  className?: string;
+}
+
+const TypedDatePicker =
+  DatePicker as unknown as React.ComponentType<DatePickerProps>;
 
 type CreateNestedPostFormData = z.infer<typeof createNestedPostSchema>;
 
@@ -410,7 +426,7 @@ const CreateNestedPost = ({
                 name="vote_deadline"
                 control={control}
                 render={({ field }) => (
-                  <DatePicker
+                  <TypedDatePicker
                     selected={field.value}
                     onChange={(date) => field.onChange(date)}
                     showTimeSelect

@@ -1,7 +1,9 @@
+import React from "react";
+
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../../supabase-client";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Badge } from "../ui/badge";
+import { supabase } from "../../supabase-client.ts";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card.tsx";
+import { Badge } from "../ui/badge.tsx";
 import { TrendingUp, Users, RefreshCw, Clock } from "lucide-react";
 
 interface PersuasionStatsProps {

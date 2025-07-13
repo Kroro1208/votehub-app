@@ -1,10 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import { supabase } from "../supabase-client";
-import { useAuth } from "./useAuth";
-import { useLanguage } from "../context/LanguageContext";
-import { usePostLimits } from "./usePostLimits";
+import { supabase } from "../supabase-client.ts";
+import { useAuth } from "./useAuth.ts";
+import { useLanguage } from "../context/LanguageContext.tsx";
+import { usePostLimits } from "./usePostLimits.ts";
 
 export interface PostInput {
   title: string;

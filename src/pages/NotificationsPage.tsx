@@ -1,3 +1,5 @@
+import React from "react";
+
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { formatDistanceToNow } from "date-fns";
@@ -12,10 +14,10 @@ import {
   Check,
 } from "lucide-react";
 import { VscBell } from "react-icons/vsc";
-import { useNotifications } from "../hooks/useNotifications";
-import { Button } from "../components/ui/button";
-import { Card, CardContent } from "../components/ui/card";
-import type { NotificationType } from "../types/notification";
+import { useNotifications } from "../hooks/useNotifications.ts";
+import { Button } from "../components/ui/button.tsx";
+import { Card, CardContent } from "../components/ui/card.tsx";
+import type { NotificationType } from "../types/notification.ts";
 
 export default function NotificationsPage() {
   const navigate = useNavigate();

@@ -1,12 +1,14 @@
+import React from "react";
+
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "../ui/dialog";
+} from "../ui/dialog.tsx";
 import { MessageSquarePlus } from "lucide-react";
-import CreateNestedPost from "./CreateNestedPost";
+import CreateNestedPost from "./CreateNestedPost.tsx";
 
 type CreateNestedPostDialogProps = {
   data: { title: string; community_id: number | null; nest_level?: number };

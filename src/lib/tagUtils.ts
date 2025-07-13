@@ -1,4 +1,4 @@
-import type { TagStats } from "../hooks/useTagStats";
+import type { TagStats } from "../hooks/useTagStats.ts";
 
 // タグの人気度スコア計算方法の定義
 export enum PopularityCalculationType {

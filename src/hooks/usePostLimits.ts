@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "../supabase-client";
-import { useAuth } from "./useAuth";
+import { supabase } from "../supabase-client.ts";
+import { useAuth } from "./useAuth.ts";
 
 export interface PostLimitStatus {
   can_post: boolean;

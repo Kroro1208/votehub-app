@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "../supabase-client";
+import { supabase } from "../supabase-client.ts";
 import { useState } from "react";
-import { useAuth } from "./useAuth";
+import { useAuth } from "./useAuth.ts";
 
 export interface Vote {
   id: number;

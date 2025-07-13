@@ -1,8 +1,10 @@
+import React from "react";
+
 import { Link } from "react-router";
-import { CommunityItemType } from "./CommunityItem";
+import { CommunityItemType } from "./CommunityItem.tsx";
 import { AlertTriangle, CheckCircle, Clock, Users } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
-import { getTimeRemaining, isPersuasionTime } from "../../utils/formatTime";
+import { useAuth } from "../../hooks/useAuth.ts";
+import { getTimeRemaining, isPersuasionTime } from "../../utils/formatTime.tsx";
 import { FaRegCalendarTimes } from "react-icons/fa";
 
 interface IndexItemProps {

@@ -1,10 +1,12 @@
+import React from "react";
+
 import { useParams, Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "../hooks/useAuth";
-import { supabase } from "../supabase-client";
-import ErrorMessage from "../components/ErrorMessage";
-import Loading from "../components/Loading";
-import type { PostType } from "../components/Post/PostList";
+import { useAuth } from "../hooks/useAuth.ts";
+import { supabase } from "../supabase-client.ts";
+import ErrorMessage from "../components/ErrorMessage.tsx";
+import Loading from "../components/Loading.tsx";
+import type { PostType } from "../components/Post/PostList.tsx";
 import {
   Users,
   Calendar,
@@ -13,17 +15,17 @@ import {
   Settings,
   Award,
 } from "lucide-react";
-import PostItem from "../components/Post/PostItem";
-import { useUserEmpathyPoints } from "../hooks/useEmpathyPoints";
-import { useUserQualityScore } from "../hooks/useQualityScore";
+import PostItem from "../components/Post/PostItem.tsx";
+import { useUserEmpathyPoints } from "../hooks/useEmpathyPoints.ts";
+import { useUserQualityScore } from "../hooks/useQualityScore.ts";
 import {
   useUserEmpathyScore,
   useEmpathyRanking,
-} from "../hooks/useEmpathyScore";
-import QualityScoreDisplay from "../components/Profile/QualityScoreDisplay";
-import EmpathyPointsDisplay from "../components/Profile/EmpathyPointsDisplay";
-import { calculateAllExistingScores } from "../utils/calculateExistingScores";
-import { Button } from "../components/ui/button";
+} from "../hooks/useEmpathyScore.ts";
+import QualityScoreDisplay from "../components/Profile/QualityScoreDisplay.tsx";
+import EmpathyPointsDisplay from "../components/Profile/EmpathyPointsDisplay.tsx";
+import { calculateAllExistingScores } from "../utils/calculateExistingScores.ts";
+import { Button } from "../components/ui/button.tsx";
 import { RefreshCw } from "lucide-react";
 import { toast } from "react-toastify";
 

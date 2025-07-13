@@ -1,12 +1,14 @@
+import React from "react";
+
 import { useQuery } from "@tanstack/react-query";
-import ErrorMessage from "../ErrorMessage";
-import Loading from "../Loading";
-import type { PostType } from "../Post/PostList";
-import { supabase } from "../../supabase-client";
+import ErrorMessage from "../ErrorMessage.tsx";
+import Loading from "../Loading.tsx";
+import type { PostType } from "../Post/PostList.tsx";
+import { supabase } from "../../supabase-client.ts";
 import { Users, TrendingUp } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
-import PopularItem from "./PopularItem";
-import IndexItem from "./IndexItem";
+import { useAuth } from "../../hooks/useAuth.ts";
+import PopularItem from "./PopularItem.tsx";
+import IndexItem from "./IndexItem.tsx";
 
 interface Props {
   communityId: number;

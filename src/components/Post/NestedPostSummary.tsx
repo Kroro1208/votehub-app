@@ -1,5 +1,7 @@
+import React from "react";
+
 import { Link } from "react-router";
-import type { PostType } from "./PostList";
+import type { PostType } from "./PostList.tsx";
 import {
   Clock,
   Users,
@@ -8,13 +10,13 @@ import {
   ChevronRight,
   ExternalLink,
 } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
-import { useHandleVotes } from "../../hooks/useHandleVotes";
-import { useHandlePost } from "../../hooks/useHandlePost";
+import { useAuth } from "../../hooks/useAuth.ts";
+import { useHandleVotes } from "../../hooks/useHandleVotes.ts";
+import { useHandlePost } from "../../hooks/useHandlePost.ts";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import { FaArrowAltCircleUp, FaArrowAltCircleDown } from "react-icons/fa";
 import { useState, useEffect } from "react";
-import { supabase } from "../../supabase-client";
+import { supabase } from "../../supabase-client.ts";
 
 interface NestedPostSummaryProps {
   post: PostType;

@@ -1,18 +1,20 @@
+import React from "react";
+
 import { Route, Routes } from "react-router";
-import Home from "./pages/Home";
-import Navbar from "./components/Navbar";
-import CreatePostPage from "./pages/CreatePostPage";
-import PostPage from "./pages/PostPage";
-import CreateCommunityPage from "./pages/CreateCommunityPage";
-import CommunitiesPage from "./pages/CommunitiesPage";
-import CommunityDetailPage from "./pages/CommunityDetailPage";
-import ProfilePage from "./pages/ProfilePage";
-import PopularVotesPage from "./pages/PopularVotesPage";
-import VoteResultsPage from "./pages/VoteResultsPage";
-import BookmarksPage from "./pages/BookmarksPage";
-import NotificationsPage from "./pages/NotificationsPage";
-import SettingsPage from "./pages/SettingsPage";
-import TagPostsPage from "./pages/TagPostsPage";
+import Home from "./pages/Home.tsx";
+import Navbar from "./components/Navbar.tsx";
+import CreatePostPage from "./pages/CreatePostPage.tsx";
+import PostPage from "./pages/PostPage.tsx";
+import CreateCommunityPage from "./pages/CreateCommunityPage.tsx";
+import CommunitiesPage from "./pages/CommunitiesPage.tsx";
+import CommunityDetailPage from "./pages/CommunityDetailPage.tsx";
+import ProfilePage from "./pages/ProfilePage.tsx";
+import PopularVotesPage from "./pages/PopularVotesPage.tsx";
+import VoteResultsPage from "./pages/VoteResultsPage.tsx";
+import BookmarksPage from "./pages/BookmarksPage.tsx";
+import NotificationsPage from "./pages/NotificationsPage.tsx";
+import SettingsPage from "./pages/SettingsPage.tsx";
+import TagPostsPage from "./pages/TagPostsPage.tsx";
 
 function App() {
   return (

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { useAuth } from "./useAuth";
-import { useUserPointsDetail } from "./useUserPoints";
+import { useAuth } from "./useAuth.ts";
+import { useUserPointsDetail } from "./useUserPoints.ts";
 
 interface FirstTimeUserStatus {
   isFirstTime: boolean;

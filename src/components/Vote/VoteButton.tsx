@@ -1,14 +1,16 @@
+import React from "react";
+
 import { TbArrowBigUpLine } from "react-icons/tb";
 import { TbArrowBigDownLine } from "react-icons/tb";
 
 import { CheckCircle, LogIn } from "lucide-react";
-import { Button } from "../ui/button";
-import { useHandleVotes } from "../../hooks/useHandleVotes";
-import VoteGageBar from "./VoteGageBar";
-import VoteConfirmModal from "./VoteConfirmModal";
+import { Button } from "../ui/button.tsx";
+import { useHandleVotes } from "../../hooks/useHandleVotes.ts";
+import VoteGageBar from "./VoteGageBar.tsx";
+import VoteConfirmModal from "./VoteConfirmModal.tsx";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth.ts";
 
 interface PostProps {
   postId: number;

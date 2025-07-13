@@ -1,8 +1,10 @@
+import React from "react";
+
 import { MessageSquarePlus } from "lucide-react";
-import { Button } from "../ui/button";
-import { PostType } from "./PostList";
+import { Button } from "../ui/button.tsx";
+import { PostType } from "./PostList.tsx";
 import { User } from "@supabase/supabase-js";
-import NestedPostSummary from "./NestedPostSummary";
+import NestedPostSummary from "./NestedPostSummary.tsx";
 
 type NestedPostSectionProps = {
   data: PostType;

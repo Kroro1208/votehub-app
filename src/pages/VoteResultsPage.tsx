@@ -1,11 +1,13 @@
+import React from "react";
+
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../supabase-client";
-import { useAuth } from "../hooks/useAuth";
+import { supabase } from "../supabase-client.ts";
+import { useAuth } from "../hooks/useAuth.ts";
 import { Trophy, Clock, CalendarX, BarChart3 } from "lucide-react";
-import Loading from "../components/Loading";
-import ErrorMessage from "../components/ErrorMessage";
-import RankingList from "../components/Vote/RankingList";
-import { CompletedPost } from "../types/post";
+import Loading from "../components/Loading.tsx";
+import ErrorMessage from "../components/ErrorMessage.tsx";
+import RankingList from "../components/Vote/RankingList.tsx";
+import { CompletedPost } from "../types/post.ts";
 import RightPanel from "../components/Vote/RightPanel.tsx";
 
 // 期限終了投稿データを取得する関数

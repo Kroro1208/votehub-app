@@ -1,10 +1,12 @@
+import React from "react";
+
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../../supabase-client";
-import PostItem from "./PostItem";
-import NestedPostItem from "./NestedPostItem";
+import { supabase } from "../../supabase-client.ts";
+import PostItem from "./PostItem.tsx";
+import NestedPostItem from "./NestedPostItem.tsx";
 import { useEffect } from "react";
 import { useAtom } from "jotai";
-import { postsAtom } from "../../stores/PostAtom";
+import { postsAtom } from "../../stores/PostAtom.ts";
 
 export interface PostType {
   id: number;

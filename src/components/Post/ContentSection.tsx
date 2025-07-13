@@ -1,16 +1,28 @@
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
-import { MessageSquare } from "lucide-react";
-import { useLanguage } from "../../context/LanguageContext";
-import { Controller } from "react-hook-form";
+import React from "react";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Label } from "../ui/label.tsx";
+import { Input } from "../ui/input.tsx";
+import { Textarea } from "../ui/textarea.tsx";
+import { MessageSquare } from "lucide-react";
+import {
+  Controller,
+  Control,
+  UseFormWatch,
+  UseFormSetValue,
+  FieldErrors,
+} from "react-hook-form";
+import { useLanguage } from "../../hooks/useLanguage.ts";
+
+interface FormData {
+  content: string;
+  [key: string]: unknown;
+}
+
 interface ContentSectionProps {
-  control: any;
-  watch: any;
-  setValue: any;
-  errors: any;
+  control: Control<FormData>;
+  watch: UseFormWatch<FormData>;
+  setValue: UseFormSetValue<FormData>;
+  errors: FieldErrors<FormData>;
   watchedContent: string;
 }
 
@@ -46,7 +58,9 @@ const ContentSection = ({
             <Input
               placeholder={t("create.post.content.pro.placeholder")}
               className="text-sm border-green-200 dark:border-green-700 focus:border-green-400 dark:focus:border-green-500"
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = (e.target as HTMLInputElement & { value: string })
+                  .value;
                 const currentContent = watch("content") || "";
                 const lines = currentContent.split("\n");
                 const proPrefix = t("create.post.content.pro.prefix");
@@ -54,9 +68,9 @@ const ContentSection = ({
                   line.startsWith(proPrefix),
                 );
                 if (proIndex !== -1) {
-                  lines[proIndex] = `${proPrefix} ${e.target.value}`;
+                  lines[proIndex] = `${proPrefix} ${value}`;
                 } else {
-                  lines.unshift(`${proPrefix} ${e.target.value}`);
+                  lines.unshift(`${proPrefix} ${value}`);
                 }
                 setValue("content", lines.join("\n"));
               }}
@@ -72,7 +86,9 @@ const ContentSection = ({
             <Input
               placeholder={t("create.post.content.con.placeholder")}
               className="text-sm border-red-200 dark:border-red-700 focus:border-red-400 dark:focus:border-red-500"
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = (e.target as HTMLInputElement & { value: string })
+                  .value;
                 const currentContent = watch("content") || "";
                 const lines = currentContent.split("\n");
                 const conPrefix = t("create.post.content.con.prefix");
@@ -81,19 +97,15 @@ const ContentSection = ({
                   line.startsWith(conPrefix),
                 );
                 if (conIndex !== -1) {
-                  lines[conIndex] = `${conPrefix} ${e.target.value}`;
+                  lines[conIndex] = `${conPrefix} ${value}`;
                 } else {
                   const proIndex = lines.findIndex((line: string) =>
                     line.startsWith(proPrefix),
                   );
                   if (proIndex !== -1) {
-                    lines.splice(
-                      proIndex + 1,
-                      0,
-                      `${conPrefix} ${e.target.value}`,
-                    );
+                    lines.splice(proIndex + 1, 0, `${conPrefix} ${value}`);
                   } else {
-                    lines.push(`${conPrefix} ${e.target.value}`);
+                    lines.push(`${conPrefix} ${value}`);
                   }
                 }
                 setValue("content", lines.join("\n"));
@@ -108,7 +120,10 @@ const ContentSection = ({
               rows={4}
               placeholder={t("create.post.content.detail.placeholder")}
               className="text-sm resize-none border-gray-200 dark:border-gray-600"
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                const value = (
+                  e.target as HTMLTextAreaElement & { value: string }
+                ).value;
                 const currentContent = watch("content") || "";
                 const lines = currentContent.split("\n");
                 // 賛成・反対以外の行を削除
@@ -118,8 +133,8 @@ const ContentSection = ({
                   (line: string) =>
                     line.startsWith(proPrefix) || line.startsWith(conPrefix),
                 );
-                if (e.target.value.trim()) {
-                  filteredLines.push("", e.target.value);
+                if (value.trim()) {
+                  filteredLines.push("", value);
                 }
                 setValue("content", filteredLines.join("\n"));
               }}

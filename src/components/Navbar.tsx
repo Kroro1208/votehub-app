@@ -1,13 +1,13 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router";
 import { CgMenuGridO } from "react-icons/cg";
 import { RiCloseLargeFill } from "react-icons/ri";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/useAuth.ts";
 import { VscSignOut } from "react-icons/vsc";
 import { FaRegUser } from "react-icons/fa";
-import { Button } from "./ui/button";
-import NotificationDropdown from "./Notification/NotificationDropdown";
-import { useUserPoints } from "../hooks/useUserPoints";
+import { Button } from "./ui/button.tsx";
+import NotificationDropdown from "./Notification/NotificationDropdown.tsx";
+import { useUserPoints } from "../hooks/useUserPoints.ts";
 import { Coins } from "lucide-react";
 
 export default function Navbar() {

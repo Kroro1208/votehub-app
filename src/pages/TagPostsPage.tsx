@@ -1,9 +1,11 @@
+import React from "react";
+
 import { useParams, useNavigate } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { supabase } from "../supabase-client";
-import { PostType } from "../components/Post/PostList";
-import PostItem from "../components/Post/PostItem";
+import { supabase } from "../supabase-client.ts";
+import { PostType } from "../components/Post/PostList.tsx";
+import PostItem from "../components/Post/PostItem.tsx";
 import { ArrowLeft, Tag } from "lucide-react";
 
 interface TagInfo {

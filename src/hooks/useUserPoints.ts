@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "./useAuth";
-import { supabase } from "../supabase-client";
+import { useAuth } from "./useAuth.ts";
+import { supabase } from "../supabase-client.ts";
 
 interface UserPoints {
   id: string;

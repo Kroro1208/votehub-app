@@ -1,13 +1,15 @@
+import React from "react";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
-import { supabase } from "../../supabase-client";
-import { useAuth } from "../../hooks/useAuth";
+import { supabase } from "../../supabase-client.ts";
+import { useAuth } from "../../hooks/useAuth.ts";
 import {
   commentVotesAtomFamily,
   mostVotedCommentAtomFamily,
   updateCommentVotes,
-} from "../../stores/CommentVoteAtom";
+} from "../../stores/CommentVoteAtom.ts";
 import { Heart, Skull } from "lucide-react";
 
 interface VoteProps {

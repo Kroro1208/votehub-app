@@ -1,8 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { supabase } from "../supabase-client";
-import { NotificationType } from "../types/notification";
-import { useAuth } from "./useAuth";
+import { supabase } from "../supabase-client.ts";
+import { NotificationType } from "../types/notification.ts";
+import { useAuth } from "./useAuth.ts";
 
 export const useNotifications = () => {
   const { user } = useAuth();

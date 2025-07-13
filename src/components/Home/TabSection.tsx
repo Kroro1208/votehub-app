@@ -1,3 +1,5 @@
+import React from "react";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { useLanguage } from "../../context/LanguageContext";
 import PostList from "../Post/PostList";

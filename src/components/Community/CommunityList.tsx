@@ -1,6 +1,8 @@
+import React from "react";
+
 /* eslint-disable react-refresh/only-export-components */
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../../supabase-client";
+import { supabase } from "../../supabase-client.ts";
 import { Link } from "react-router";
 import { useState } from "react";
 import {
@@ -11,7 +13,7 @@ import {
   TrendingUp,
   Flame,
 } from "lucide-react";
-import Error from "../Error";
+import Error from "../Error.tsx";
 
 export interface Community {
   id: number;
@@ -35,7 +37,7 @@ export const getCommunitites = async (): Promise<CommunityWithStats[]> => {
 
   // 各コミュニティの統計情報を並行取得
   const communitiesWithStats = await Promise.all(
-    communities.map(async (community) => {
+    communities.map(async (community: Community) => {
       // 投稿数を取得
       const { count: postCount } = await supabase
         .from("posts")
@@ -102,7 +104,11 @@ const CommunityList = () => {
             placeholder="スペースを検索"
             className="w-full pl-10 pr-4 py-2 text-black border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const value = (e.target as HTMLInputElement & { value: string })
+                .value;
+              setSearchTerm(value);
+            }}
           />
         </div>
       </div>

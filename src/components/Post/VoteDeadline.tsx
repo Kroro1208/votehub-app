@@ -1,13 +1,15 @@
+import React from "react";
+
 import { Calendar, Clock, MessageCircle, Megaphone } from "lucide-react";
 import {
   getTimeRemainingObject,
   isVotingExpired,
-} from "../../utils/formatTime";
-import { PostType } from "./PostList";
-import { Button } from "../ui/button";
+} from "../../utils/formatTime.tsx";
+import { PostType } from "./PostList.tsx";
+import { Button } from "../ui/button.tsx";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../../supabase-client";
+import { supabase } from "../../supabase-client.ts";
 
 interface Comment {
   id: number;
