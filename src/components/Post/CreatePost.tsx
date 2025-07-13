@@ -30,11 +30,9 @@ import {
   SelectValue,
 } from "../ui/select.tsx";
 import { Button } from "../ui/button.tsx";
-import DatePicker from "react-datepicker";
 import { z } from "zod";
 import { toast } from "react-toastify";
-import { createPostSchema } from "../../utils/schema.ts";
-import { useLanguage } from "../../context/LanguageContext.tsx";
+import { createPostSchema } from "../../utils/schema.tsx";
 import { usePostLimits } from "../../hooks/usePostLimits.ts";
 import { useCreatePost } from "../../hooks/useCreatePost.ts";
 import { useImagePreview } from "../../hooks/useImagePreview.ts";
@@ -43,6 +41,8 @@ import GradePanel from "./GradePanel.tsx";
 import ContentSection from "./ContentSection.tsx";
 import ImageUploadSection from "./ImageUploadSection.tsx";
 import TagSection from "./TagSection.tsx";
+import { TypedDatePicker } from "./CreateNestedPost.tsx";
+import { useLanguage } from "../../hooks/useLanguage.ts";
 
 type CreatePostFormData = z.infer<typeof createPostSchema>;
 
@@ -247,7 +247,7 @@ const CreatePost = () => {
                       name="vote_deadline"
                       control={control}
                       render={({ field }) => (
-                        <DatePicker
+                        <TypedDatePicker
                           selected={field.value}
                           onChange={(date) => field.onChange(date)}
                           showTimeSelect

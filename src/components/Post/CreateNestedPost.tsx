@@ -46,7 +46,7 @@ interface DatePickerProps {
   className?: string;
 }
 
-const TypedDatePicker =
+export const TypedDatePicker =
   DatePicker as unknown as React.ComponentType<DatePickerProps>;
 
 type CreateNestedPostFormData = z.infer<typeof createNestedPostSchema>;
