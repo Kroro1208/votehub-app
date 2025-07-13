@@ -1,8 +1,8 @@
 import React from "react";
 
 import { Clock, TrendingUp, Users } from "lucide-react";
-import { useHomeStats } from "../../hooks/useHomeStats";
-import { useLanguage } from "../../context/LanguageContext";
+import { useLanguage } from "../../hooks/useLanguage.ts";
+import { useHomeStats } from "../../hooks/useHomeStats.ts";
 
 const HeaderStatus = () => {
   const { data: homeStats, isLoading: statsLoading } = useHomeStats();

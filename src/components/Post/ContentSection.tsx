@@ -13,7 +13,7 @@ import {
 } from "react-hook-form";
 import { useLanguage } from "../../hooks/useLanguage.ts";
 
-interface FormData {
+export interface FormData {
   content: string;
   title: string;
   image: FileList;

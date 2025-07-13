@@ -49,7 +49,7 @@ const CreateNestedPostDialog = ({
             }}
             onCancel={() => setShowCreateNested(false)}
             onSuccess={handleNestedPostCreate}
-            isDialog={true}
+            isDialog
           />
         )}
       </DialogContent>

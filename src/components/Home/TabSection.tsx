@@ -1,8 +1,8 @@
 import React from "react";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { useLanguage } from "../../context/LanguageContext";
-import PostList from "../Post/PostList";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs.tsx";
+import { useLanguage } from "../../hooks/useLanguage.ts";
+import PostList from "../Post/PostList.tsx";
 
 const TabSection = () => {
   const { t } = useLanguage();

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth.ts";
 import { useTheme } from "../context/ThemeContext.tsx";
-import { useLanguage } from "../context/LanguageContext.tsx";
 import { supabase } from "../supabase-client.ts";
 import { toast } from "react-toastify";
 import {
@@ -27,6 +26,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card.tsx";
+import { useLanguage } from "../hooks/useLanguage.ts";
 
 export default function SettingsPage() {
   const navigate = useNavigate();

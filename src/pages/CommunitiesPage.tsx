@@ -4,7 +4,7 @@ import CommunityList from "../components/Community/CommunityList.tsx";
 import Sidebar from "../components/SideBar.tsx";
 import { Users, Plus } from "lucide-react";
 import { Link } from "react-router";
-import { useLanguage } from "../context/LanguageContext.tsx";
+import { useLanguage } from "../hooks/useLanguage.ts";
 
 const CommunitiesPage = () => {
   const { t } = useLanguage();

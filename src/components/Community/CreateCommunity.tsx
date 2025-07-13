@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
 import { FaPeopleLine } from "react-icons/fa6";
 import { IoPricetagsOutline } from "react-icons/io5";
 import { TbFileDescription } from "react-icons/tb";
-import { useLanguage } from "../../context/LanguageContext.tsx";
+import { useLanguage } from "../../hooks/useLanguage.ts";
 
 const communitySchema = z.object({
   name: z.string().min(1, "スペース名は必須です"),

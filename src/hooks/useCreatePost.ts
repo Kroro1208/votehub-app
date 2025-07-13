@@ -3,8 +3,8 @@ import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { supabase } from "../supabase-client.ts";
 import { useAuth } from "./useAuth.ts";
-import { useLanguage } from "../context/LanguageContext.tsx";
 import { usePostLimits } from "./usePostLimits.ts";
+import { useLanguage } from "./useLanguage.ts";
 
 export interface PostInput {
   title: string;
@@ -18,7 +18,9 @@ export interface PostInput {
 
 const createPost = async (post: PostInput, imageFile: File) => {
   const fileExt = imageFile.name.split(".").pop() || "";
-  const filePath = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+  const filePath = `${Date.now()}-${Math.random()
+    .toString(36)
+    .substring(2, 9)}.${fileExt}`;
 
   // Supabase Storageに画像をアップロード
   const { error: uploadError } = await supabase.storage

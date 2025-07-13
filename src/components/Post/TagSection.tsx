@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "../ui/select.tsx";
 import { Hash, Loader2 } from "lucide-react";
-import { useLanguage } from "../../context/LanguageContext.tsx";
+import { useLanguage } from "../../hooks/useLanguage.ts";
 import { Controller } from "react-hook-form";
 import { useAuth } from "../../hooks/useAuth.ts";
 

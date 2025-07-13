@@ -5,12 +5,13 @@ import { Input } from "../ui/input.tsx";
 import { Button } from "../ui/button.tsx";
 import { Card, CardContent } from "../ui/card.tsx";
 import { ImageIcon, X } from "lucide-react";
-import { useLanguage } from "../../context/LanguageContext.tsx";
+import { useLanguage } from "../../hooks/useLanguage.ts";
+import { FieldErrors, UseFormRegister } from "react-hook-form";
+import { FormData } from "./ContentSection.tsx";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 interface ImageUploadSectionProps {
-  register: any;
-  errors: any;
+  register: UseFormRegister<FormData>;
+  errors: FieldErrors<FormData>;
   imagePreview: string | null;
   watchImage: FileList | null;
   onRemoveImage: () => void;
