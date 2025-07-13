@@ -13,6 +13,7 @@ import BookmarksPage from "./pages/BookmarksPage.tsx";
 import NotificationsPage from "./pages/NotificationsPage.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
 import TagPostsPage from "./pages/TagPostsPage.tsx";
+import "./index.css";
 
 function App() {
   return (
