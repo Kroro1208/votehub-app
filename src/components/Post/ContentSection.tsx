@@ -15,7 +15,12 @@ import { useLanguage } from "../../hooks/useLanguage.ts";
 
 interface FormData {
   content: string;
-  [key: string]: unknown;
+  title: string;
+  image: FileList;
+  community_id: number | null;
+  vote_deadline: Date;
+  tag_id?: number | null | undefined;
+  parent_post_id?: number | null | undefined;
 }
 
 interface ContentSectionProps {
