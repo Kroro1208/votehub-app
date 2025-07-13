@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTagStats, TagStats } from "../../hooks/useTagStats.ts";
 import {
   getTopTagsByPopularity,
