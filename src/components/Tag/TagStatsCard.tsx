@@ -1,4 +1,3 @@
-import React from "react";
 import { useTagStatsById } from "../../hooks/useTagStats.ts";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card.tsx";
 import { Badge } from "../ui/badge.tsx";

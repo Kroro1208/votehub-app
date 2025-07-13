@@ -1,5 +1,3 @@
-import React from "react";
-
 import { Link } from "react-router";
 import { BasePost } from "../../types/post.ts";
 import { getTimeRemaining, isVotingExpired } from "../../utils/formatTime.tsx";

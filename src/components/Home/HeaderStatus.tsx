@@ -1,5 +1,3 @@
-import React from "react";
-
 import { Clock, TrendingUp, Users } from "lucide-react";
 import { useLanguage } from "../../hooks/useLanguage.ts";
 import { useHomeStats } from "../../hooks/useHomeStats.ts";

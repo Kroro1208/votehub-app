@@ -1,4 +1,3 @@
-import React from "react";
 import { useBookmarks } from "../../hooks/useBookmarks.ts";
 import { useAuth } from "../../hooks/useAuth.ts";
 import { Bookmark, BookmarkCheck } from "lucide-react";

@@ -1,5 +1,3 @@
-import React from "react";
-
 import { Link } from "react-router";
 import { CommunityItemType } from "./CommunityItem.tsx";
 import { AlertTriangle, CheckCircle, Clock, Users } from "lucide-react";

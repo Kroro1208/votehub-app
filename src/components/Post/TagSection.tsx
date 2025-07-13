@@ -1,5 +1,3 @@
-import React from "react";
-
 import { Label } from "../ui/label.tsx";
 import { Input } from "../ui/input.tsx";
 import { Button } from "../ui/button.tsx";

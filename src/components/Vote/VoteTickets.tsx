@@ -1,5 +1,3 @@
-import React from "react";
-
 interface VoteTicketsProps {
   upVotes: number;
   downVotes: number;

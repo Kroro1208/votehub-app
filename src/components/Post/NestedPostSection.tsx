@@ -1,5 +1,3 @@
-import React from "react";
-
 import { MessageSquarePlus } from "lucide-react";
 import { Button } from "../ui/button.tsx";
 import { PostType } from "./PostList.tsx";

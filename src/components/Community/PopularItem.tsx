@@ -1,5 +1,3 @@
-import React from "react";
-
 import { CheckCircle, Flame, Trophy, Users } from "lucide-react";
 import { CommunityItemType } from "./CommunityItem.tsx";
 import { Link } from "react-router";

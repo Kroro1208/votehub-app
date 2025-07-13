@@ -1,5 +1,3 @@
-import React from "react";
-
 import CommunityList from "../components/Community/CommunityList.tsx";
 import Sidebar from "../components/SideBar.tsx";
 import { Users, Plus } from "lucide-react";

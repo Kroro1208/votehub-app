@@ -1,5 +1,3 @@
-import React from "react";
-
 interface BarProps {
   totalVotes: number;
   upVotes: number;

@@ -1,4 +1,3 @@
-import React from "react";
 import { ThumbsUp, ThumbsDown, Info, User } from "lucide-react";
 
 interface PostContentDisplayProps {

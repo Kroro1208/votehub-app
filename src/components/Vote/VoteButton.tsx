@@ -1,5 +1,3 @@
-import React from "react";
-
 import { TbArrowBigUpLine } from "react-icons/tb";
 import { TbArrowBigDownLine } from "react-icons/tb";
 

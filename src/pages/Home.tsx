@@ -1,5 +1,3 @@
-import React from "react";
-
 import Sidebar from "../components/SideBar.tsx";
 import RightPanel from "../components/RightPanel.tsx";
 import WelcomeModal from "../components/WelcomeModal.tsx";

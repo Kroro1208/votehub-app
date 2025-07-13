@@ -11,7 +11,6 @@ import { Button } from "../ui/button.tsx";
 import { MessageCircle } from "lucide-react";
 import { UseMutationResult } from "@tanstack/react-query";
 import { CommentType } from "./PostDetail.tsx";
-import React from "react";
 
 type PersuationDialogProps = {
   open: boolean;

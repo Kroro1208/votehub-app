@@ -1,5 +1,3 @@
-import React from "react";
-
 import { useAtomValue } from "jotai";
 import { postsAtom } from "../stores/PostAtom.ts";
 import { PostType } from "./Post/PostList.tsx";

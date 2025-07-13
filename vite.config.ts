@@ -4,7 +4,12 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react({
+      jsxRuntime: "automatic",
+    }),
+    tailwindcss(),
+  ],
   server: {
     host: "0.0.0.0", // Dockerで外部からアクセス可能にする
     port: 5173,

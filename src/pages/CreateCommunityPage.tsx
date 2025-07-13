@@ -1,5 +1,3 @@
-import React from "react";
-
 import CreateCommunity from "../components/Community/CreateCommunity.tsx";
 import Sidebar from "../components/SideBar.tsx";
 

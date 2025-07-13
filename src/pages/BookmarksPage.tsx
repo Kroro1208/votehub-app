@@ -1,5 +1,3 @@
-import React from "react";
-
 import { useBookmarks } from "../hooks/useBookmarks.ts";
 import { useAuth } from "../hooks/useAuth.ts";
 import Loading from "../components/Loading.tsx";

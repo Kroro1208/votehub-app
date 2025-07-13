@@ -1,5 +1,3 @@
-import React from "react";
-
 import { useState } from "react";
 import { VscBell, VscBellDot } from "react-icons/vsc";
 import { MessageSquare, Reply, Clock, TrendingUp } from "lucide-react";

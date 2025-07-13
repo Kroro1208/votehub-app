@@ -1,5 +1,3 @@
-import React from "react";
-
 import { Link } from "react-router";
 import type { PostType } from "./PostList.tsx";
 import { Clock, Users, CheckCircle, AlertTriangle, Trash2 } from "lucide-react";

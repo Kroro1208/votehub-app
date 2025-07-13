@@ -1,5 +1,3 @@
-import React from "react";
-
 import { Route, Routes } from "react-router";
 import Home from "./pages/Home.tsx";
 import Navbar from "./components/Navbar.tsx";

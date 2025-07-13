@@ -1,5 +1,3 @@
-import React from "react";
-
 import { useParams } from "react-router";
 import CommunityItem from "../components/Community/CommunityItem.tsx";
 

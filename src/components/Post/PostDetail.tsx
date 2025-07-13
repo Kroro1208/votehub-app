@@ -1,5 +1,3 @@
-import React from "react";
-
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../../supabase-client.ts";
 import type { PostType } from "./PostList.tsx";

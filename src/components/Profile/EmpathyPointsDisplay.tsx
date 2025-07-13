@@ -1,4 +1,3 @@
-import React from "react";
 import { Heart, Trophy, Users, TrendingUp, Star, Crown } from "lucide-react";
 import {
   EmpathyPointsData,

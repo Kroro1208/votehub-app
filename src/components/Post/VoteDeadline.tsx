@@ -1,5 +1,3 @@
-import React from "react";
-
 import { Calendar, Clock, MessageCircle, Megaphone } from "lucide-react";
 import {
   getTimeRemainingObject,

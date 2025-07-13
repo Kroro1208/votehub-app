@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import type { Comment } from "./CommentSection.tsx";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronsUp, ChevronsUpDown, MessageSquare, Send } from "lucide-react";

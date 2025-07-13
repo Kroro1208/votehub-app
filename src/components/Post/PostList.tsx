@@ -1,5 +1,3 @@
-import React from "react";
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../../supabase-client.ts";
 import PostItem from "./PostItem.tsx";

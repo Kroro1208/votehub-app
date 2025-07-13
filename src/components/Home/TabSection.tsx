@@ -1,5 +1,3 @@
-import React from "react";
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs.tsx";
 import { useLanguage } from "../../hooks/useLanguage.ts";
 import PostList from "../Post/PostList.tsx";

@@ -1,5 +1,3 @@
-import React from "react";
-
 import { AlertTriangle, Crown, Sparkles, Users } from "lucide-react";
 import { Card, CardContent } from "../ui/card.tsx";
 import { PostLimitStatus } from "../../hooks/usePostLimits.ts";

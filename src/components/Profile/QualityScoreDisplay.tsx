@@ -1,4 +1,3 @@
-import React from "react";
 import { Award, TrendingUp, BarChart3 } from "lucide-react";
 import { UserQualityScoreStats } from "../../hooks/useQualityScore.ts";
 
