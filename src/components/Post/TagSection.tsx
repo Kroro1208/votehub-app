@@ -12,15 +12,21 @@ import {
 } from "../ui/select.tsx";
 import { Hash, Loader2 } from "lucide-react";
 import { useLanguage } from "../../hooks/useLanguage.ts";
-import { Controller } from "react-hook-form";
+import { Controller, Control, UseFormSetValue } from "react-hook-form";
 import { useAuth } from "../../hooks/useAuth.ts";
+import { FormData } from "./ContentSection.tsx";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+interface Tag {
+  id: number;
+  name: string;
+  community_id: number;
+}
+
 interface TagSectionProps {
-  control: any;
-  setValue: any;
+  control: Control<FormData>;
+  setValue: UseFormSetValue<FormData>;
   watchCommunityId: number | null;
-  tagsData: any[];
+  tagsData: Tag[];
   newTagName: string;
   setNewTagName: (name: string) => void;
   isCreatingTag: boolean;
