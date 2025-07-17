@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/useAuth.ts";
 import { Trophy, Crown, Medal, Award, Star, TrendingUp } from "lucide-react";
 import Loading from "../components/Loading.tsx";
 import ErrorMessage from "../components/ErrorMessage.tsx";
+import { Card } from "../components/ui/card.tsx";
 
 interface UserRankingData {
   user_id: string;
@@ -27,24 +28,7 @@ const fetchUserRanking = async (): Promise<UserRankingData[]> => {
 
   if (error) throw new Error(error.message);
 
-  // ユーザーメタデータを別途取得 (管理者権限が必要なため、エラーが発生する可能性がある)
-  let userMetadata = new Map();
-  try {
-    const { data: authData } = await supabase.auth.admin.listUsers();
-    userMetadata = new Map(
-      authData?.users.map((u) => [u.id, u.user_metadata]) || [],
-    );
-  } catch (error) {
-    console.warn("Cannot fetch user metadata:", error);
-  }
-
-  // メタデータを結合
-  const rankingsWithMetadata = data.map((ranking: any) => ({
-    ...ranking,
-    user_metadata: userMetadata.get(ranking.user_id) || {},
-  }));
-
-  return rankingsWithMetadata as UserRankingData[];
+  return data as UserRankingData[];
 };
 
 const UserRankingPage = () => {
@@ -159,24 +143,24 @@ const UserRankingPage = () => {
         )}
 
         {/* ランキングリスト */}
-        <div className="space-y-4">
+        <div className="space-y-2">
           {rankings?.map((ranking) => {
             const styling = getRankStyling(ranking.rank);
             const isCurrentUser = ranking.user_id === user?.id;
 
             return (
-              <div
+              <Card
                 key={ranking.user_id}
                 className={`relative rounded-xl border transition-all duration-300 ${styling.container} ${
                   isCurrentUser ? "ring-2 ring-blue-400 shadow-lg" : ""
                 }`}
               >
-                <div className="flex items-center p-6">
+                <div className="flex items-center px-4">
                   {/* 順位バッジ */}
-                  <div className="flex-shrink-0 mr-6">
+                  <div className="flex-shrink-0 mr-4">
                     <div className="relative">
                       <div
-                        className={`w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold shadow-lg ${styling.badge}`}
+                        className={`size-15 rounded-full flex items-center justify-center text-xl font-bold shadow-lg ${styling.badge}`}
                       >
                         {ranking.rank}
                       </div>
@@ -189,29 +173,33 @@ const UserRankingPage = () => {
                   </div>
 
                   {/* ユーザー情報 */}
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-1">
                       {ranking.user_metadata?.avatar_url ? (
                         <img
                           src={ranking.user_metadata.avatar_url}
                           alt="Avatar"
-                          className="w-10 h-10 rounded-full object-cover"
+                          className="size-10 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold">
+                        <div className="size-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold">
                           {ranking.user_metadata?.full_name?.charAt(0) || "U"}
                         </div>
                       )}
-                      <div>
-                        <h3 className={`text-lg font-semibold ${styling.text}`}>
-                          {ranking.user_metadata?.full_name || "ユーザー"}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3
+                            className={`text-lg font-semibold ${styling.text} truncate`}
+                          >
+                            {ranking.user_metadata?.full_name || "ユーザー"}
+                          </h3>
                           {isCurrentUser && (
-                            <span className="ml-2 text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                            <span className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex-shrink-0">
                               あなた
                             </span>
                           )}
-                        </h3>
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-gray-600">
                           <span>
                             {ranking.empathy_rank} {ranking.badge_icon}
                           </span>
@@ -222,11 +210,11 @@ const UserRankingPage = () => {
                   </div>
 
                   {/* スコア詳細 */}
-                  <div className="text-right">
-                    <div className={`text-2xl font-bold ${styling.text} mb-1`}>
+                  <div className="text-right flex-shrink-0">
+                    <div className={`text-xl font-bold ${styling.text}`}>
                       {ranking.total_score.toLocaleString()}pt
                     </div>
-                    <div className="text-sm text-gray-500 space-y-1">
+                    <div className="text-sm text-gray-500">
                       <div>
                         品質: {ranking.quality_score.toLocaleString()}pt
                       </div>
@@ -236,7 +224,7 @@ const UserRankingPage = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>

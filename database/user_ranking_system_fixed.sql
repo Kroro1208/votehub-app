@@ -85,9 +85,17 @@ BEGIN
         COALESCE(qr.quality_rank, 'F') as quality_rank,
         ru.empathy_rank,
         ru.badge_icon,
-        '{}'::jsonb as user_metadata
+        COALESCE(
+            jsonb_build_object(
+                'full_name', COALESCE(au.raw_user_meta_data->>'full_name', au.raw_user_meta_data->>'name'),
+                'avatar_url', au.raw_user_meta_data->>'avatar_url',
+                'email', au.email
+            ),
+            '{}'::jsonb
+        ) as user_metadata
     FROM ranked_users ru
     LEFT JOIN quality_ranks qr ON ru.user_id = qr.user_id
+    LEFT JOIN auth.users au ON ru.user_id = au.id::text
     ORDER BY ru.rank;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
