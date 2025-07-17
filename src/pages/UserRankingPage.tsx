@@ -65,29 +65,30 @@ const UserRankingPage = () => {
       case 1:
         return {
           container:
-            "bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200 shadow-lg",
+            "bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/30 dark:to-amber-900/30 border-yellow-200 dark:border-yellow-700 shadow-lg",
           badge: "bg-gradient-to-r from-yellow-500 to-amber-500 text-white",
-          text: "text-yellow-700",
+          text: "text-yellow-700 dark:text-yellow-300",
         };
       case 2:
         return {
           container:
-            "bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200 shadow-md",
+            "bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800/30 dark:to-slate-800/30 border-gray-200 dark:border-gray-600 shadow-md",
           badge: "bg-gradient-to-r from-gray-500 to-slate-500 text-white",
-          text: "text-gray-700",
+          text: "text-gray-700 dark:text-gray-300",
         };
       case 3:
         return {
           container:
-            "bg-gradient-to-r from-orange-50 to-red-50 border-orange-200 shadow-md",
+            "bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/30 dark:to-red-900/30 border-orange-200 dark:border-orange-700 shadow-md",
           badge: "bg-gradient-to-r from-orange-500 to-red-500 text-white",
-          text: "text-orange-700",
+          text: "text-orange-700 dark:text-orange-300",
         };
       default:
         return {
-          container: "bg-white border-gray-200 hover:shadow-md",
+          container:
+            "bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-600 hover:shadow-md",
           badge: "bg-gradient-to-r from-blue-500 to-indigo-500 text-white",
-          text: "text-gray-700",
+          text: "text-gray-700 dark:text-gray-300",
         };
     }
   };
@@ -95,7 +96,7 @@ const UserRankingPage = () => {
   const currentUserRank = rankings?.find((r) => r.user_id === user?.id);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-black py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* ヘッダー */}
         <div className="text-center mb-8">
@@ -110,31 +111,33 @@ const UserRankingPage = () => {
               <Star size={32} className="text-white" />
             </div>
           </div>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 dark:text-gray-300 text-lg">
             品質度スコア + 共感ポイントの総合評価ランキング
           </p>
         </div>
 
         {/* 自分の順位表示 */}
         {currentUserRank && (
-          <div className="mb-8 p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+          <div className="mb-8 p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 rounded-xl border border-purple-200 dark:border-purple-700">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full">
                   <TrendingUp size={24} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-purple-700">
+                  <h3 className="text-xl font-bold text-purple-700 dark:text-purple-300">
                     あなたの順位
                   </h3>
-                  <p className="text-purple-600">現在の総合ランキング</p>
+                  <p className="text-purple-600 dark:text-purple-400">
+                    現在の総合ランキング
+                  </p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-purple-700">
+                <div className="text-3xl font-bold text-purple-700 dark:text-purple-300">
                   {currentUserRank.rank}位
                 </div>
-                <div className="text-sm text-purple-600">
+                <div className="text-sm text-purple-600 dark:text-purple-400">
                   {currentUserRank.total_score.toLocaleString()}pt
                 </div>
               </div>
@@ -199,7 +202,7 @@ const UserRankingPage = () => {
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-3 text-sm text-gray-600">
+                        <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                           <span>
                             {ranking.empathy_rank} {ranking.badge_icon}
                           </span>
@@ -214,7 +217,7 @@ const UserRankingPage = () => {
                     <div className={`text-xl font-bold ${styling.text}`}>
                       {ranking.total_score.toLocaleString()}pt
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
                       <div>
                         品質: {ranking.quality_score.toLocaleString()}pt
                       </div>
@@ -233,11 +236,14 @@ const UserRankingPage = () => {
         {!rankings ||
           (rankings.length === 0 && (
             <div className="text-center py-16">
-              <Trophy size={64} className="text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">
+              <Trophy
+                size={64}
+                className="text-gray-400 dark:text-gray-500 mx-auto mb-4"
+              />
+              <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
                 ランキングデータがありません
               </h3>
-              <p className="text-gray-500">
+              <p className="text-gray-500 dark:text-gray-400">
                 投稿やコメントでポイントを獲得すると、ランキングに表示されます
               </p>
             </div>

@@ -7,28 +7,28 @@ const TabSection = () => {
 
   return (
     <Tabs defaultValue="all" className="w-full">
-      <TabsList className="grid w-full grid-cols-4 bg-slate-100 dark:bg-dark-surface">
+      <TabsList className="grid w-full grid-cols-4 bg-slate-100 dark:bg-gray-800">
         <TabsTrigger
           value="all"
-          className="data-[state=active]:bg-violet-500 data-[state=active]:text-white dark:text-dark-text"
+          className="data-[state=active]:bg-violet-500 data-[state=active]:text-white text-gray-700 dark:text-gray-200"
         >
           {t("home.tabs.all")}
         </TabsTrigger>
         <TabsTrigger
           value="urgent"
-          className="data-[state=active]:bg-violet-500 data-[state=active]:text-white dark:text-dark-text"
+          className="data-[state=active]:bg-violet-500 data-[state=active]:text-white text-gray-700 dark:text-gray-200"
         >
           {t("home.tabs.urgent")}
         </TabsTrigger>
         <TabsTrigger
           value="popular"
-          className="data-[state=active]:bg-violet-500 data-[state=active]:text-white dark:text-dark-text"
+          className="data-[state=active]:bg-violet-500 data-[state=active]:text-white text-gray-700 dark:text-gray-200"
         >
           {t("home.tabs.popular")}
         </TabsTrigger>
         <TabsTrigger
           value="recent"
-          className="data-[state=active]:bg-violet-500 data-[state=active]:text-white dark:text-dark-text"
+          className="data-[state=active]:bg-violet-500 data-[state=active]:text-white text-gray-700 dark:text-gray-200"
         >
           {t("home.tabs.recent")}
         </TabsTrigger>

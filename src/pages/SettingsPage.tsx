@@ -108,22 +108,22 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-300 dark:bg-dark-bg transition-colors">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       {/* Header */}
-      <div className="bg-white dark:bg-dark-surface border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
+      <div className="bg-white dark:bg-gray-800 border-b border-slate-200 dark:border-gray-700 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center space-x-4">
             <Button
               onClick={() => navigate(-1)}
               variant="ghost"
               size="sm"
-              className="p-2 hover:bg-slate-100"
+              className="p-2 hover:bg-slate-100 dark:hover:bg-gray-700"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </Button>
             <div className="flex items-center space-x-2">
-              <Settings className="w-6 h-6 text-slate-600 dark:text-slate-400" />
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-dark-text">
+              <Settings className="w-6 h-6 text-slate-600 dark:text-gray-300" />
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-gray-100">
                 {t("settings.title")}
               </h1>
             </div>
@@ -134,9 +134,9 @@ export default function SettingsPage() {
       {/* Main content */}
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Profile Settings */}
-        <Card className="dark:bg-dark-surface dark:border-slate-700">
+        <Card className="dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 dark:text-dark-text">
+            <CardTitle className="flex items-center space-x-2 dark:text-gray-100">
               <User className="w-5 h-5" />
               <span>{t("settings.profile")}</span>
             </CardTitle>
@@ -160,13 +160,13 @@ export default function SettingsPage() {
                   )}
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-slate-800 dark:text-dark-text">
+                  <h3 className="font-semibold text-slate-800 dark:text-gray-100">
                     {profileData.fullName || "未設定"}
                   </h3>
-                  <p className="text-sm text-slate-600 dark:text-dark-muted mb-2">
+                  <p className="text-sm text-slate-600 dark:text-gray-300 mb-2">
                     {user?.email}
                   </p>
-                  <p className="text-sm text-slate-600 dark:text-dark-muted">
+                  <p className="text-sm text-slate-600 dark:text-gray-300">
                     {profileData.bio || "自己紹介が設定されていません"}
                   </p>
                 </div>
@@ -174,7 +174,7 @@ export default function SettingsPage() {
                   onClick={() => setIsEditingProfile(true)}
                   variant="outline"
                   size="sm"
-                  className="flex items-center space-x-1 dark:border-slate-600 dark:text-dark-text dark:hover:bg-slate-700"
+                  className="flex items-center space-x-1 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
                 >
                   <Edit3 className="w-4 h-4" />
                   <span>{t("settings.profile.edit")}</span>
@@ -208,14 +208,14 @@ export default function SettingsPage() {
                       />
                     </label>
                   </div>
-                  <div className="text-sm text-slate-600">
+                  <div className="text-sm text-slate-600 dark:text-gray-300">
                     <p>プロフィール画像をクリックして変更</p>
                   </div>
                 </div>
 
                 {/* Name Input */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-200 mb-1">
                     表示名
                   </label>
                   <input
@@ -230,14 +230,14 @@ export default function SettingsPage() {
                         fullName: value,
                       });
                     }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
                     placeholder="あなたの名前"
                   />
                 </div>
 
                 {/* Bio Input */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-200 mb-1">
                     自己紹介
                   </label>
                   <textarea
@@ -249,7 +249,7 @@ export default function SettingsPage() {
                       setProfileData({ ...profileData, bio: value });
                     }}
                     rows={3}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
                     placeholder="あなたについて教えてください..."
                   />
                 </div>
@@ -279,16 +279,16 @@ export default function SettingsPage() {
         </Card>
 
         {/* Language Settings */}
-        <Card className="dark:bg-dark-surface dark:border-slate-700">
+        <Card className="dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 dark:text-dark-text">
+            <CardTitle className="flex items-center space-x-2 dark:text-gray-100">
               <Globe className="w-5 h-5" />
               <span>{t("settings.language")}</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <p className="text-sm text-slate-600 dark:text-dark-muted">
+              <p className="text-sm text-slate-600 dark:text-gray-300">
                 {t("settings.language.description")}
               </p>
               <div className="space-y-2">
@@ -306,7 +306,7 @@ export default function SettingsPage() {
                     }}
                     className="w-4 h-4 text-blue-600"
                   />
-                  <span className="text-slate-700 dark:text-dark-text">
+                  <span className="text-slate-700 dark:text-gray-200">
                     日本語
                   </span>
                 </label>
@@ -324,7 +324,7 @@ export default function SettingsPage() {
                     }}
                     className="w-4 h-4 text-blue-600"
                   />
-                  <span className="text-slate-700 dark:text-dark-text">
+                  <span className="text-slate-700 dark:text-gray-200">
                     English
                   </span>
                 </label>
@@ -334,9 +334,9 @@ export default function SettingsPage() {
         </Card>
 
         {/* Theme Settings */}
-        <Card className="dark:bg-dark-surface dark:border-slate-700">
+        <Card className="dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 dark:text-dark-text">
+            <CardTitle className="flex items-center space-x-2 dark:text-gray-100">
               {theme === "dark" ? (
                 <Moon className="w-5 h-5" />
               ) : (
@@ -348,12 +348,12 @@ export default function SettingsPage() {
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-slate-700 dark:text-dark-text">
+                <p className="font-medium text-slate-700 dark:text-gray-200">
                   {theme === "dark"
                     ? t("settings.theme.dark")
                     : t("settings.theme.light")}
                 </p>
-                <p className="text-sm text-slate-600 dark:text-dark-muted">
+                <p className="text-sm text-slate-600 dark:text-gray-300">
                   {theme === "dark"
                     ? t("settings.theme.dark.description")
                     : t("settings.theme.light.description")}
@@ -363,7 +363,7 @@ export default function SettingsPage() {
                 onClick={handleThemeToggle}
                 variant="outline"
                 size="sm"
-                className="flex items-center space-x-2 dark:border-slate-600 dark:text-dark-text dark:hover:bg-slate-700"
+                className="flex items-center space-x-2 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
               >
                 {theme === "dark" ? (
                   <>
@@ -382,34 +382,38 @@ export default function SettingsPage() {
         </Card>
 
         {/* Payment Settings */}
-        <Card>
+        <Card className="dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 dark:text-gray-100">
               <CreditCard className="w-5 h-5" />
               <span>支払い・サブスクリプション</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-slate-600 dark:text-gray-300">
                 プレミアム機能やサブスクリプションの管理
               </p>
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <div className="bg-slate-50 dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium text-slate-700">現在のプラン</h4>
-                    <p className="text-sm text-slate-600">無料プラン</p>
+                    <h4 className="font-medium text-slate-700 dark:text-gray-200">
+                      現在のプラン
+                    </h4>
+                    <p className="text-sm text-slate-600 dark:text-gray-300">
+                      無料プラン
+                    </p>
                   </div>
                   <Button variant="outline" size="sm" disabled>
                     近日公開
                   </Button>
                 </div>
               </div>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-medium text-blue-800 mb-2">
+              <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <h4 className="font-medium text-blue-800 dark:text-blue-300 mb-2">
                   プレミアム機能
                 </h4>
-                <ul className="text-sm text-blue-700 space-y-1">
+                <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
                   <li>• 無制限の投稿作成</li>
                   <li>• 高度な分析機能</li>
                   <li>• 優先サポート</li>
@@ -421,9 +425,9 @@ export default function SettingsPage() {
         </Card>
 
         {/* Account Information */}
-        <Card>
+        <Card className="dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 dark:text-gray-100">
               <Mail className="w-5 h-5" />
               <span>アカウント情報</span>
             </CardTitle>
@@ -431,18 +435,18 @@ export default function SettingsPage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-200 mb-1">
                   メールアドレス
                 </label>
-                <div className="text-slate-600 bg-slate-50 px-3 py-2 rounded-md">
+                <div className="text-slate-600 dark:text-gray-300 bg-slate-50 dark:bg-gray-700 px-3 py-2 rounded-md">
                   {user?.email}
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-200 mb-1">
                   登録日
                 </label>
-                <div className="text-slate-600 bg-slate-50 px-3 py-2 rounded-md flex items-center space-x-2">
+                <div className="text-slate-600 dark:text-gray-300 bg-slate-50 dark:bg-gray-700 px-3 py-2 rounded-md flex items-center space-x-2">
                   <Calendar className="w-4 h-4" />
                   <span>
                     {user?.created_at

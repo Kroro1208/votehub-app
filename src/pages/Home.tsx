@@ -17,10 +17,10 @@ export default function Home() {
   }, [isFirstTime]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       <Sidebar />
       {/* Main Content */}
-      <div className="ml-52 min-h-screen bg-slate-300 dark:bg-dark-bg transition-colors">
+      <div className="ml-52 min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
         {/* Header with stats */}
         <HeaderStatus />
 
