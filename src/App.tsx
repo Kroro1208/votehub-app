@@ -13,6 +13,7 @@ import BookmarksPage from "./pages/BookmarksPage.tsx";
 import NotificationsPage from "./pages/NotificationsPage.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
 import TagPostsPage from "./pages/TagPostsPage.tsx";
+import UserRankingPage from "./pages/UserRankingPage.tsx";
 import "./index.css";
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/tags/:tagId/posts" element={<TagPostsPage />} />
+          <Route path="/ranking" element={<UserRankingPage />} />
         </Routes>
       </div>
     </div>

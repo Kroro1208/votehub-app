@@ -49,6 +49,12 @@ export default function Navbar() {
               >
                 Create Space
               </Link>
+              <Link
+                to="/ranking"
+                className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
+              >
+                Ranking
+              </Link>
             </div>
 
             {/* 認証セクション - 右端に配置 */}
@@ -154,10 +160,16 @@ export default function Navbar() {
                   Space
                 </Link>
                 <Link
-                  to="/community/space"
+                  to="/space/create"
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
                 >
                   Create Space
+                </Link>
+                <Link
+                  to="/ranking"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                >
+                  Ranking
                 </Link>
               </div>
             </div>
