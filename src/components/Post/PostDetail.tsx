@@ -159,11 +159,14 @@ const PostDetail = ({ postId }: Props) => {
     queryFn: () => fetchNestedPosts(postId),
   });
 
-  // ユーザーの親投稿への投票状況を取得
+  // ユーザーの親投稿への投票状況を取得（派生質問の場合のみ）
   const { data: userVoteChoice } = useQuery<number | null, Error>({
-    queryKey: ["userVote", postId, user?.id],
-    queryFn: () => fetchUserVoteForPost(postId, user?.id),
-    enabled: !!user?.id,
+    queryKey: ["userVote", data?.parent_post_id, user?.id],
+    queryFn: () => {
+      if (!data?.parent_post_id) return null;
+      return fetchUserVoteForPost(data.parent_post_id, user?.id);
+    },
+    enabled: !!user?.id && !!data?.parent_post_id,
   });
 
   // 投稿者かどうかをチェック
@@ -432,6 +435,8 @@ const PostDetail = ({ postId }: Props) => {
         postId={postId}
         voteDeadline={data.vote_deadline}
         postTitle={data.title}
+        targetVoteChoice={data.target_vote_choice}
+        userVoteOnParent={userVoteChoice}
       />
       <CommentSection postId={postId} voteDeadline={data.vote_deadline} />
 

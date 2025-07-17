@@ -29,6 +29,8 @@ export const useHandleVotes = (
   postId: number,
   voteDeadline?: string | null,
   postTitle?: string,
+  targetVoteChoice?: number | null,
+  userVoteOnParent?: number | null,
 ) => {
   const [isVoting, setIsVoting] = useState(false);
   const { user } = useAuth();
@@ -47,7 +49,29 @@ export const useHandleVotes = (
     staleTime: 1000 * 60 * 5, // 5分間はデータを新鮮として扱う
   });
 
+  // 派生質問の投票権限チェック
+  const canVoteOnDerivedQuestion = () => {
+    // 派生質問でない場合（targetVoteChoiceがnullまたは未設定）は投票可能
+    if (targetVoteChoice === null || targetVoteChoice === undefined) {
+      return true;
+    }
+
+    // 親投稿に投票していない場合は投票不可
+    if (userVoteOnParent === null || userVoteOnParent === undefined) {
+      return false;
+    }
+
+    // ユーザーの親投稿への投票がtargetVoteChoiceと一致する場合のみ投票可能
+    return userVoteOnParent === targetVoteChoice;
+  };
+
   const vote = async (voteValue: number, postId: number, userId: string) => {
+    // 投票権限チェック
+    if (!canVoteOnDerivedQuestion()) {
+      const targetText = targetVoteChoice === 1 ? "賛成" : "反対";
+      throw new Error(`この派生質問は${targetText}者のみ投票できます`);
+    }
+
     const { data: existingVote } = await supabase
       .from("votes")
       .select("*")
@@ -206,5 +230,6 @@ export const useHandleVotes = (
     hasPersuasionVoteChanged,
     persuasionTime,
     isVotingDisabled,
+    canVoteOnDerivedQuestion,
   };
 };

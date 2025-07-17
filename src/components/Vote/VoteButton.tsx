@@ -14,9 +14,17 @@ interface PostProps {
   postId: number;
   voteDeadline?: string | null;
   postTitle?: string;
+  targetVoteChoice?: number | null;
+  userVoteOnParent?: number | null;
 }
 
-const VoteButton = ({ postId, voteDeadline, postTitle }: PostProps) => {
+const VoteButton = ({
+  postId,
+  voteDeadline,
+  postTitle,
+  targetVoteChoice,
+  userVoteOnParent,
+}: PostProps) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingVote, setPendingVote] = useState<number | null>(null);
   const { user, signInWithGoogle } = useAuth();
@@ -35,7 +43,13 @@ const VoteButton = ({ postId, voteDeadline, postTitle }: PostProps) => {
     hasPersuasionVoteChanged,
     persuasionTime,
     isVotingDisabled,
-  } = useHandleVotes(postId, voteDeadline, postTitle);
+  } = useHandleVotes(
+    postId,
+    voteDeadline,
+    postTitle,
+    targetVoteChoice,
+    userVoteOnParent,
+  );
 
   const isVotingExpired = () => {
     if (!voteDeadline) return false;
@@ -43,6 +57,24 @@ const VoteButton = ({ postId, voteDeadline, postTitle }: PostProps) => {
   };
 
   const votingExpired = isVotingExpired();
+
+  // 派生質問の投票権限チェック
+  const canVoteOnDerivedQuestion = () => {
+    // 派生質問でない場合（targetVoteChoiceがnullまたは未設定）は投票可能
+    if (targetVoteChoice === null || targetVoteChoice === undefined) {
+      return true;
+    }
+
+    // 親投稿に投票していない場合は投票不可
+    if (userVoteOnParent === null || userVoteOnParent === undefined) {
+      return false;
+    }
+
+    // ユーザーの親投稿への投票がtargetVoteChoiceと一致する場合のみ投票可能
+    return userVoteOnParent === targetVoteChoice;
+  };
+
+  const hasVotingPermission = canVoteOnDerivedQuestion();
 
   // ログインハンドラー
   const handleLogin = () => {
@@ -61,13 +93,15 @@ const VoteButton = ({ postId, voteDeadline, postTitle }: PostProps) => {
       return;
     }
 
-    // 説得タイム中で既存投票と異なる場合は確認モーダルを表示
-    if (
-      persuasionTime &&
-      hasUserVoted &&
-      userVote !== voteValue &&
-      !hasPersuasionVoteChanged
-    ) {
+    // 派生質問の投票権限チェック
+    if (!hasVotingPermission) {
+      const targetText = targetVoteChoice === 1 ? "賛成" : "反対";
+      toast.error(`この派生質問は${targetText}者のみ投票できます`);
+      return;
+    }
+
+    // 説得タイム中で既存投票がある場合は確認モーダルを表示
+    if (persuasionTime && hasUserVoted && !hasPersuasionVoteChanged) {
       setPendingVote(voteValue);
       setShowConfirmModal(true);
       return;
@@ -127,9 +161,26 @@ const VoteButton = ({ postId, voteDeadline, postTitle }: PostProps) => {
         </div>
       )}
 
+      {/* 派生質問の投票権限がない場合の表示 */}
+      {user &&
+        !votingExpired &&
+        !hasVotingPermission &&
+        targetVoteChoice !== null && (
+          <div className="w-full text-center py-6 px-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-yellow-700 mb-2 font-medium">
+              この派生質問は{targetVoteChoice === 1 ? "賛成" : "反対"}
+              者のみ投票できます
+            </p>
+            <p className="text-yellow-600 text-sm">
+              元の投稿に{targetVoteChoice === 1 ? "賛成" : "反対"}
+              投票すると投票権限が得られます
+            </p>
+          </div>
+        )}
+
       <div className="flex items-center gap-3">
-        {/* 投票期限内かつログイン済みの場合の投票ボタン */}
-        {!votingExpired && user && (
+        {/* 投票期限内かつログイン済みかつ投票権限ありの場合の投票ボタン */}
+        {!votingExpired && user && hasVotingPermission && (
           <>
             {/* 賛成ボタン */}
             <Button

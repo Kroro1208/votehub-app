@@ -50,7 +50,7 @@ const VoteConfirmModal = ({
                 <span className="font-bold text-orange-700">{currentVote}</span>
               </p>
               <p className="text-gray-700 font-medium mt-1">
-                変更先:{" "}
+                {voteType === currentVote ? "確定投票" : "変更先"}:{" "}
                 <span className="font-bold text-orange-700">{voteType}</span>
               </p>
             </div>
@@ -67,8 +67,17 @@ const VoteConfirmModal = ({
             </div>
 
             <p className="text-gray-600 text-sm">
-              本当に<strong className="text-orange-600">{voteType}</strong>
-              に変更しますか？
+              {voteType === currentVote ? (
+                <>
+                  本当に<strong className="text-orange-600">{voteType}</strong>
+                  で確定しますか？
+                </>
+              ) : (
+                <>
+                  本当に<strong className="text-orange-600">{voteType}</strong>
+                  に変更しますか？
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -88,7 +97,7 @@ const VoteConfirmModal = ({
             onClick={onConfirm}
             className="flex-1 h-12 font-bold bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg"
           >
-            投票を変更する
+            {voteType === currentVote ? "投票を確定する" : "投票を変更する"}
           </Button>
         </div>
       </div>
