@@ -1,12 +1,13 @@
-// @ts-expect-error - Deno runtime modules
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-// @ts-expect-error - ESM import
-import { createClient } from "supabase";
-// @ts-expect-error - ESM import
-import { GoogleGenerativeAI } from "@google/generative-ai";
+// Setup type definitions for built-in Supabase Runtime APIs
 
-// Deno環境変数の型宣言
+// @ts-expect-error Deno Edge Function環境での型定義不備
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+// @ts-expect-error Deno Edge Function環境での型定義不備
+import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.2.1";
+
+// Deno グローバル宣言
 declare const Deno: {
+  serve: (handler: (request: Request) => Response | Promise<Response>) => void;
   env: {
     get(key: string): string | undefined;
   };
@@ -18,6 +19,7 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 interface VoteAnalysisRequest {
@@ -39,6 +41,11 @@ interface CommentData {
   id: number;
 }
 
+interface CommentVoteData {
+  comment_id: number;
+  vote: number;
+}
+
 interface AnalysisResult {
   trendAnalysis: string;
   sentimentAnalysis: string;
@@ -48,12 +55,15 @@ interface AnalysisResult {
   confidenceScore: number;
 }
 
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   console.log("リクエスト受信:", req.method);
 
-  // Handle CORS
+  // Handle CORS preflight
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders,
+    });
   }
 
   try {
@@ -117,25 +127,32 @@ serve(async (req: Request) => {
       throw new Error(`コメントデータ取得エラー: ${commentsError.message}`);
     }
 
-    // 各コメントのUpvote/Downvote数を取得
-    const commentsWithVotes = await Promise.all(
-      comments.map(async (comment: CommentData) => {
-        const { data: commentVotes } = await supabase
-          .from("comment_votes")
-          .select("vote")
-          .eq("comment_id", comment.id);
+    // コメント投票数を一括取得（高速化）
+    const commentIds = comments.map((c: CommentData) => c.id);
+    const { data: allCommentVotes } = await supabase
+      .from("comment_votes")
+      .select("comment_id, vote")
+      .in("comment_id", commentIds);
 
-        const upvotes = commentVotes?.filter((v: { vote: number }) => v.vote === 1).length || 0;
-        const downvotes =
-          commentVotes?.filter((v: { vote: number }) => v.vote === -1).length || 0;
+    // コメントごとの投票数を計算
+    const commentsWithVotes = comments.map((comment: CommentData) => {
+      const commentVotes =
+        allCommentVotes?.filter(
+          (v: CommentVoteData) => v.comment_id === comment.id,
+        ) || [];
+      const upvotes = commentVotes.filter(
+        (v: CommentVoteData) => v.vote === 1,
+      ).length;
+      const downvotes = commentVotes.filter(
+        (v: CommentVoteData) => v.vote === -1,
+      ).length;
 
-        return {
-          ...comment,
-          upvotes,
-          downvotes,
-        };
-      }),
-    );
+      return {
+        ...comment,
+        upvotes,
+        downvotes,
+      };
+    });
 
     // 投稿情報を取得
     const { data: post } = await supabase

@@ -1,15 +1,8 @@
 {
   "compilerOptions": {
-    "lib": ["deno.window", "dom"],
-    "strict": false,
-    "noEmit": true,
-    "skipLibCheck": true,
     "allowJs": true,
-    "checkJs": false
-  },
-  "imports": {
-    "supabase": "https://esm.sh/@supabase/supabase-js@2",
-    "@google/generative-ai": "https://esm.sh/@google/generative-ai@0.2.1"
-  },
-  "exclude": ["**/*.test.ts", "**/*.spec.ts"]
+    "lib": ["deno.window"],
+    "strict": false,
+    "types": ["https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts"]
+  }
 }

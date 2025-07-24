@@ -9,18 +9,6 @@ export const useAIAnalysis = (postId: number) => {
     queryFn: async (): Promise<AIAnalysisResult | null> => {
       console.log("AI分析結果を取得中:", { postId });
 
-      // まずLocalStorageから確認（モック結果の場合）
-      try {
-        const localData = localStorage.getItem(`ai-analysis-${postId}`);
-        if (localData) {
-          const parsed = JSON.parse(localData);
-          console.log("LocalStorageから分析結果を取得:", parsed);
-          return parsed;
-        }
-      } catch (error) {
-        console.error("LocalStorage読み込みエラー:", error);
-      }
-
       // データベースから取得
       const { data, error } = await supabase
         .from("ai_vote_analysis")
@@ -56,7 +44,7 @@ export const useGenerateAIAnalysis = () => {
       try {
         // Supabase Edge Functionを呼び出し
         const { data, error } = await supabase.functions.invoke(
-          "gemini-vote-analysis",
+          "smooth-worker",
           {
             body: { postId },
           },
@@ -84,15 +72,8 @@ export const useGenerateAIAnalysis = () => {
     onSuccess: (data, postId) => {
       console.log("AI分析結果をキャッシュに保存:", { postId, data });
 
-      // 成功時にキャッシュを更新（永続化）
+      // 成功時にキャッシュを更新
       queryClient.setQueryData(["ai-analysis", postId], data);
-
-      // LocalStorageにも保存して永続化
-      try {
-        localStorage.setItem(`ai-analysis-${postId}`, JSON.stringify(data));
-      } catch (error) {
-        console.error("LocalStorage保存エラー:", error);
-      }
 
       // クエリを無効化して再フェッチを促す
       queryClient.invalidateQueries({ queryKey: ["ai-analysis", postId] });

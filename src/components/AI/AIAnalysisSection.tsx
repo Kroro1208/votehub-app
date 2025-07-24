@@ -5,7 +5,6 @@ import {
   useGenerateAIAnalysis,
   useCanGenerateAIAnalysis,
 } from "../../hooks/useAIAnalysis";
-import { useGenerateAIAnalysisMock } from "../../hooks/useAIAnalysisMock";
 import {
   Brain,
   TrendingUp,
@@ -26,35 +25,14 @@ export const AIAnalysisSection = ({ postId }: AIAnalysisSectionProps) => {
   const { data: canGenerate, isLoading: isCheckingPermission } =
     useCanGenerateAIAnalysis(postId);
 
-  // 本番環境ではuseGenerateAIAnalysis、開発環境ではモックを使用
   const generateAnalysis = useGenerateAIAnalysis();
-  const generateAnalysisMock = useGenerateAIAnalysisMock();
-
-  // Edge Functionが利用できない場合はモックを使用
-  const isUsingMock = import.meta.env.DEV; // 開発環境でモックを使用
 
   const handleGenerateAnalysis = async () => {
     try {
-      if (isUsingMock) {
-        await generateAnalysisMock.mutateAsync(postId);
-        toast.success("🤖 モックAI分析が完了しました！");
-      } else {
-        await generateAnalysis.mutateAsync(postId);
-        toast.success("AI分析が完了しました！");
-      }
+      await generateAnalysis.mutateAsync(postId);
+      toast.success("AI分析が完了しました！");
     } catch (error) {
-      if (isUsingMock) {
-        toast.error("モックAI分析でエラーが発生しました");
-      } else {
-        toast.error("AI分析の実行に失敗しました。モック機能に切り替えます。");
-        // フォールバックとしてモックを実行
-        try {
-          await generateAnalysisMock.mutateAsync(postId);
-          toast.success("🤖 フォールバック: モックAI分析が完了しました！");
-        } catch {
-          toast.error("分析機能が利用できません");
-        }
-      }
+      toast.error("AI分析の実行に失敗しました");
       console.error("AI分析エラー:", error);
     }
   };
@@ -106,20 +84,18 @@ export const AIAnalysisSection = ({ postId }: AIAnalysisSectionProps) => {
         </p>
         <Button
           onClick={handleGenerateAnalysis}
-          disabled={
-            generateAnalysis.isPending || generateAnalysisMock.isPending
-          }
+          disabled={generateAnalysis.isPending}
           className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
         >
-          {generateAnalysis.isPending || generateAnalysisMock.isPending ? (
+          {generateAnalysis.isPending ? (
             <>
               <LoadingSpinner size="sm" />
-              {isUsingMock ? "モック分析中..." : "分析中..."}
+              分析中...
             </>
           ) : (
             <>
               <Brain className="w-4 h-4 mr-2" />
-              {isUsingMock ? "🤖 モックAI分析を実行" : "AI分析を実行"}
+              AI分析を実行
             </>
           )}
         </Button>
