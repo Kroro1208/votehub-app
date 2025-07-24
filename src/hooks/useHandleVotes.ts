@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAuth } from "./useAuth.ts";
 import { isPersuasionTime } from "../utils/formatTime.tsx";
 import { checkAndNotifyPersuasionTimeStarted } from "../utils/notifications.ts";
+import { validateNestedPostVote } from "../utils/nestedPostValidation.ts";
 
 export interface Vote {
   id: number;
@@ -66,7 +67,13 @@ export const useHandleVotes = (
   };
 
   const vote = async (voteValue: number, postId: number, userId: string) => {
-    // 投票権限チェック
+    // 強化された投票権限チェック
+    const validationResult = await validateNestedPostVote(userId, postId);
+    if (!validationResult.isValid) {
+      throw new Error(validationResult.error || "投票権限がありません");
+    }
+
+    // 従来のチェックも維持（フォールバック）
     if (!canVoteOnDerivedQuestion()) {
       const targetText = targetVoteChoice === 1 ? "賛成" : "反対";
       throw new Error(`この派生質問は${targetText}者のみ投票できます`);

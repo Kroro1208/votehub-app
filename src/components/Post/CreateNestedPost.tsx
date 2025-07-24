@@ -5,6 +5,7 @@ import { createNestedPostSchema } from "../../utils/schema.tsx";
 import { z } from "zod";
 import { supabase } from "../../supabase-client.ts";
 import { useAuth } from "../../hooks/useAuth.ts";
+import { validateNestedPostCreation } from "../../utils/nestedPostValidation.ts";
 import {
   Upload,
   X,
@@ -90,6 +91,7 @@ const CreateNestedPost = ({
       parent_post_id: parentPost.id,
       target_vote_choice: undefined,
       vote_deadline: undefined,
+      image: new DataTransfer().files as FileList,
     },
   });
 
@@ -120,12 +122,21 @@ const CreateNestedPost = ({
       return;
     }
 
-    if (parentPost.nest_level >= 3) {
-      toast.error("ネストレベルは最大3段階までです");
+    setIsSubmitting(true);
+
+    // 強化された検証ロジック実行
+    const validationResult = await validateNestedPostCreation(
+      user.id,
+      parentPost.id,
+      data.target_vote_choice,
+      parentPost.nest_level + 1,
+    );
+
+    if (!validationResult.isValid) {
+      toast.error(validationResult.error || "派生質問の作成に失敗しました");
+      setIsSubmitting(false);
       return;
     }
-
-    setIsSubmitting(true);
     try {
       let imageUrl = null;
 
@@ -171,7 +182,7 @@ const CreateNestedPost = ({
           target_vote_choice: data.target_vote_choice,
           community_id: parentPost.community_id,
           user_id: user.id,
-          image_url: imageUrl,
+          image_url: imageUrl || null,
           avatar_url: user.user_metadata?.avatar_url || null,
         })
         .select("id")

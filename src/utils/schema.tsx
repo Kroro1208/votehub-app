@@ -70,14 +70,12 @@ export const createNestedPostSchema = z.object({
   }),
   image: z
     .instanceof(FileList)
-    .optional()
     .refine(
-      (files) => !files || files.length === 0 || files.length === 1,
+      (files) => files.length === 0 || files.length === 1,
       "画像は1つまでアップロード可能です",
     )
     .refine(
       (files) =>
-        !files ||
         files.length === 0 ||
         ["image/jpeg", "image/png"].includes(files[0]?.type || ""),
       "対応している画像形式はJPEG、PNGです",
