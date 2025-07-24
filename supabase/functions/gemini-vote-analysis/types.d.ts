@@ -6,13 +6,13 @@ declare module "https://deno.land/std@0.190.0/http/server.ts" {
 }
 
 declare module "supabase" {
-  export function createClient(url: string, key: string): any;
+  export function createClient(url: string, key: string): unknown;
 }
 
 declare module "@google/generative-ai" {
   export class GoogleGenerativeAI {
     constructor(apiKey: string);
-    getGenerativeModel(config: { model: string }): any;
+    getGenerativeModel(config: { model: string }): unknown;
   }
 }
 
