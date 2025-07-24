@@ -3,7 +3,6 @@ import { LoadingSpinner } from "../ui/LoadingSpinner";
 import {
   useAIAnalysis,
   useGenerateAIAnalysis,
-  useCanGenerateAIAnalysis,
 } from "../../hooks/useAIAnalysis";
 import {
   Brain,
@@ -17,13 +16,23 @@ import { toast } from "react-toastify";
 
 interface AIAnalysisSectionProps {
   postId: number;
+  voteDeadline?: string | null;
 }
 
-export const AIAnalysisSection = ({ postId }: AIAnalysisSectionProps) => {
-  const { data: analysisData, isLoading: isLoadingAnalysis } =
-    useAIAnalysis(postId);
-  const { data: canGenerate, isLoading: isCheckingPermission } =
-    useCanGenerateAIAnalysis(postId);
+export const AIAnalysisSection = ({
+  postId,
+  voteDeadline,
+}: AIAnalysisSectionProps) => {
+  // 投票期限チェックをローカルで実行（不要なAPIクエリを避ける）
+  const canGenerate = voteDeadline
+    ? new Date() > new Date(voteDeadline)
+    : false;
+
+  // 投票期限が終了している場合のみAI分析データを取得
+  const { data: analysisData, isLoading: isLoadingAnalysis } = useAIAnalysis(
+    postId,
+    canGenerate,
+  );
 
   const generateAnalysis = useGenerateAIAnalysis();
 
@@ -36,21 +45,6 @@ export const AIAnalysisSection = ({ postId }: AIAnalysisSectionProps) => {
       console.error("AI分析エラー:", error);
     }
   };
-
-  // 権限チェック中
-  if (isCheckingPermission) {
-    return (
-      <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-6 border border-purple-200 dark:border-purple-700">
-        <div className="flex items-center gap-3 mb-4">
-          <Brain className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            AI投票分析
-          </h3>
-        </div>
-        <LoadingSpinner />
-      </div>
-    );
-  }
 
   // AI分析が利用できない場合
   if (!canGenerate) {

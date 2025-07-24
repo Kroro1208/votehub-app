@@ -3,9 +3,10 @@ import { supabase } from "../supabase-client";
 import type { AIAnalysisResult } from "../types/ai";
 
 // AI分析結果を取得するフック
-export const useAIAnalysis = (postId: number) => {
+export const useAIAnalysis = (postId: number, enabled: boolean = true) => {
   return useQuery({
     queryKey: ["ai-analysis", postId],
+    enabled: enabled, // 条件付きでクエリを実行
     queryFn: async (): Promise<AIAnalysisResult | null> => {
       console.log("AI分析結果を取得中:", { postId });
 
@@ -22,7 +23,9 @@ export const useAIAnalysis = (postId: number) => {
           console.log("データベースに分析結果なし:", { postId });
           return null;
         }
-        throw new Error(`AI分析結果の取得に失敗しました: ${error.message}`);
+        // 406エラーやその他のエラーもnullを返す（テーブル未作成の場合など）
+        console.warn("AI分析データ取得エラー:", error.message, error.code);
+        return null;
       }
 
       console.log("データベースから分析結果を取得:", data);
