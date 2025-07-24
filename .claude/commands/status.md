@@ -1,6 +1,6 @@
 ---
 name: "dev-status"
-description: "現在の開発状況を確認するために.claude/Claude.mdとGitHub Issueを分析"
+description: "現在の開発状況を確認するために.claude/Claude.mdとGitHub Issueを分析。必要であれば `.claude/Claude.md` とgithub issueを更新および追記する"
 ---
 
 # Development Status Check
