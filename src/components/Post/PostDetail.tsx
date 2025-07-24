@@ -19,6 +19,7 @@ import NestedPostSection from "./NestedPostSection.tsx";
 import VoteDeadline from "./VoteDeadline.tsx";
 import BookmarkButton from "./BookmarkButton.tsx";
 import { isPersuasionTime } from "../../utils/formatTime.tsx";
+import { AIAnalysisSection } from "../AI/AIAnalysisSection.tsx";
 
 interface Props {
   postId: number;
@@ -439,6 +440,9 @@ const PostDetail = ({ postId }: Props) => {
         userVoteOnParent={userVoteChoice}
       />
       <CommentSection postId={postId} voteDeadline={data.vote_deadline} />
+
+      {/* AI分析セクション */}
+      <AIAnalysisSection postId={postId} />
 
       {/* 派生質問セクション */}
       <NestedPostSection
