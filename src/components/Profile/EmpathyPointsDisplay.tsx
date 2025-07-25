@@ -172,7 +172,7 @@ const EmpathyPointsDisplay = ({
           {scoreBreakdown.map((item) => (
             <div
               key={item.label}
-              className="flex items-center gap-3 p-2 bg-white rounded-lg"
+              className="flex items-center text-slate-500 gap-3 p-2 bg-white rounded-lg"
             >
               <div className={`p-1 rounded ${item.color}`}>
                 <item.icon size={16} />

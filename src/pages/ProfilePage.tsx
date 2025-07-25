@@ -196,7 +196,8 @@ const ProfilePage = () => {
     empathyLoading ||
     qualityLoading ||
     empathyScoreLoading ||
-    profileLoading
+    empathyRankingLoading ||
+    (profileLoading && !isOwnProfile)
   )
     return <Loading />;
   if (postsError) return <ErrorMessage error={postsError} />;

@@ -21,61 +21,72 @@ export const useUserEmpathyPoints = (userId?: string) => {
     queryFn: async () => {
       if (!userId) throw new Error("ユーザーIDが必要です");
 
-      // 総ポイントを取得
-      const { data: userPoints, error: pointsError } = await supabase
-        .from("user_points")
-        .select("points")
-        .eq("user_id", userId)
-        .single();
+      try {
+        // 総ポイントを取得
+        const { data: userPoints, error: pointsError } = await supabase
+          .from("user_points")
+          .select("total_points")
+          .eq("user_id", userId)
+          .single();
 
-      if (pointsError) {
-        console.error("ユーザーポイント取得エラー:", pointsError);
+        if (pointsError) {
+          console.error("ユーザーポイント取得エラー:", pointsError);
+        }
+
+        // 共感ポイントの合計を取得
+        const { data: empathyTransactions, error: empathyError } =
+          await supabase
+            .from("point_transactions")
+            .select("points")
+            .eq("user_id", userId)
+            .eq("transaction_type", "empathy");
+
+        if (empathyError) {
+          console.error("共感ポイント取得エラー:", empathyError);
+        }
+
+        const empathyPoints =
+          empathyTransactions?.reduce(
+            (total: number, transaction: { points: number }) =>
+              total + transaction.points,
+            0,
+          ) || 0;
+
+        // 共感ランキングを取得
+        const { data: rankings, error: rankError } = await supabase.rpc(
+          "get_empathy_rankings",
+          {
+            p_community_id: null, // 全体ランキング
+            p_limit: 100,
+          },
+        );
+        console.log("ランキングデータ:", rankings);
+
+        if (rankError) {
+          console.error("ランキング取得エラー:", rankError);
+        }
+
+        const userRank =
+          rankings?.find((r: EmpathyScore) => r.user_id === userId)
+            ?.rank_position || null;
+
+        return {
+          total_points: userPoints?.total_points || 0,
+          empathy_points: empathyPoints,
+          empathy_rank: userRank,
+        };
+      } catch (error) {
+        console.error("Error in useUserEmpathyPoints:", error);
+        return {
+          total_points: 0,
+          empathy_points: 0,
+          empathy_rank: null,
+        };
       }
-
-      // 共感ポイントの合計を取得
-      const { data: empathyTransactions, error: empathyError } = await supabase
-        .from("point_transactions")
-        .select("points_change")
-        .eq("user_id", userId)
-        .eq("transaction_type", "empathy");
-
-      if (empathyError) {
-        console.error("共感ポイント取得エラー:", empathyError);
-      }
-
-      const empathyPoints =
-        empathyTransactions?.reduce(
-          (total: number, transaction: { points_change: number }) =>
-            total + transaction.points_change,
-          0,
-        ) || 0;
-
-      // 共感ランキングを取得
-      const { data: rankings, error: rankError } = await supabase.rpc(
-        "get_empathy_rankings",
-        {
-          p_community_id: null, // 全体ランキング
-          p_limit: 100,
-        },
-      );
-      console.log("ランキングデータ:", rankings);
-
-      if (rankError) {
-        console.error("ランキング取得エラー:", rankError);
-      }
-
-      const userRank =
-        rankings?.find((r: EmpathyScore) => r.user_id === userId)
-          ?.rank_position || null;
-
-      return {
-        total_points: userPoints?.points || 0,
-        empathy_points: empathyPoints,
-        empathy_rank: userRank,
-      };
     },
     enabled: !!userId,
     staleTime: 1000 * 60 * 5, // 5分間キャッシュ
+    retry: 1, // リトライ回数を制限
   });
 };
 

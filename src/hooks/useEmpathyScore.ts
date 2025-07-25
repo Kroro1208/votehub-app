@@ -177,20 +177,36 @@ const getEmpathyRanking = async (
 export const useUserEmpathyScore = (userId: string | null | undefined) => {
   return useQuery<EmpathyPointsData | null, Error>({
     queryKey: ["userEmpathyScore", userId],
-    queryFn: () => getUserEmpathyPoints(userId!),
+    queryFn: async () => {
+      try {
+        return await getUserEmpathyPoints(userId!);
+      } catch (error) {
+        console.error("Error in getUserEmpathyPoints:", error);
+        return null;
+      }
+    },
     enabled: !!userId,
     staleTime: 5 * 60 * 1000, // 5分間キャッシュ
     gcTime: 10 * 60 * 1000, // 10分間キャッシュ保持
+    retry: 1, // リトライ回数を制限
   });
 };
 
 export const useEmpathyRanking = (userId: string | null | undefined) => {
   return useQuery<{ position: number; totalUsers: number } | null, Error>({
     queryKey: ["empathyRanking", userId],
-    queryFn: () => getEmpathyRanking(userId!),
+    queryFn: async () => {
+      try {
+        return await getEmpathyRanking(userId!);
+      } catch (error) {
+        console.error("Error in getEmpathyRanking:", error);
+        return null;
+      }
+    },
     enabled: !!userId,
     staleTime: 10 * 60 * 1000, // 10分間キャッシュ
     gcTime: 15 * 60 * 1000, // 15分間キャッシュ保持
+    retry: 1, // リトライ回数を制限
   });
 };
 
