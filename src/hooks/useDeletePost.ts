@@ -67,6 +67,16 @@ const deletePost = async ({ postId, imageUrl }: DeletePostData) => {
       }
     }
 
+    // 投稿削除後、ユーザーの共感ポイントを再計算
+    try {
+      await supabase.rpc("calculate_empathy_points", {
+        target_user_id: user.id,
+      });
+    } catch (empathyError) {
+      console.warn("共感ポイント再計算に失敗しました:", empathyError);
+      // エラーがあっても処理を続行（削除は成功しているため）
+    }
+
     // 画像を削除
     if (imageUrl) {
       const urlParts = imageUrl.split("/");
@@ -122,7 +132,10 @@ export const useDeletePost = () => {
             queryKey[0] === "nestedPosts" ||
             queryKey[0] === "bookmarks" ||
             queryKey[0] === "notifications" ||
-            queryKey[0] === "unread-notifications-count"
+            queryKey[0] === "unread-notifications-count" ||
+            queryKey[0] === "user-ranking" ||
+            queryKey[0] === "user-empathy-points" ||
+            queryKey[0] === "user-quality-scores"
           );
         },
       });

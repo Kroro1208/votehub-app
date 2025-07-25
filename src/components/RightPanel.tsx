@@ -3,7 +3,26 @@ import { postsAtom } from "../stores/PostAtom.ts";
 import { PostType } from "./Post/PostList.tsx";
 import { useHandlePost } from "../hooks/useHandlePost.ts";
 import { useTagRanking } from "../hooks/useTagRanking.ts";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "../supabase-client.ts";
 import { Link } from "react-router";
+import { Crown, Trophy, Medal, Award } from "lucide-react";
+
+interface TopUserRankingData {
+  user_id: string;
+  total_score: number;
+  user_metadata?: {
+    full_name?: string;
+    avatar_url?: string;
+  };
+}
+
+// トップユーザーランキングデータを取得
+const fetchTopUserRanking = async (): Promise<TopUserRankingData[]> => {
+  const { data, error } = await supabase.rpc("get_user_total_ranking");
+  if (error) throw new Error(error.message);
+  return (data as TopUserRankingData[]).slice(0, 5); // トップ5を取得
+};
 
 const RightPanel = () => {
   const posts = useAtomValue(postsAtom);
@@ -12,6 +31,16 @@ const RightPanel = () => {
     isPending: isTagLoading,
     error: tagError,
   } = useTagRanking(5);
+
+  const {
+    data: topUsers,
+    isPending: isUserLoading,
+    error: userError,
+  } = useQuery<TopUserRankingData[], Error>({
+    queryKey: ["top-user-ranking"],
+    queryFn: fetchTopUserRanking,
+    refetchInterval: 300000, // 5分ごとに更新
+  });
   const urgentPost = posts
     .filter((post) => {
       if (!post.vote_deadline) return false;
@@ -73,6 +102,87 @@ const RightPanel = () => {
             ))
           ) : (
             <p className="text-sm text-slate-500">トレンドタグがありません</p>
+          )}
+        </div>
+      </div>
+
+      <div className="bg-yellow-100 rounded-xl shadow-sm border border-slate-200 p-4 mb-2">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-slate-800 flex items-center gap-2">
+            <Crown size={16} className="text-yellow-600" />
+            トップユーザー
+          </h3>
+          <Link
+            to="/user-ranking"
+            className="text-xs text-slate-600 hover:text-slate-800 transition-colors"
+          >
+            全て見る →
+          </Link>
+        </div>
+        <div className="space-y-2">
+          {isUserLoading ? (
+            <p className="text-sm text-slate-500">読み込み中...</p>
+          ) : userError ? (
+            <p className="text-sm text-red-500">エラーが発生しました</p>
+          ) : topUsers && topUsers.length > 0 ? (
+            topUsers.map((user: TopUserRankingData, index: number) => {
+              const getRankDisplay = (rank: number) => {
+                switch (rank) {
+                  case 1:
+                    return <Trophy size={16} className="text-yellow-500" />;
+                  case 2:
+                    return <Medal size={16} className="text-gray-400" />;
+                  case 3:
+                    return <Award size={16} className="text-orange-500" />;
+                  default:
+                    return (
+                      <div className="w-4 h-4 flex items-center justify-center">
+                        <span className="text-xs font-bold text-slate-500">
+                          {rank}
+                        </span>
+                      </div>
+                    );
+                }
+              };
+
+              return (
+                <div
+                  key={user.user_id}
+                  className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg transition-colors"
+                >
+                  {/* ランク表示 - 固定幅で配置を揃える */}
+                  <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
+                    {getRankDisplay(index + 1)}
+                  </div>
+                  {/* ユーザー情報 */}
+                  <div className="flex-1 min-w-0 flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          to={`/profile/${user.user_id}`}
+                          className="text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors truncate"
+                        >
+                          {user.user_metadata?.full_name || "ユーザー"}
+                        </Link>
+                        {/* 1-3位にはトロフィーも追加表示 */}
+                        {index < 3 && (
+                          <div className="flex-shrink-0">
+                            {getRankDisplay(index + 1)}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-500">
+                        {user.total_score.toLocaleString()}pt
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <p className="text-sm text-slate-500">
+              ランキングデータがありません
+            </p>
           )}
         </div>
       </div>

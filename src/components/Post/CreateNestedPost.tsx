@@ -388,14 +388,14 @@ const CreateNestedPost = ({
                   <SelectContent className="rounded-xl border-2 border-gray-200 bg-white">
                     <SelectItem
                       value="1"
-                      className="py-3 text-gray-900 focus:bg-green-50"
+                      className="py-3 text-gray-900 focus:bg-green-100 focus:text-black"
                     >
                       <FaArrowAltCircleUp className="text-green-500" />
                       <p>賛成者向け</p>
                     </SelectItem>
                     <SelectItem
                       value="-1"
-                      className="py-3 text-gray-900 focus:bg-red-50"
+                      className="py-3 text-gray-900 focus:bg-red-100 focus:text-black"
                     >
                       <FaArrowAltCircleDown className="text-red-500" />
                       <p>反対者向け</p>

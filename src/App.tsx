@@ -36,7 +36,7 @@ function App() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/tags/:tagId/posts" element={<TagPostsPage />} />
-          <Route path="/ranking" element={<UserRankingPage />} />
+          <Route path="/user-ranking" element={<UserRankingPage />} />
         </Routes>
       </div>
     </div>

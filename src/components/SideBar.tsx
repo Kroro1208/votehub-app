@@ -3,7 +3,7 @@ import {
   TrendingUp,
   Trophy,
   Bookmark,
-  BarChart3,
+  Crown,
   Users,
   Settings,
 } from "lucide-react";
@@ -22,7 +22,7 @@ const Sidebar = () => {
     { icon: TrendingUp, label: t("nav.trending"), path: "/trending" },
     { icon: Trophy, label: t("nav.results"), path: "/results" },
     { icon: Bookmark, label: t("nav.bookmarks"), path: "/bookmarks" },
-    { icon: BarChart3, label: t("nav.stats"), path: "/stats" },
+    { icon: Crown, label: "ユーザーランキング", path: "/user-ranking" },
     { icon: Users, label: t("nav.space"), path: "/space" },
     { icon: Settings, label: t("nav.settings"), path: "/settings" },
   ];

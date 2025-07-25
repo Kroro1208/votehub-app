@@ -50,10 +50,10 @@ export default function Navbar() {
                 Create Space
               </Link>
               <Link
-                to="/ranking"
+                to="/user-ranking"
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
-                Ranking
+                UserRanking
               </Link>
             </div>
 

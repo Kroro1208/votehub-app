@@ -122,7 +122,7 @@ const NestedPostItem = ({
                   )}
                   {post.target_vote_choice !== null && (
                     <span
-                      className={`text-xs px-2 py-1 rounded-full ${
+                      className={`text-xs px-2 py-1 rounded-full hover:text-black ${
                         post.target_vote_choice === 1
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"

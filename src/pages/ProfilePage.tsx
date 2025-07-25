@@ -34,6 +34,16 @@ interface UserStats {
   joinDate: string;
 }
 
+interface UserProfile {
+  user_id: string;
+  user_metadata?: {
+    full_name?: string;
+    user_name?: string;
+    avatar_url?: string;
+    email?: string;
+  };
+}
+
 const getUserPosts = async (userId: string): Promise<PostType[]> => {
   const { data, error } = await supabase
     .rpc("get_posts_with_counts")
@@ -42,6 +52,19 @@ const getUserPosts = async (userId: string): Promise<PostType[]> => {
 
   if (error) throw new Error(error.message);
   return data || [];
+};
+
+const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
+  // ユーザーランキングから取得（user_metadataが含まれている）
+  const { data, error } = await supabase.rpc("get_user_total_ranking");
+
+  if (error) {
+    console.warn("Failed to get user profile from ranking:", error);
+    return null;
+  }
+
+  const userProfile = data?.find((u: UserProfile) => u.user_id === userId);
+  return userProfile || null;
 };
 
 const getUserStats = async (userId: string): Promise<UserStats> => {
@@ -108,6 +131,16 @@ const ProfilePage = () => {
     enabled: !!targetUserId,
   });
 
+  // 他のユーザーのプロフィール情報を取得
+  const { data: userProfile, isPending: profileLoading } = useQuery<
+    UserProfile | null,
+    Error
+  >({
+    queryKey: ["userProfile", targetUserId],
+    queryFn: () => getUserProfile(targetUserId!),
+    enabled: !!targetUserId && !isOwnProfile,
+  });
+
   // 共感ポイントを取得（既存）
   const { data: empathyData, isPending: empathyLoading } =
     useUserEmpathyPoints(targetUserId);
@@ -162,19 +195,25 @@ const ProfilePage = () => {
     statsLoading ||
     empathyLoading ||
     qualityLoading ||
-    empathyScoreLoading
+    empathyScoreLoading ||
+    profileLoading
   )
     return <Loading />;
   if (postsError) return <ErrorMessage error={postsError} />;
   if (statsError) return <ErrorMessage error={statsError} />;
 
-  const profileUser = isOwnProfile ? user : null;
-  const displayName =
-    profileUser?.user_metadata?.full_name ||
-    profileUser?.user_metadata?.user_name ||
-    profileUser?.email ||
-    "ユーザー";
-  const avatarUrl = profileUser?.user_metadata?.avatar_url;
+  const displayName = isOwnProfile
+    ? user?.user_metadata?.full_name ||
+      user?.user_metadata?.user_name ||
+      user?.email ||
+      "ユーザー"
+    : userProfile?.user_metadata?.full_name ||
+      userProfile?.user_metadata?.user_name ||
+      userProfile?.user_metadata?.email ||
+      "ユーザー";
+  const avatarUrl = isOwnProfile
+    ? user?.user_metadata?.avatar_url
+    : userProfile?.user_metadata?.avatar_url;
 
   return (
     <div className="min-h-screen">
@@ -208,8 +247,8 @@ const ProfilePage = () => {
                 )}
               </h1>
 
-              {profileUser?.email && (
-                <p className="text-gray-600 mb-2">{profileUser.email}</p>
+              {isOwnProfile && user?.email && (
+                <p className="text-gray-600 mb-2">{user.email}</p>
               )}
 
               {/* Settings Link for Own Profile */}
