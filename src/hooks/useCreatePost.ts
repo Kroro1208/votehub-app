@@ -5,6 +5,7 @@ import { supabase } from "../supabase-client.ts";
 import { useAuth } from "./useAuth.ts";
 import { usePostLimits } from "./usePostLimits.ts";
 import { useLanguage } from "./useLanguage.ts";
+import { checkRateLimit, RateLimitError } from "../utils/rateLimiter.ts";
 
 export interface PostInput {
   title: string;
@@ -82,6 +83,17 @@ export const useCreatePost = () => {
     if (!user) {
       toast.error(t("create.post.error.login.required"));
       return;
+    }
+
+    // レート制限チェック
+    try {
+      checkRateLimit(user.id, "POST_CREATE");
+    } catch (error) {
+      if (error instanceof RateLimitError) {
+        toast.error(error.message);
+        return;
+      }
+      throw error;
     }
 
     // 投稿制限チェック

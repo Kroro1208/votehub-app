@@ -5,6 +5,8 @@ import { useAuth } from "./useAuth.ts";
 import { isPersuasionTime } from "../utils/formatTime.tsx";
 import { checkAndNotifyPersuasionTimeStarted } from "../utils/notifications.ts";
 import { validateNestedPostVote } from "../utils/nestedPostValidation.ts";
+import { checkRateLimit, RateLimitError } from "../utils/rateLimiter.ts";
+import { toast } from "react-toastify";
 
 export interface Vote {
   id: number;
@@ -67,6 +69,17 @@ export const useHandleVotes = (
   };
 
   const vote = async (voteValue: number, postId: number, userId: string) => {
+    // レート制限チェック
+    try {
+      checkRateLimit(userId, "VOTE");
+    } catch (error) {
+      if (error instanceof RateLimitError) {
+        toast.error(error.message);
+        throw error;
+      }
+      throw error;
+    }
+
     // 強化された投票権限チェック
     const validationResult = await validateNestedPostVote(userId, postId);
     if (!validationResult.isValid) {
