@@ -58,7 +58,7 @@
 - **Supabaseフル統合**: 完了（Edge Functions含む）
 - **モダンな技術スタック**: React 19 + TypeScript + Tailwind CSS
 
-**🔥 最新の重要修正・実装 (2025-07-24)**
+**🔥 最新の重要修正・実装 (2025-07-25)**
 
 - **AI投票分析機能**: 完全実装完了
   - Gemini AI統合による高度な投票・議論分析
@@ -73,6 +73,15 @@
   - 派生質問作成時の通知機能復旧
   - データベース型不一致問題修正
   - 投稿削除時の外部キー制約問題修正
+
+**🔐 セキュリティ強化実装 (2025-07-25)**
+
+- **包括的なセキュリティシステム実装**: 完全実装完了
+  - レート制限システム（投稿・投票・コメント・API制限）
+  - セキュリティヘッダー設定（CSP、XSS対策、フレーム保護）
+  - 2FA（二要素認証）システム完全実装（TOTP + バックアップコード）
+  - セキュリティ監査システム（定期的な脆弱性チェック）
+  - Content Security Policy WebSocket対応（wss://\*.supabase.co許可）
 
 ## 🏢 大手企業売却戦略・実装ロードマップ
 
@@ -293,6 +302,14 @@
 - **Supabase 2.49.4** (BaaS: PostgreSQL + Auth + Storage + Real-time)
 - **Row Level Security (RLS)** (データアクセス制御)
 - **Supabase Storage** (画像アップロード)
+
+### セキュリティ技術スタック
+
+- **Speakeasy 2.0.0** (TOTP認証ライブラリ)
+- **QRCode 1.5.4** (認証アプリ連携)
+- **Crypto-JS 4.2.0** (AES暗号化)
+- **Content Security Policy** (XSS攻撃防止)
+- **レート制限システム** (DDoS・スパム対策)
 
 ### 開発ツール
 
@@ -813,6 +830,22 @@ src/
   - TabSection, HeaderStatus のテキスト視認性改善
 - **ユーザーランキングページ**: コンパクトなカードデザイン**✅完全実装済み**
 
+#### セキュリティシステム (**2025-07-25実装完了**)
+
+- **レート制限システム**: 完全実装完了**✅完全実装済み**
+  - 投稿作成制限（1時間5投稿）、投票制限（1分間10票）
+  - コメント制限（1分間5コメント）、API制限（1分間100回）
+  - LocalStorageベースの制限管理とリアルタイムエラーハンドリング
+- **Content Security Policy**: 完全実装完了**✅完全実装済み**
+  - XSS攻撃防止、クリックジャッキング防止、MIMEスニッフィング防止
+  - WebSocket対応（wss://\*.supabase.co）でSupabaseリアルタイム機能サポート
+- **2FA（二要素認証）システム**: 完全実装完了**✅完全実装済み**
+  - TOTP認証（speakeasy）、QRコード生成、AES暗号化
+  - バックアップコード管理、認証試行ログ、完全なUI統合
+- **セキュリティ監査システム**: 完全実装完了**✅完全実装済み**
+  - RLSポリシーチェック、異常パターン検出、データ整合性監査
+  - 定期自動監査（1時間間隔）、重大度別アラート機能
+
 ### ❌ 未実装・次期開発対象
 
 #### 高優先度（次期実装対象）
@@ -1009,6 +1042,152 @@ src/
 - `comments` のネスト構造（parent_comment_id）を活用
 - `comment_votes` でコメント評価システムを構築
 - 新規 `users` テーブルで既存の `user_id` (text) を統合
+
+## 🔐 セキュリティシステム詳細実装
+
+### 1. レート制限システム
+
+#### 実装場所
+
+- `/src/utils/rateLimiter.ts` - 統一的なレート制限管理
+- `/src/hooks/useCreatePost.ts` - 投稿作成制限
+- `/src/hooks/useHandleVotes.ts` - 投票制限
+
+#### 制限設定
+
+```typescript
+const RATE_LIMITS = {
+  POST_CREATION: { limit: 5, window: 60 * 60 * 1000 }, // 1時間に5投稿
+  VOTING: { limit: 10, window: 60 * 1000 }, // 1分間に10票
+  COMMENTING: { limit: 5, window: 60 * 1000 }, // 1分間に5コメント
+  API_REQUEST: { limit: 100, window: 60 * 1000 }, // 1分間に100API呼び出し
+};
+```
+
+#### セキュリティ機能
+
+- LocalStorageベースの制限管理
+- 複数アクションの統合監視
+- リアルタイムエラーハンドリング
+
+### 2. Content Security Policy (CSP)
+
+#### 実装場所
+
+- `/vite.config.ts` - 開発環境セキュリティヘッダー
+- `/nginx.conf` - 本番環境ヘッダー設定
+
+#### セキュリティ対策
+
+```typescript
+// CSP設定例
+"Content-Security-Policy":
+  "default-src 'self'; " +
+  "script-src 'self' 'unsafe-inline' https://accounts.google.com; " +
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co; " +
+  "frame-src 'self' https://accounts.google.com;"
+```
+
+#### 追加ヘッダー
+
+- `X-Frame-Options: DENY` - クリックジャッキング防止
+- `X-Content-Type-Options: nosniff` - MIMEスニッフィング防止
+- `X-XSS-Protection: 1; mode=block` - XSS攻撃検出
+- `Referrer-Policy: strict-origin-when-cross-origin` - リファラー制限
+
+### 3. 2FA（二要素認証）システム
+
+#### 実装場所
+
+- `/database/2fa_system.sql` - データベーススキーマ
+- `/src/hooks/use2FA.ts` - React統合フック
+- `/src/components/2FA/` - UI コンポーネント群
+
+#### 技術仕様
+
+- **TOTP（Time-based OTP）**: 30秒間隔、6桁コード
+- **暗号化**: AES暗号化による秘密キー保護
+- **バックアップコード**: 10個の使い捨てコード（8桁英数字）
+- **QRコード**: speakeasy + qrcode ライブラリ使用
+
+#### データベース設計
+
+```sql
+-- 2FA設定テーブル
+CREATE TABLE user_2fa_settings (
+    id bigserial PRIMARY KEY,
+    user_id uuid NOT NULL UNIQUE REFERENCES auth.users(id),
+    is_enabled boolean DEFAULT false,
+    secret_key text, -- AES暗号化済み
+    backup_codes text[], -- AES暗号化済み配列
+    last_used_at timestamptz,
+    enabled_at timestamptz,
+    created_at timestamptz DEFAULT now()
+);
+
+-- 2FA認証ログテーブル
+CREATE TABLE user_2fa_attempts (
+    id bigserial PRIMARY KEY,
+    user_id uuid NOT NULL REFERENCES auth.users(id),
+    attempt_type text CHECK (attempt_type IN ('totp', 'backup_code')),
+    success boolean DEFAULT false,
+    attempted_at timestamptz DEFAULT now()
+);
+```
+
+#### セキュリティ機能
+
+- **秘密キー暗号化**: 環境変数によるAES暗号化
+- **試行ログ記録**: 成功・失敗ログの完全記録
+- **バックアップコード管理**: 一回使用で自動削除
+- **型安全性**: TypeScript完全対応
+
+### 4. セキュリティ監査システム
+
+#### 実装場所
+
+- `/src/utils/securityAudit.ts` - 監査エンジン
+
+#### 監査項目
+
+1. **RLSポリシーチェック**: 全テーブルのアクセス制御確認
+2. **異常な投票パターン検出**: 1時間50票以上の異常検出
+3. **データアクセスパターン**: 24時間20投稿以上の監視
+4. **データ整合性チェック**: 孤立レコードの検出
+5. **2FA採用状況**: セキュリティ普及率監視
+
+#### 自動監査機能
+
+```typescript
+// 定期監査の開始
+export const startPeriodicSecurityAudit = (intervalMinutes: number = 60) => {
+  // 1時間間隔で自動セキュリティ監査実行
+};
+```
+
+#### アラート機能
+
+- 重大度別アラート（Critical/High/Medium/Low）
+- リアルタイム異常検知
+- 管理者通知システム
+
+### 5. Row Level Security (RLS)
+
+#### 実装状況
+
+- **posts**: ユーザー別アクセス制御
+- **votes**: 投票者制限
+- **comments**: コメント投稿者制限
+- **user_2fa_settings**: 本人のみアクセス
+- **user_2fa_attempts**: 本人のみ参照
+
+#### セキュリティポリシー例
+
+```sql
+-- 2FA設定は本人のみアクセス可能
+CREATE POLICY "Users can view own 2FA settings" ON user_2fa_settings
+    FOR SELECT USING (auth.uid() = user_id);
+```
 
 ## セキュリティ・パフォーマンス要件
 
