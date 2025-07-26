@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router";
 import { supabase } from "../supabase-client.ts";
 import { useAuth } from "../hooks/useAuth.ts";
 import { Trophy, Crown, Medal, Award, Star, TrendingUp } from "lucide-react";
@@ -19,6 +20,7 @@ interface UserRankingData {
     full_name?: string;
     avatar_url?: string;
     email?: string;
+    bio?: string;
   };
 }
 
@@ -33,6 +35,7 @@ const fetchUserRanking = async (): Promise<UserRankingData[]> => {
 
 const UserRankingPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const {
     data: rankings,
@@ -154,9 +157,10 @@ const UserRankingPage = () => {
             return (
               <Card
                 key={ranking.user_id}
-                className={`relative rounded-xl border transition-all duration-300 ${styling.container} ${
+                className={`relative rounded-xl border transition-all duration-300 cursor-pointer hover:scale-[1.02] ${styling.container} ${
                   isCurrentUser ? "ring-2 ring-blue-400 shadow-lg" : ""
                 }`}
+                onClick={() => navigate(`/profile/${ranking.user_id}`)}
               >
                 <div className="flex items-center px-4">
                   {/* 順位バッジ */}
@@ -174,7 +178,6 @@ const UserRankingPage = () => {
                       )}
                     </div>
                   </div>
-
                   {/* ユーザー情報 */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-1">
@@ -197,8 +200,8 @@ const UserRankingPage = () => {
                             {ranking.user_metadata?.full_name || "ユーザー"}
                           </h3>
                           {isCurrentUser && (
-                            <span className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex-shrink-0">
-                              あなた
+                            <span className="text-sm bg-green-500 px-2 items-center rounded-md text-center flex-shrink-0">
+                              you
                             </span>
                           )}
                         </div>
@@ -211,7 +214,14 @@ const UserRankingPage = () => {
                       </div>
                     </div>
                   </div>
-
+                  {/* 自己紹介文 */}
+                  <div className="flex-1 min-w-0 mx-4">
+                    {ranking.user_metadata?.bio && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap line-clamp-2">
+                        {ranking.user_metadata.bio}
+                      </p>
+                    )}
+                  </div>
                   {/* スコア詳細 */}
                   <div className="text-right flex-shrink-0">
                     <div className={`text-xl font-bold ${styling.text}`}>

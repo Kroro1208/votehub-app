@@ -41,6 +41,7 @@ interface UserProfile {
     user_name?: string;
     avatar_url?: string;
     email?: string;
+    bio?: string;
   };
 }
 
@@ -250,6 +251,17 @@ const ProfilePage = () => {
 
               {isOwnProfile && user?.email && (
                 <p className="text-gray-600 mb-2">{user.email}</p>
+              )}
+
+              {/* 自己紹介文 */}
+              {(isOwnProfile
+                ? user?.user_metadata?.bio
+                : userProfile?.user_metadata?.bio) && (
+                <p className="text-gray-700 mb-3 text-sm leading-relaxed whitespace-pre-wrap">
+                  {isOwnProfile
+                    ? user?.user_metadata?.bio
+                    : userProfile?.user_metadata?.bio}
+                </p>
               )}
 
               {/* Settings Link for Own Profile */}
