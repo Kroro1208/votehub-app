@@ -38,47 +38,48 @@ interface PostListProps {
   showNested?: boolean;
 }
 
+// 各投稿の投票数とコメント数を取得
+interface VoteCountData {
+  id: string;
+}
+
+interface CommentCountData {
+  id: string;
+}
+
+interface PostWithCountsResult
+  extends Omit<PostType, "vote_count" | "comment_count"> {
+  vote_count: number;
+  comment_count: number;
+  nest_level: number;
+  parent_post_id: number | null;
+  target_vote_choice: number | null;
+  children: PostType[];
+}
+
 const PostList = ({ filter, showNested = false }: PostListProps) => {
   const [, setPosts] = useAtom(postsAtom);
 
   const getFilteredPosts = async (): Promise<PostType[]> => {
-    // get_posts_with_counts関数の代わりに直接クエリを実行
-    const { data, error } = await supabase
-      .from("posts")
-      .select(
-        `
-        id,
-        title,
-        content,
-        created_at,
-        image_url,
-        avatar_url,
-        vote_deadline,
-        community_id,
-        user_id,
-        parent_post_id,
-        nest_level,
-        target_vote_choice
-      `,
-      )
-      .order("created_at", { ascending: false });
+    const { data, error } = await supabase.rpc("get_posts_with_counts");
 
     if (error) throw new Error(error.message);
 
-    // 各投稿の投票数とコメント数を取得
-    const postsWithCounts = await Promise.all(
-      data.map(async (post) => {
+    const postsWithCounts: PostWithCountsResult[] = await Promise.all(
+      data.map(async (post: PostType): Promise<PostWithCountsResult> => {
         // 投票数を取得
-        const { data: voteData } = await supabase
-          .from("votes")
-          .select("id", { count: "exact" })
-          .eq("post_id", post.id);
+        const { data: voteData }: { data: VoteCountData[] | null } =
+          await supabase
+            .from("votes")
+            .select("id", { count: "exact" })
+            .eq("post_id", post.id);
 
         // コメント数を取得
-        const { data: commentData } = await supabase
-          .from("comments")
-          .select("id", { count: "exact" })
-          .eq("post_id", post.id);
+        const { data: commentData }: { data: CommentCountData[] | null } =
+          await supabase
+            .from("comments")
+            .select("id", { count: "exact" })
+            .eq("post_id", post.id);
 
         return {
           ...post,
@@ -88,7 +89,7 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
           parent_post_id: post.parent_post_id || null,
           target_vote_choice: post.target_vote_choice || null,
           children: [] as PostType[],
-        } as PostType;
+        } as PostWithCountsResult;
       }),
     );
 
