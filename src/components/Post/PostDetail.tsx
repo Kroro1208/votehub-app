@@ -251,7 +251,7 @@ const PostDetail = ({ postId }: Props) => {
       return;
     }
 
-    // Edge Function (deadline-checker) がサーバーサイドで期限チェックを行うため、
+    // Edge Function (quick-function) がサーバーサイドで期限チェックを行うため、
     // フロントエンドでのポーリングは不要。
     // 必要に応じて手動でEdge Functionを呼び出すことも可能
     const triggerDeadlineCheckIfNeeded = async () => {
@@ -263,7 +263,7 @@ const PostDetail = ({ postId }: Props) => {
         try {
           // Edge Function endpoint を直接呼び出し
           const response = await fetch(
-            "https://rvgsxdggkipvjevphjzb.supabase.co/functions/v1/deadline-checker",
+            "https://rvgsxdggkipvjevphjzb.supabase.co/functions/v1/quick-function",
             {
               method: "POST",
               headers: {
@@ -275,17 +275,17 @@ const PostDetail = ({ postId }: Props) => {
 
           if (!response.ok) {
             console.warn(
-              `[EDGE_FUNCTION] deadline-checker responded with status ${response.status}`,
+              `[EDGE_FUNCTION] quick-function responded with status ${response.status}`,
             );
           } else {
             const result = await response.json();
             console.log(
-              `[EDGE_FUNCTION] deadline-checker processed ${result.processed} posts`,
+              `[EDGE_FUNCTION] quick-function processed ${result.processed} posts`,
             );
           }
         } catch (error) {
           console.error(
-            `[EDGE_FUNCTION] Failed to call deadline-checker:`,
+            `[EDGE_FUNCTION] Failed to call quick-function:`,
             error,
           );
         }
