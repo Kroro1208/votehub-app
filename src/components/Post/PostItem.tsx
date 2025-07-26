@@ -25,6 +25,8 @@ const PostItem = ({ post }: PostItemType) => {
   const { mutate: deletePost, isPending: isDeleting } = useDeletePost();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const ownUserPost = user?.id === post.user_id; // 投稿者本人かどうか
+
   const hasUserVoted = userVote !== null && userVote !== undefined;
 
   const isPostOwner = user?.id === post.user_id; // 投稿者本人か
@@ -186,7 +188,7 @@ const PostItem = ({ post }: PostItemType) => {
             </div>
 
             <div className="text-center h-6 flex items-center justify-center">
-              {!hasUserVoted && !votingExpired && (
+              {!ownUserPost && !hasUserVoted && !votingExpired && (
                 <div className="inline-flex items-center space-x-1 text-xs bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-3 py-1 rounded-full font-bold animate-pulse">
                   <span>👆</span>
                   <span>あなたの意見を投票しよう！</span>

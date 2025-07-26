@@ -2,9 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../../supabase-client.ts";
 import PostItem from "./PostItem.tsx";
 import NestedPostItem from "./NestedPostItem.tsx";
-import { useEffect } from "react";
-import { useAtom } from "jotai";
-import { postsAtom } from "../../stores/PostAtom.ts";
 
 export interface PostType {
   id: number;
@@ -34,8 +31,6 @@ interface PostListProps {
 }
 
 const PostList = ({ filter, showNested = false }: PostListProps) => {
-  const [, setPosts] = useAtom(postsAtom);
-
   const getFilteredPosts = async (): Promise<PostType[]> => {
     // get_posts_with_counts RPC関数で投票数とコメント数を含むデータを一括取得
     const { data, error } = await supabase.rpc("get_posts_with_counts");
@@ -162,12 +157,6 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
   const handleNestedPostCreate = () => {
     refetch();
   };
-
-  useEffect(() => {
-    if (posts) {
-      setPosts(posts);
-    }
-  }, [posts, setPosts]);
 
   if (isPending) {
     return (
