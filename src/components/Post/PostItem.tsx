@@ -176,8 +176,8 @@ const PostItem = ({ post }: PostItemType) => {
             )}
           </div>
 
-          <div className="bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-800 dark:via-gray-800 dark:to-indigo-900 rounded-xl p-4 mb-4 border border-slate-200 dark:border-gray-600 group-hover:shadow-inner transition-all duration-300">
-            <div className="flex justify-center mb-2">
+          <div className="bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-800 dark:via-gray-800 dark:to-indigo-900 rounded-xl p-2 mb-2 border border-slate-200 dark:border-gray-600 group-hover:shadow-inner transition-all duration-300">
+            <div className="flex justify-center mt-2">
               <VoteTickets
                 upVotes={upVotes ?? 0}
                 downVotes={downVotes ?? 0}

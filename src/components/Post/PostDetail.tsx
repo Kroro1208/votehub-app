@@ -35,14 +35,17 @@ export interface CommentType {
 }
 
 const fetchPostById = async (id: number): Promise<PostType> => {
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*")
-    .eq("id", id) // 受け取ったidとpostsテーブルのidが一致するものを取得
-    .single();
+  const { data, error } = await supabase.rpc("get_post_by_id", {
+    p_post_id: id,
+  });
 
   if (error) throw new Error(error.message);
-  return data as PostType;
+
+  if (!data || data.length === 0) {
+    throw new Error("投稿が見つかりません");
+  }
+
+  return data[0] as PostType;
 };
 
 const fetchNestedPosts = async (parentId: number): Promise<PostType[]> => {
@@ -62,26 +65,24 @@ const fetchNestedPosts = async (parentId: number): Promise<PostType[]> => {
   })) as PostType[];
 };
 
-// ユーザーが親投稿に投票したかどうか、どの選択肢に投票したかを取得
+// ユーザーが親投稿に投票したかどうか、どの選択肢に投票したかを取得（セキュアなRPC関数使用）
 const fetchUserVoteForPost = async (
   postId: number,
   userId: string | undefined,
 ): Promise<number | null> => {
   if (!userId) return null;
 
-  const { data, error } = await supabase
-    .from("votes")
-    .select("*")
-    .eq("post_id", postId)
-    .eq("user_id", userId)
-    .maybeSingle();
+  const { data, error } = await supabase.rpc("get_user_vote_for_post", {
+    p_post_id: postId,
+    p_user_id: userId,
+  });
 
   if (error) {
     console.error("投票データ取得エラー:", error);
     return null;
   }
 
-  return data ? data.vote : null;
+  return data && data.length > 0 ? data[0].vote_type : null;
 };
 
 const fetchCommentById = async (
@@ -89,14 +90,13 @@ const fetchCommentById = async (
 ): Promise<CommentType | null> => {
   if (id === null) return null;
 
-  const { data, error } = await supabase
-    .from("comments")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const { data, error } = await supabase.rpc("get_comment_by_id", {
+    p_comment_id: id,
+  });
 
   if (error) throw new Error(error.message);
-  return data as CommentType;
+
+  return data && data.length > 0 ? (data[0] as CommentType) : null;
 };
 
 const createPersuasionComment = async (
@@ -119,20 +119,28 @@ const createPersuasionComment = async (
     user.email?.split("@")[0] ||
     "匿名ユーザー";
 
-  const { data, error } = await supabase
-    .from("comments")
-    .insert({
-      post_id: postId,
-      content,
-      user_id: userId,
-      author: effectiveUserName, // authorフィールドを追加
-      is_persuasion_comment: true,
-    })
-    .select()
-    .single();
+  const { data, error } = await supabase.rpc("create_persuasion_comment_safe", {
+    p_post_id: postId,
+    p_content: content,
+    p_user_id: userId,
+    p_author: effectiveUserName,
+  });
 
   if (error) throw new Error(error.message);
-  return data as CommentType;
+
+  if (!data || data.length === 0) {
+    throw new Error("コメントの作成に失敗しました");
+  }
+
+  // RPC関数の戻り値をCommentType形式に変換
+  const result = data[0];
+  return {
+    id: result.comment_id,
+    post_id: result.comment_post_id,
+    user_id: result.comment_user_id,
+    content: result.comment_content,
+    created_at: result.comment_created_at,
+  } as CommentType;
 };
 
 const PostDetail = ({ postId }: Props) => {
@@ -237,50 +245,55 @@ const PostDetail = ({ postId }: Props) => {
     fetchComment();
   }, [mostVotedInfo.commentId]);
 
-  // 投票期限終了チェック（Edge Function + フロントエンド併用）
+  // 投票期限終了チェック（Edge Function使用）
   useEffect(() => {
     if (!data || !data.vote_deadline) {
       return;
     }
 
-    const checkDeadline = async () => {
-      // 期限が過ぎているかチェック
+    // Edge Function (deadline-checker) がサーバーサイドで期限チェックを行うため、
+    // フロントエンドでのポーリングは不要。
+    // 必要に応じて手動でEdge Functionを呼び出すことも可能
+    const triggerDeadlineCheckIfNeeded = async () => {
       const deadline = new Date(data.vote_deadline!);
       const now = new Date();
 
+      // 期限が過ぎている場合のみ、即座にEdge Functionを呼び出し
       if (now > deadline) {
         try {
-          const { error } = await supabase.rpc(
-            "trigger_deadline_notifications_for_post",
+          // Edge Function endpoint を直接呼び出し
+          const response = await fetch(
+            "https://rvgsxdggkipvjevphjzb.supabase.co/functions/v1/deadline-checker",
             {
-              p_post_id: postId,
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+                "Content-Type": "application/json",
+              },
             },
           );
 
-          if (error) {
-            console.error(
-              `[NOTIFICATION_ERROR] Failed to trigger deadline notification for post ${postId}:`,
-              error.message,
+          if (!response.ok) {
+            console.warn(
+              `[EDGE_FUNCTION] deadline-checker responded with status ${response.status}`,
+            );
+          } else {
+            const result = await response.json();
+            console.log(
+              `[EDGE_FUNCTION] deadline-checker processed ${result.processed} posts`,
             );
           }
         } catch (error) {
           console.error(
-            `[NOTIFICATION_ERROR] Exception while triggering deadline notification:`,
+            `[EDGE_FUNCTION] Failed to call deadline-checker:`,
             error,
           );
         }
       }
     };
 
-    // 初回チェック
-    checkDeadline();
-
-    // 30秒ごとにチェック（Edge Functionがデプロイされるまでの一時的措置）
-    const interval = setInterval(checkDeadline, 30000);
-
-    return () => {
-      clearInterval(interval);
-    };
+    // 初回チェックのみ実行（ポーリングなし）
+    triggerDeadlineCheckIfNeeded();
   }, [postId, data?.vote_deadline, data]);
 
   // モーダルを閉じる
