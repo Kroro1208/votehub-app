@@ -62,7 +62,7 @@ const PostItem = ({ post }: PostItemType) => {
 
   return (
     <Link to={`/post/${post.id}`} className="block group">
-      <div className="bg-gradient-to-br from-white via-slate-50 to-indigo-50 dark:from-gray-800 dark:via-gray-900 dark:to-indigo-900 rounded-2xl shadow-xl border-2 border-slate-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 transform hover:scale-105 hover:shadow-2xl transition-all duration-300 overflow-hidden">
+      <div className="bg-gradient-to-br from-white via-slate-50 to-indigo-50 dark:from-gray-800 dark:via-gray-900 dark:to-indigo-900 rounded-2xl shadow-xl border-2 border-slate-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 transform hover:shadow-2xl transition-all duration-300 overflow-hidden">
         {/* Urgent Vote Banner */}
         <div
           className={`h-3 bg-gradient-to-r ${
@@ -113,16 +113,17 @@ const PostItem = ({ post }: PostItemType) => {
                     : "🗳️ 投票募集中"}
               </span>
             </div>
-            {timeRemaining && !votingExpired && (
-              <div className="text-xs font-bold bg-red-500 text-white px-3 py-1 rounded-full animate-pulse">
-                ⏰ 残り{timeRemaining}
-              </div>
-            )}
+            <div className="h-6 flex items-center justify-end">
+              {timeRemaining && !votingExpired && (
+                <div className="text-xs font-bold bg-red-500 text-white px-3 py-1 rounded-full animate-pulse">
+                  ⏰ 残り{timeRemaining}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         <div className="p-4">
-          {/* Question as Call-to-Action */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center space-x-2">
@@ -151,64 +152,49 @@ const PostItem = ({ post }: PostItemType) => {
             </h3>
           </div>
 
-          {/* Image with Vote Overlay */}
-          {post.image_url && (
-            <div className="mb-4 relative">
-              <img
-                src={post.image_url}
-                alt={post.title}
-                className="w-full h-32 object-cover rounded-xl border-2 border-gray-200 dark:border-gray-600"
-              />
-              {!hasUserVoted && !votingExpired && (
-                <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="text-white text-center">
-                    <div className="text-lg font-bold">🗳️</div>
-                    <div className="text-xs font-semibold">
-                      クリックして投票
+          <div className="mb-4 h-32">
+            {post.image_url && (
+              <div className="relative h-full">
+                <img
+                  src={post.image_url}
+                  alt={post.title}
+                  className="w-full h-full object-cover rounded-xl border-2 border-gray-200 dark:border-gray-600"
+                />
+                {!hasUserVoted && !votingExpired && (
+                  <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="text-white text-center">
+                      <div className="text-lg font-bold">🗳️</div>
+                      <div className="text-xs font-semibold">
+                        クリックして投票
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
+          </div>
 
-          {/* Interactive Vote Results */}
           <div className="bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-800 dark:via-gray-800 dark:to-indigo-900 rounded-xl p-4 mb-4 border border-slate-200 dark:border-gray-600 group-hover:shadow-inner transition-all duration-300">
-            <div className="text-center mb-3">
-              <div className="text-3xl font-black text-gray-800 dark:text-white mb-1">
-                {totalVotes ?? 0}
-              </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 font-bold uppercase tracking-wide">
-                {totalVotes === 0
-                  ? "まだ投票がありません！"
-                  : totalVotes === 1
-                    ? "人が投票"
-                    : "人が投票"}
-              </div>
-            </div>
-
-            {/* Enhanced Vote Breakdown */}
             <div className="flex justify-center mb-2">
               <VoteTickets
                 upVotes={upVotes ?? 0}
                 downVotes={downVotes ?? 0}
+                totalVotes={totalVotes ?? 0}
                 size="sm"
                 showLabels={true}
               />
             </div>
 
-            {/* Call to Action */}
-            {!hasUserVoted && !votingExpired && (
-              <div className="text-center">
+            <div className="text-center h-6 flex items-center justify-center">
+              {!hasUserVoted && !votingExpired && (
                 <div className="inline-flex items-center space-x-1 text-xs bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-3 py-1 rounded-full font-bold animate-pulse">
                   <span>👆</span>
                   <span>あなたの意見を投票しよう！</span>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
-          {/* Action Bar with Engagement */}
           <div className="flex items-center justify-between pt-3 border-t-2 border-dashed border-gray-200 dark:border-gray-600">
             <div className="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400">
               <span className="font-medium flex items-center space-x-1">
@@ -255,7 +241,6 @@ const PostItem = ({ post }: PostItemType) => {
                 </div>
               )}
 
-              {/* Enhanced Status Indicator */}
               <div className="flex items-center space-x-1">
                 <div
                   className={`w-4 h-4 rounded-full border-2 border-white shadow-lg ${
