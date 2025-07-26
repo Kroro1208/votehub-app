@@ -7,6 +7,8 @@ import { Users, TrendingUp } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth.ts";
 import PopularItem from "./PopularItem.tsx";
 import IndexItem from "./IndexItem.tsx";
+import { useNavigate } from "react-router";
+import { Button } from "../ui/button.tsx";
 
 interface Props {
   communityId: number;
@@ -63,6 +65,7 @@ const getUserVotedPostIds = async (userId?: string): Promise<Set<number>> => {
 
 const CommunityItem = ({ communityId }: Props) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const {
     data: communityItemData,
@@ -109,23 +112,39 @@ const CommunityItem = ({ communityId }: Props) => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-100 to-purple-100 rounded-xl">
-                  <TrendingUp size={18} className="text-violet-600" />
-                  <span className="text-violet-700 font-semibold">
-                    {communityItemData?.length || 0}件の投稿
-                  </span>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex gap-2">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-100 to-purple-100 rounded-xl">
+                    <TrendingUp size={18} className="text-violet-600" />
+                    <span className="text-violet-700 font-semibold">
+                      {communityItemData?.length || 0}件の投稿
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-teal-100 rounded-xl">
+                    <Users size={18} className="text-blue-600" />
+                    <span className="text-blue-700 font-semibold">
+                      活発な議論中
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-teal-100 rounded-xl">
-                  <Users size={18} className="text-blue-600" />
-                  <span className="text-blue-700 font-semibold">
-                    活発な議論中
-                  </span>
-                </div>
+                {/* 投稿作成ボタン - 投稿がある場合のみ表示 */}
+                {communityItemData && communityItemData.length > 0 && (
+                  <div className="text-center">
+                    <Button
+                      onClick={() =>
+                        navigate(`/create?community_id=${communityId}`)
+                      }
+                      className="inline-flex items-center text-white shadow-xl hover:shadow-xl cursor-pointer transform hover:scale-105"
+                    >
+                      <span>このスペースに投稿する</span>
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
+
         {/* 人気投稿セクション */}
         <PopularItem
           communityItemData={communityItemData}
@@ -153,7 +172,12 @@ const CommunityItem = ({ communityId }: Props) => {
                 <p className="text-slate-500 text-lg mb-8 max-w-md mx-auto">
                   このコミュニティで最初の投稿をしてみませんか？きっと素晴らしい議論が始まるはずです。
                 </p>
-                <button className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold rounded-2xl hover:from-violet-600 hover:to-purple-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105">
+                <button
+                  onClick={() =>
+                    navigate(`/create?community_id=${communityId}`)
+                  }
+                  className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold rounded-2xl hover:from-violet-600 hover:to-purple-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+                >
                   <span className="text-lg">最初の投稿を作成</span>
                 </button>
               </div>

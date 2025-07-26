@@ -219,43 +219,112 @@ const CommunityList = () => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCommunities?.map((community) => (
             <Link
               key={community.id}
               to={`/space/${community.id}`}
-              className="group block bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-300 hover:shadow-md transition-all duration-200"
+              className="group block relative"
             >
-              <div className="flex items-start space-x-4">
-                {/* アバター - カラフル */}
-                <div
-                  className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
-                  style={{
-                    backgroundColor: `hsl(${(community.id * 137.508) % 360}, 70%, 50%)`,
-                  }}
-                >
-                  {community.name.charAt(0).toUpperCase()}
-                </div>
+              {/* 投票ブース風カード */}
+              <div className="bg-gradient-to-br from-white to-slate-50 dark:from-gray-800 dark:to-gray-900 rounded-xl shadow-md border border-slate-200 dark:border-gray-600 hover:border-slate-300 dark:hover:border-gray-500 hover:shadow-lg transition-all duration-300 overflow-hidden">
+                {/* 投票所バナー */}
+                <div className="h-2 bg-gradient-to-r from-slate-400 to-slate-600 dark:from-slate-600 dark:to-slate-500"></div>
 
-                {/* コンテンツ */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-                      {community.name}
-                    </h3>
-                    <ArrowRight
-                      size={16}
-                      className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5"
-                    />
+                {/* ヘッダー：投票所看板風 */}
+                <div className="bg-gradient-to-r from-slate-700 to-slate-800 dark:from-slate-600 dark:to-slate-700 p-4 text-white">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                      <span className="text-xs font-medium uppercase tracking-wide">
+                        投票スペース
+                      </span>
+                    </div>
+                    <div className="text-xs bg-white/15 px-2 py-1 rounded">
+                      OPEN
+                    </div>
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                  {/* スペース名 */}
+                  <div className="flex items-center space-x-3">
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-semibold text-sm"
+                      style={{
+                        backgroundColor: `hsl(${(community.id * 137.508) % 360}, 50%, 45%)`,
+                      }}
+                    >
+                      {community.name.charAt(0).toUpperCase()}
+                    </div>
+                    <h3 className="font-semibold text-base group-hover:text-slate-200 transition-colors line-clamp-1">
+                      {community.name}
+                    </h3>
+                  </div>
+                </div>
+
+                {/* メインコンテンツ */}
+                <div className="p-4">
+                  {/* 説明文 */}
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2 leading-relaxed">
                     {community.description}
                   </p>
 
-                  <div className="flex items-center justify-end space-x-4 text-xs text-gray-500">
+                  {/* 投票活動状況 */}
+                  <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 mb-4">
+                    <div className="text-center mb-2">
+                      <div className="text-xl font-bold text-gray-800 dark:text-white">
+                        {community.post_count || 0}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                        進行中の議論
+                      </div>
+                    </div>
+
+                    {/* 活動レベル表示 */}
+                    <div className="flex justify-center">
+                      <div className="flex items-center space-x-1 text-xs">
+                        {community.post_count === 0 ? (
+                          <>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                            <span className="text-gray-500">静寂</span>
+                          </>
+                        ) : community.post_count &&
+                          community.post_count >= 10 ? (
+                          <>
+                            <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                            <span className="text-red-600">白熱中</span>
+                          </>
+                        ) : community.post_count &&
+                          community.post_count >= 5 ? (
+                          <>
+                            <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                            <span className="text-orange-600">活発</span>
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                            <span className="text-emerald-600">穏やか</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 参加を促すCTA */}
+                  <div className="text-center mb-3">
+                    <div className="inline-flex items-center space-x-2 text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg font-medium transition-colors duration-200">
+                      <Vote size={12} />
+                      <span>議論に参加</span>
+                      <ArrowRight
+                        size={12}
+                        className="group-hover:translate-x-1 transition-transform"
+                      />
+                    </div>
+                  </div>
+
+                  {/* フッター情報 */}
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-600 text-xs text-gray-500 dark:text-gray-400">
                     <div className="flex items-center space-x-1">
-                      <Calendar size={15} />
+                      <Calendar size={12} />
                       <span>
                         {new Date(community.created_at).toLocaleDateString(
                           "ja-JP",
@@ -267,8 +336,8 @@ const CommunityList = () => {
                       </span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <Vote size={15} />
-                      <span>{community.post_count || 0}件の投稿</span>
+                      <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                      <span className="font-medium">ACTIVE</span>
                     </div>
                   </div>
                 </div>

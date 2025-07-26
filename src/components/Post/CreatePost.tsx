@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router";
 import {
   type Community,
   getCommunitites,
@@ -47,6 +48,11 @@ type CreatePostFormData = z.infer<typeof createPostSchema>;
 const CreatePost = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const communityIdFromUrl = searchParams.get("community_id");
+  const initialCommunityId = communityIdFromUrl
+    ? parseInt(communityIdFromUrl, 10)
+    : null;
 
   // 投稿制限機能
   const {
@@ -69,7 +75,7 @@ const CreatePost = () => {
     defaultValues: {
       title: "",
       content: "",
-      community_id: null,
+      community_id: initialCommunityId,
       tag_id: null,
       vote_deadline: undefined,
     },
