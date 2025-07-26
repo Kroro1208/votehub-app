@@ -251,7 +251,7 @@ const PostDetail = ({ postId }: Props) => {
       return;
     }
 
-    // Edge Function (quick-function) がサーバーサイドで期限チェックを行うため、
+    // Edge Function (smooth-task) がサーバーサイドで期限チェックを行うため、
     // フロントエンドでのポーリングは不要。
     // 必要に応じて手動でEdge Functionを呼び出すことも可能
     const triggerDeadlineCheckIfNeeded = async () => {
@@ -263,7 +263,7 @@ const PostDetail = ({ postId }: Props) => {
         try {
           // Edge Function endpoint を直接呼び出し
           const response = await fetch(
-            "https://rvgsxdggkipvjevphjzb.supabase.co/functions/v1/quick-function",
+            "https://rvgsxdggkipvjevphjzb.supabase.co/functions/v1/smooth-task",
             {
               method: "POST",
               headers: {
@@ -275,19 +275,16 @@ const PostDetail = ({ postId }: Props) => {
 
           if (!response.ok) {
             console.warn(
-              `[EDGE_FUNCTION] quick-function responded with status ${response.status}`,
+              `[EDGE_FUNCTION] smooth-task responded with status ${response.status}`,
             );
           } else {
             const result = await response.json();
             console.log(
-              `[EDGE_FUNCTION] quick-function processed ${result.processed} posts`,
+              `[EDGE_FUNCTION] smooth-task processed ${result.processed} posts`,
             );
           }
         } catch (error) {
-          console.error(
-            `[EDGE_FUNCTION] Failed to call quick-function:`,
-            error,
-          );
+          console.error(`[EDGE_FUNCTION] Failed to call smooth-task:`, error);
         }
       }
     };
