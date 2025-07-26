@@ -177,7 +177,7 @@ export const deleteTag = async (tagId: number) => {
   }
 };
 
-// 高度な検索・フィルタリング機能
+// 高度な検索・フィルタリング機能（セキュアなRPC関数を使用）
 export const searchTags = async (
   filters: TagFilters = {},
 ): Promise<TagStats[]> => {
@@ -193,25 +193,18 @@ export const searchTags = async (
   } = filters;
 
   try {
-    // 基本的なタグクエリ
-    let query = supabase.from("tags").select(`
-        id,
-        name,
-        community_id,
-        created_at,
-        communities(id, name)
-      `);
-
-    // フィルタリング
-    if (communityId) {
-      query = query.eq("community_id", communityId);
-    }
-
-    if (searchTerm) {
-      query = query.ilike("name", `%${searchTerm}%`);
-    }
-
-    const { data: tags, error: tagsError } = await query;
+    // セキュアなRPC関数を使用してタグ検索
+    const { data: tags, error: tagsError } = await supabase.rpc(
+      "search_tags_safe",
+      {
+        p_search_term: searchTerm || null,
+        p_community_id: communityId || null,
+        p_sort_by: sortBy,
+        p_sort_order: sortOrder,
+        p_limit: limit,
+        p_offset: offset,
+      },
+    );
 
     if (tagsError) {
       throw new Error(`タグ検索エラー: ${tagsError.message}`);
@@ -221,97 +214,76 @@ export const searchTags = async (
       return [];
     }
 
-    // 各タグの統計情報を取得
-    const tagStatsPromises = tags.map(async (tag) => {
-      // 投稿数を取得
-      const { data: posts, error: postsError } = await supabase
-        .from("posts")
-        .select("id")
-        .eq("tag_id", tag.id);
-
-      if (postsError) {
-        console.error(`投稿数取得エラー (tag_id: ${tag.id}):`, postsError);
-        return null;
-      }
-
-      const postIds = posts?.map((post) => post.id) || [];
-      const postCount = postIds.length;
-
-      // 投票数を取得
-      let voteCount = 0;
-      if (postIds.length > 0) {
-        const { data: votes, error: votesError } = await supabase
-          .from("votes")
-          .select("id")
-          .in("post_id", postIds);
-
-        if (votesError) {
-          console.error(`投票数取得エラー (tag_id: ${tag.id}):`, votesError);
-        } else {
-          voteCount = votes?.length || 0;
-        }
-      }
-
-      // 人気度スコアを計算
-      const popularityScore = postCount * 2 + voteCount;
-
-      return {
-        id: tag.id,
-        name: tag.name,
-        community_id: tag.community_id,
-        created_at: tag.created_at,
-        post_count: postCount,
-        vote_count: voteCount,
-        popularity_score: popularityScore,
-        community: Array.isArray(tag.communities)
-          ? tag.communities[0]
-          : tag.communities,
-      };
-    });
-
-    const tagStats = (await Promise.all(tagStatsPromises)).filter(
-      Boolean,
-    ) as TagStats[];
+    // RPC関数の結果をTagStats型に変換
+    const tagStats: TagStats[] = tags.map((tag: any) => ({
+      id: tag.id,
+      name: tag.name,
+      community_id: tag.community_id,
+      created_at: tag.created_at,
+      post_count: Number(tag.post_count) || 0,
+      vote_count: 0, // RPC関数で投票数計算を追加する場合はここで設定
+      popularity_score: Number(tag.post_count) * 2, // 簡易計算
+      community: tag.community_name
+        ? { id: tag.community_id, name: tag.community_name }
+        : null,
+    }));
 
     // 最小値フィルタリング
-    const filteredStats = tagStats.filter(
+    return tagStats.filter(
       (stat) =>
         stat.post_count >= minPostCount && stat.vote_count >= minVoteCount,
     );
-
-    // ソート処理
-    const sortedStats = filteredStats.sort((a, b) => {
-      const aValue = a[sortBy];
-      const bValue = b[sortBy];
-
-      if (sortOrder === "asc") {
-        return Number(aValue) - Number(bValue);
-      } else {
-        return Number(bValue) - Number(aValue);
-      }
-    });
-
-    // ページネーション
-    return sortedStats.slice(offset, offset + limit);
   } catch (error) {
     console.error("タグ検索エラー:", error);
     throw error;
   }
 };
 
-// 人気タグTOP N を取得
+// 人気タグTOP N を取得（セキュアなRPC関数を使用）
 export const getTopTags = async (
   communityId?: number,
   limit: number = 10,
   sortBy: "post_count" | "vote_count" | "popularity_score" = "popularity_score",
 ): Promise<TagStats[]> => {
-  return searchTags({
-    communityId,
-    sortBy,
-    sortOrder: "desc",
-    limit,
-    minPostCount: 1, // 最低1つの投稿があるタグのみ
-  });
+  try {
+    // 人気タグランキング専用のRPC関数を使用
+    const { data: tags, error } = await supabase.rpc(
+      "get_popular_tags_ranking",
+      {
+        p_limit: limit,
+      },
+    );
+
+    if (error) {
+      throw new Error(`人気タグ取得エラー: ${error.message}`);
+    }
+
+    if (!tags || tags.length === 0) {
+      return [];
+    }
+
+    // コミュニティでフィルタリング（必要な場合）
+    const filteredTags = communityId
+      ? tags.filter((tag: any) => tag.community_id === communityId)
+      : tags;
+
+    // TagStats型に変換
+    return filteredTags.map((tag: any) => ({
+      id: tag.id,
+      name: tag.name,
+      community_id: tag.community_id,
+      created_at: new Date().toISOString(), // RPC関数にcreated_atがない場合のフォールバック
+      post_count: Number(tag.post_count) || 0,
+      vote_count: Number(tag.total_votes) || 0,
+      popularity_score: Number(tag.popularity_score) || 0,
+      community: tag.community_name
+        ? { id: tag.community_id, name: tag.community_name }
+        : null,
+    }));
+  } catch (error) {
+    console.error("人気タグ取得エラー:", error);
+    throw error;
+  }
 };
 
 // タグの投稿一覧を取得

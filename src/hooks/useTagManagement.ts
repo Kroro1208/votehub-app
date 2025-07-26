@@ -163,7 +163,7 @@ export const useTagManagement = (
     loadRelatedTags();
   }, [watchTagId, watchCommunityId]);
 
-  // 新規タグ名入力時の類似タグ検索
+  // 新規タグ名入力時の類似タグ検索（セキュアなRPC関数を使用）
   useEffect(() => {
     const searchSimilarTags = async () => {
       if (
@@ -177,18 +177,26 @@ export const useTagManagement = (
 
       setIsLoadingSimilarTags(true);
       try {
-        const { data: tags, error } = await supabase
-          .from("tags")
-          .select("id, name")
-          .eq("community_id", watchCommunityId)
-          .ilike("name", `%${newTagName.trim()}%`)
-          .limit(5);
+        // セキュアなRPC関数を使用して類似タグを検索
+        const { data: tags, error } = await supabase.rpc("search_tags_safe", {
+          p_search_term: newTagName.trim(),
+          p_community_id: watchCommunityId,
+          p_sort_by: "name",
+          p_sort_order: "asc",
+          p_limit: 5,
+          p_offset: 0,
+        });
 
         if (error) {
           console.error("類似タグ検索エラー:", error);
           setSimilarTags([]);
         } else {
-          setSimilarTags(tags || []);
+          // RPC関数の結果を適切な形式に変換
+          const similarTagsData = (tags || []).map((tag: any) => ({
+            id: tag.id,
+            name: tag.name,
+          }));
+          setSimilarTags(similarTagsData);
         }
       } catch (error) {
         console.error("類似タグ検索エラー:", error);

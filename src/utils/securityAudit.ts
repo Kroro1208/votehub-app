@@ -34,6 +34,23 @@ class SecurityAuditor {
   private alerts: AnomalyAlert[] = [];
 
   /**
+   * 包括的なセキュリティ監査を実行（RPC関数使用）
+   */
+  async runComprehensiveSecurityAudit(): Promise<any> {
+    try {
+      const { data: auditResult, error } =
+        await supabase.rpc("run_security_audit");
+
+      if (error) throw error;
+
+      return auditResult;
+    } catch (error) {
+      console.error("Comprehensive security audit failed:", error);
+      throw error;
+    }
+  }
+
+  /**
    * 包括的なセキュリティ監査を実行
    */
   async runSecurityAudit(): Promise<SecurityAuditReport> {
@@ -131,25 +148,14 @@ class SecurityAuditor {
     const checks: SecurityCheck[] = [];
 
     try {
-      // 1時間以内の投票で異常なパターンを検知
-      const { data: recentVotes, error } = await supabase
-        .from("votes")
-        .select("user_id, post_id, created_at")
-        .gte("created_at", new Date(Date.now() - 60 * 60 * 1000).toISOString());
+      // 異常な投票パターンをチェック（RPC関数使用）
+      const { data: suspiciousVotingData, error } = await supabase.rpc(
+        "check_abnormal_voting_patterns",
+      );
 
       if (error) throw error;
 
-      // ユーザー別投票数をカウント
-      const userVoteCounts = new Map<string, number>();
-      recentVotes?.forEach((vote) => {
-        const count = userVoteCounts.get(vote.user_id) || 0;
-        userVoteCounts.set(vote.user_id, count + 1);
-      });
-
-      // 異常に多い投票をチェック（1時間に50票以上）
-      const suspiciousUsers = Array.from(userVoteCounts.entries()).filter(
-        ([, count]) => count > 50,
-      );
+      const suspiciousUsers = suspiciousVotingData || [];
 
       if (suspiciousUsers.length === 0) {
         checks.push({
@@ -172,9 +178,9 @@ class SecurityAuditor {
           description: `Suspicious voting activity detected for ${suspiciousUsers.length} users`,
           timestamp: new Date().toISOString(),
           data: {
-            suspiciousUsers: suspiciousUsers.map(([userId, count]) => ({
-              userId,
-              count,
+            suspiciousUsers: suspiciousUsers.map((user: any) => ({
+              userId: user.user_id,
+              count: user.vote_count,
             })),
           },
         });
@@ -216,27 +222,14 @@ class SecurityAuditor {
     const checks: SecurityCheck[] = [];
 
     try {
-      // 過去24時間の投稿作成数をチェック
-      const { data: recentPosts, error } = await supabase
-        .from("posts")
-        .select("user_id, created_at")
-        .gte(
-          "created_at",
-          new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        );
+      // 異常な投稿パターンをチェック（RPC関数使用）
+      const { data: suspiciousPostingData, error } = await supabase.rpc(
+        "check_abnormal_posting_patterns",
+      );
 
       if (error) throw error;
 
-      const userPostCounts = new Map<string, number>();
-      recentPosts?.forEach((post) => {
-        const count = userPostCounts.get(post.user_id) || 0;
-        userPostCounts.set(post.user_id, count + 1);
-      });
-
-      // 異常に多い投稿をチェック（24時間に20投稿以上）
-      const suspiciousPostUsers = Array.from(userPostCounts.entries()).filter(
-        ([, count]) => count > 20,
-      );
+      const suspiciousPostUsers = suspiciousPostingData || [];
 
       if (suspiciousPostUsers.length === 0) {
         checks.push({
@@ -315,12 +308,10 @@ class SecurityAuditor {
     const checks: SecurityCheck[] = [];
 
     try {
-      // 孤立した投票レコードをチェック
-      const { data: orphanedVotes, error: voteError } = await supabase
-        .from("votes")
-        .select("id, post_id")
-        .not("post_id", "in", supabase.from("posts").select("id"))
-        .limit(10);
+      // 孤立した投票レコードをチェック（RPC関数使用）
+      const { data: orphanedVotes, error: voteError } = await supabase.rpc(
+        "check_orphaned_votes",
+      );
 
       if (voteError) throw voteError;
 
