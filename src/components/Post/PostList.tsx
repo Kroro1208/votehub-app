@@ -28,101 +28,44 @@ export interface PostType {
   children?: PostType[];
 }
 
-interface Community {
-  id: number;
-  name: string;
-}
-
 interface PostListProps {
   filter?: "urgent" | "popular" | "recent";
   showNested?: boolean;
-}
-
-// 各投稿の投票数とコメント数を取得
-interface VoteCountData {
-  id: string;
-}
-
-interface CommentCountData {
-  id: string;
-}
-
-interface PostWithCountsResult
-  extends Omit<PostType, "vote_count" | "comment_count"> {
-  vote_count: number;
-  comment_count: number;
-  nest_level: number;
-  parent_post_id: number | null;
-  target_vote_choice: number | null;
-  children: PostType[];
 }
 
 const PostList = ({ filter, showNested = false }: PostListProps) => {
   const [, setPosts] = useAtom(postsAtom);
 
   const getFilteredPosts = async (): Promise<PostType[]> => {
+    // get_posts_with_counts RPC関数で投票数とコメント数を含むデータを一括取得
     const { data, error } = await supabase.rpc("get_posts_with_counts");
 
     if (error) throw new Error(error.message);
 
-    const postsWithCounts: PostWithCountsResult[] = await Promise.all(
-      data.map(async (post: PostType): Promise<PostWithCountsResult> => {
-        // 投票数を取得
-        const { data: voteData }: { data: VoteCountData[] | null } =
-          await supabase
-            .from("votes")
-            .select("id", { count: "exact" })
-            .eq("post_id", post.id);
+    // コミュニティ情報を一括取得（N+1クエリ問題を解決）
+    const communityIds = [
+      ...new Set(
+        data.map((post: PostType) => post.community_id).filter(Boolean),
+      ),
+    ];
+    const { data: communities } = await supabase
+      .from("communities")
+      .select("id, name")
+      .in("id", communityIds);
 
-        // コメント数を取得
-        const { data: commentData }: { data: CommentCountData[] | null } =
-          await supabase
-            .from("comments")
-            .select("id", { count: "exact" })
-            .eq("post_id", post.id);
+    const communityMap = new Map(communities?.map((c) => [c.id, c]) || []);
 
-        return {
-          ...post,
-          vote_count: voteData?.length || 0,
-          comment_count: commentData?.length || 0,
-          nest_level: post.nest_level || 0,
-          parent_post_id: post.parent_post_id || null,
-          target_vote_choice: post.target_vote_choice || null,
-          children: [] as PostType[],
-        } as PostWithCountsResult;
-      }),
-    );
-
-    const postsData = postsWithCounts;
-
-    // コミュニティ情報を追加
-    const postsWithCommunities = await Promise.all(
-      postsData.map(async (post: PostType) => {
-        if (post.community_id) {
-          const { data: community } = await supabase
-            .from("communities")
-            .select("id, name")
-            .eq("id", post.community_id)
-            .single();
-
-          return {
-            ...post,
-            communities: community as Community,
-            parent_post_id: post.parent_post_id || null,
-            nest_level: post.nest_level || 0,
-            target_vote_choice: post.target_vote_choice || null,
-            children: [],
-          };
-        }
-        return {
-          ...post,
-          parent_post_id: post.parent_post_id || null,
-          nest_level: post.nest_level || 0,
-          target_vote_choice: post.target_vote_choice || null,
-          children: [],
-        };
-      }),
-    );
+    // データを統合（N+1クエリを使わず一括処理）
+    const postsWithCommunities: PostType[] = data.map((post: PostType) => ({
+      ...post,
+      communities: post.community_id
+        ? communityMap.get(post.community_id)
+        : null,
+      nest_level: post.nest_level || 0,
+      parent_post_id: post.parent_post_id || null,
+      target_vote_choice: post.target_vote_choice || null,
+      children: [] as PostType[],
+    }));
 
     // showNestedがtrueの場合のみネスト構造を構築
     let filteredPosts: PostType[];
@@ -211,8 +154,9 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
   } = useQuery<PostType[], Error>({
     queryKey: ["posts", filter, showNested],
     queryFn: getFilteredPosts,
-    staleTime: 0, // Always refetch to ensure fresh data
-    refetchOnWindowFocus: true, // Refetch when window gets focus
+    staleTime: 1000 * 60 * 5, // 5分間キャッシュを有効とみなす
+    gcTime: 1000 * 60 * 10, // 10分間キャッシュを保持
+    refetchOnWindowFocus: false, // フォーカス時の自動リフェッチを無効化
   });
 
   const handleNestedPostCreate = () => {

@@ -28,23 +28,20 @@ const getCommunitityItem = async (
 
   if (error) throw new Error(error.message);
 
-  // コミュニティ名を追加で取得
-  const postsWithCommunity = await Promise.all(
-    data.map(async (post: PostType) => {
-      const { data: communityData } = await supabase
-        .from("communities")
-        .select("id, name")
-        .eq("id", post.community_id)
-        .single();
+  // コミュニティ名を一度だけ取得（同じcommunity_idなので）
+  const { data: communityData } = await supabase
+    .from("communities")
+    .select("id, name")
+    .eq("id", communityId)
+    .single();
 
-      return {
-        ...post,
-        communities: communityData
-          ? { id: communityData.id, name: communityData.name }
-          : undefined,
-      };
-    }),
-  );
+  // 全ての投稿に同じコミュニティ情報を追加
+  const postsWithCommunity = data.map((post: PostType) => ({
+    ...post,
+    communities: communityData
+      ? { id: communityData.id, name: communityData.name }
+      : undefined,
+  }));
 
   return postsWithCommunity as CommunityItemType[];
 };
