@@ -16,6 +16,46 @@ interface RateLimitEntry {
 
 class RateLimiter {
   private storage = new Map<string, RateLimitEntry>();
+  private cleanupInterval: NodeJS.Timeout | null = null;
+  private isCleanupRunning = false;
+
+  constructor() {
+    this.startCleanup();
+  }
+
+  /**
+   * クリーンアップタイマーを開始
+   */
+  startCleanup(): void {
+    if (this.isCleanupRunning) return;
+
+    this.isCleanupRunning = true;
+    this.cleanupInterval = setInterval(
+      () => {
+        this.cleanup();
+      },
+      5 * 60 * 1000,
+    ); // 5分ごと
+  }
+
+  /**
+   * クリーンアップタイマーを停止（メモリリーク防止）
+   */
+  stopCleanup(): void {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+      this.isCleanupRunning = false;
+    }
+  }
+
+  /**
+   * インスタンス破棄時のクリーンアップ
+   */
+  destroy(): void {
+    this.stopCleanup();
+    this.storage.clear();
+  }
 
   /**
    * レート制限チェック
@@ -83,16 +123,33 @@ class RateLimiter {
   }
 }
 
-// シングルトンインスタンス
 export const rateLimiter = new RateLimiter();
 
-// 定期的なクリーンアップ（5分ごと）
-setInterval(
-  () => {
-    rateLimiter.cleanup();
-  },
-  5 * 60 * 1000,
-);
+// ブラウザ環境でのページアンロード時のクリーンアップ
+if (typeof window !== "undefined") {
+  const handleBeforeUnload = () => {
+    rateLimiter.stopCleanup();
+  };
+
+  const handleUnload = () => {
+    rateLimiter.destroy();
+  };
+
+  // ページアンロード時にクリーンアップ
+  window.addEventListener("beforeunload", handleBeforeUnload);
+  window.addEventListener("unload", handleUnload);
+
+  // ページが非表示になった時もクリーンアップ（モバイル対応）
+  if ("visibilitychange" in document) {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") {
+        rateLimiter.stopCleanup();
+      } else if (document.visibilityState === "visible") {
+        rateLimiter.startCleanup();
+      }
+    });
+  }
+}
 
 /**
  * レート制限設定

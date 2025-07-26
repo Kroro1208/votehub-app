@@ -1,6 +1,6 @@
 ---
 name: "progress-check"
-description: "開発の完成度を%で計算し、次に取り組むべき工程を特定"
+description: "開発の完成度とGithub Issueを確認して%で計算し、次に取り組むべき工程を特定"
 ---
 
 # Development Progress Check

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import CommentItem from "./CommentItem.tsx";
 import {
@@ -83,6 +83,32 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
     queryKey: ["comments", postId],
     queryFn: () => getComment(postId),
   });
+
+  // リアルタイム機能：この特定の投稿へのコメント変更を監視
+  useEffect(() => {
+    const commentsChannel = supabase
+      .channel(`comments-${postId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "comments",
+          filter: `post_id=eq.${postId}`,
+        },
+        () => {
+          // この投稿へのコメントが変更されたらキャッシュを無効化
+          queryClient.invalidateQueries({
+            queryKey: ["comments", postId],
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(commentsChannel);
+    };
+  }, [postId, queryClient]);
 
   const { mutate, isError, isPending } = useMutation({
     mutationFn: (newComment: NewComment) => {

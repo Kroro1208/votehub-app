@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "../../supabase-client.ts";
 import PostItem from "./PostItem.tsx";
 import NestedPostItem from "./NestedPostItem.tsx";
@@ -31,6 +32,7 @@ interface PostListProps {
 }
 
 const PostList = ({ filter, showNested = false }: PostListProps) => {
+  const queryClient = useQueryClient();
   const getFilteredPosts = async (): Promise<PostType[]> => {
     // get_posts_with_counts RPC関数で投票数とコメント数を含むデータを一括取得
     const { data, error } = await supabase.rpc("get_posts_with_counts");
@@ -153,6 +155,72 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
     gcTime: 1000 * 60 * 10, // 10分間キャッシュを保持
     refetchOnWindowFocus: false, // フォーカス時の自動リフェッチを無効化
   });
+
+  // リアルタイム機能：投稿・投票・コメントの変更を監視
+  useEffect(() => {
+    // 投稿のリアルタイム更新を監視
+    const postsChannel = supabase
+      .channel("posts-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "posts",
+        },
+        () => {
+          // 投稿が変更されたらキャッシュを無効化
+          queryClient.invalidateQueries({
+            queryKey: ["posts", filter, showNested],
+          });
+        },
+      )
+      .subscribe();
+
+    // 投票のリアルタイム更新を監視
+    const votesChannel = supabase
+      .channel("votes-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "votes",
+        },
+        () => {
+          // 投票が変更されたらキャッシュを無効化
+          queryClient.invalidateQueries({
+            queryKey: ["posts", filter, showNested],
+          });
+        },
+      )
+      .subscribe();
+
+    // コメントのリアルタイム更新を監視
+    const commentsChannel = supabase
+      .channel("comments-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "comments",
+        },
+        () => {
+          // コメントが変更されたらキャッシュを無効化
+          queryClient.invalidateQueries({
+            queryKey: ["posts", filter, showNested],
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(postsChannel);
+      supabase.removeChannel(votesChannel);
+      supabase.removeChannel(commentsChannel);
+    };
+  }, [filter, showNested, queryClient]);
 
   const handleNestedPostCreate = () => {
     refetch();

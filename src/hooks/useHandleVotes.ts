@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../supabase-client.ts";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "./useAuth.ts";
 import { isPersuasionTime } from "../utils/formatTime.tsx";
 import { checkAndNotifyPersuasionTimeStarted } from "../utils/notifications.ts";
@@ -51,6 +51,32 @@ export const useHandleVotes = (
     refetchInterval: false,
     staleTime: 1000 * 60 * 5, // 5分間はデータを新鮮として扱う
   });
+
+  // リアルタイム機能：この特定の投稿への投票変更を監視
+  useEffect(() => {
+    const votesChannel = supabase
+      .channel(`votes-${postId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "votes",
+          filter: `post_id=eq.${postId}`,
+        },
+        () => {
+          // この投稿への投票が変更されたらキャッシュを無効化
+          queryClient.invalidateQueries({
+            queryKey: ["votes", postId],
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(votesChannel);
+    };
+  }, [postId, queryClient]);
 
   // 派生質問の投票権限チェック
   const canVoteOnDerivedQuestion = () => {
