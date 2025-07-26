@@ -256,9 +256,7 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
   return (
     <div
       className={
-        showNested
-          ? "space-y-4"
-          : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3"
+        showNested ? "space-y-4" : "grid grid-cols-1 md:grid-cols-2 gap-4"
       }
     >
       {posts.map((item) =>

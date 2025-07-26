@@ -17,18 +17,16 @@ export default function Home() {
   }, [isFirstTime]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-gray-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900 transition-colors">
       <Sidebar />
       {/* Main Content */}
-      <div className="ml-52 min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-        {/* Header with stats */}
+      <div className="ml-52 min-h-screen">
+        {/* Header with voting dashboard */}
         <HeaderStatus />
 
-        {/* Tabs Section */}
-        <div className="border-b mt-5 border-slate-200 dark:border-slate-700">
-          <div className="max-w-4xl mx-auto px-6 xl:mr-80">
-            <TabSection />
-          </div>
+        {/* Voting Categories Section */}
+        <div className="xl:mr-80">
+          <TabSection />
         </div>
         <RightPanel />
       </div>
