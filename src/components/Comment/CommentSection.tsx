@@ -41,22 +41,23 @@ const createComment = async (
   if (!userId || !author) {
     throw new Error("コメントするにはログインが必要です");
   }
-  const { error } = await supabase.from("comments").insert({
-    post_id: postId,
-    content: newComment.content,
-    parent_comment_id: newComment.parent_comment_id || null,
-    author: author,
-    user_id: userId,
+
+  const { data, error } = await supabase.rpc("create_comment_secure", {
+    p_post_id: postId,
+    p_content: newComment.content,
+    p_parent_comment_id: newComment.parent_comment_id || null,
+    p_author: author,
+    p_user_id: userId,
   });
+
   if (error) throw new Error(error.message);
+  return data;
 };
 
 const getComment = async (postId: number): Promise<Comment[]> => {
-  const { data, error } = await supabase
-    .from("comments")
-    .select("*")
-    .eq("post_id", postId)
-    .order("created_at", { ascending: true });
+  const { data, error } = await supabase.rpc("get_comments_for_post", {
+    p_post_id: postId,
+  });
 
   if (error) throw new Error(error.message);
   return data as Comment[];

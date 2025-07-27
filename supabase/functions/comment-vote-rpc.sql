@@ -35,14 +35,14 @@ DECLARE
     new_vote_id integer;
 BEGIN
     -- 認証チェック
-    IF auth.uid()::text != p_user_id THEN
+    IF auth.uid()::text != p_user_id::text THEN
         RAISE EXCEPTION 'Unauthorized: You can only vote as yourself';
     END IF;
 
     -- 既存の投票を確認
     SELECT * INTO existing_vote
     FROM comment_votes
-    WHERE comment_id = p_comment_id AND user_id = p_user_id;
+    WHERE comment_id = p_comment_id AND user_id::text = p_user_id::text;
 
     -- 既存の投票がある場合
     IF FOUND THEN
@@ -75,7 +75,7 @@ BEGIN
     ELSE
         -- 既存の投票がない場合は新規挿入
         INSERT INTO comment_votes (comment_id, user_id, vote)
-        VALUES (p_comment_id, p_user_id, p_vote_value)
+        VALUES (p_comment_id, p_user_id::UUID, p_vote_value)
         RETURNING id INTO new_vote_id;
         
         action_type := 'inserted';

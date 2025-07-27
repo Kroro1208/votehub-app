@@ -37,11 +37,17 @@ const createPost = async (post: PostInput, imageFile: File) => {
     .from("post-images")
     .getPublicUrl(filePath);
 
-  // 公開URLと共にSupabaseのpostsテーブルに投稿を作成
-  const { data, error } = await supabase
-    .from("posts")
-    .insert({ ...post, image_url: publicUrlData.publicUrl })
-    .select();
+  // RPC関数を使用して安全に投稿を作成
+  const { data, error } = await supabase.rpc("create_post_secure", {
+    p_title: post.title,
+    p_content: post.content,
+    p_avatar_url: post.avatar_url,
+    p_community_id: post.community_id,
+    p_tag_id: post.tag_id,
+    p_vote_deadline: post.vote_deadline,
+    p_user_id: post.user_id,
+    p_image_url: publicUrlData.publicUrl,
+  });
 
   if (error) {
     throw new Error(error.message);

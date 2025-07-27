@@ -19,10 +19,9 @@ export interface Vote {
 }
 
 const getVotes = async (postId: number): Promise<Vote[]> => {
-  const { data, error } = await supabase
-    .from("votes")
-    .select("*")
-    .eq("post_id", postId);
+  const { data, error } = await supabase.rpc("get_votes_for_post", {
+    p_post_id: postId,
+  });
 
   if (error) throw new Error(error.message);
   return data as Vote[];
@@ -118,45 +117,25 @@ export const useHandleVotes = (
       throw new Error(`この派生質問は${targetText}者のみ投票できます`);
     }
 
-    const { data: existingVote } = await supabase
-      .from("votes")
-      .select("*")
-      .eq("post_id", postId)
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    // 新規投票の場合
-    if (!existingVote) {
-      const { data, error } = await supabase
-        .from("votes")
-        .insert({ post_id: postId, user_id: userId, vote: voteValue })
-        .select();
-      if (error) throw new Error(error.message);
-      return { action: "inserted", data };
-    }
-
-    const updateData: {
-      vote: number;
-      persuasion_vote_changed?: boolean;
-      original_vote?: number;
-      changed_at?: string;
-    } = { vote: voteValue };
-
-    if (persuasionTime) {
-      updateData.persuasion_vote_changed = true;
-      updateData.original_vote =
-        existingVote.original_vote || existingVote.vote;
-      updateData.changed_at = new Date().toISOString();
-    }
-
-    const { data, error } = await supabase
-      .from("votes")
-      .update(updateData)
-      .eq("id", existingVote.id)
-      .select();
+    // RPC関数を使用して安全に投票処理
+    const { data, error } = await supabase.rpc("handle_vote_secure", {
+      p_post_id: postId,
+      p_user_id: userId,
+      p_vote_value: voteValue,
+    });
 
     if (error) throw new Error(error.message);
-    return { action: "updated", data };
+
+    if (!data) {
+      throw new Error("投票処理に失敗しました");
+    }
+
+    // 説得タイム中の追加処理が必要な場合は、別のRPC関数を作成する必要があります
+    // 現在は基本的な投票処理のみ対応
+    return {
+      action: data.action,
+      data: data.data,
+    };
   };
 
   const { mutate } = useMutation({

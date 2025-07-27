@@ -45,12 +45,11 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
         data.map((post: PostType) => post.community_id).filter(Boolean),
       ),
     ];
-    const { data: communities } = await supabase
-      .from("communities")
-      .select("id, name")
-      .in("id", communityIds);
+    const { data: communities } = await supabase.rpc("get_communities_by_ids", {
+      p_community_ids: communityIds,
+    });
 
-    const communityMap = new Map(communities?.map((c) => [c.id, c]) || []);
+    const communityMap = new Map(communities?.map((c: any) => [c.id, c]) || []);
 
     // データを統合（N+1クエリを使わず一括処理）
     const postsWithCommunities: PostType[] = data.map((post: PostType) => ({

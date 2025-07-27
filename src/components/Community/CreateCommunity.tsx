@@ -26,7 +26,12 @@ const communitySchema = z.object({
 type CommunityFormData = z.infer<typeof communitySchema>;
 
 const createCommunity = async (community: CommunityFormData) => {
-  const { data, error } = await supabase.from("communities").insert(community);
+  const { data, error } = await supabase.rpc("create_community_secure", {
+    p_name: community.name,
+    p_description: community.description,
+    p_icon: community.icon,
+  });
+
   if (error) {
     // Postgresのユニーク制約違反エラー（23505）をチェック
     if (error.code === "23505") {

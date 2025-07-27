@@ -24,14 +24,17 @@ const createReply = async (
   if (!userId || !author) {
     throw new Error("コメントするにはログインが必要です");
   }
-  const { error } = await supabase.from("comments").insert({
-    post_id: postId,
-    content: reply,
-    parent_comment_id: parentCommentId || null,
-    author: author,
-    user_id: userId,
+
+  const { data, error } = await supabase.rpc("create_comment_secure", {
+    p_post_id: postId,
+    p_content: reply,
+    p_parent_comment_id: parentCommentId || null,
+    p_author: author,
+    p_user_id: userId,
   });
+
   if (error) throw new Error(error.message);
+  return data;
 };
 
 const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
