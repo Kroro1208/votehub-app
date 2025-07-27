@@ -294,17 +294,19 @@ export const use2FA = () => {
         throw new Error("ユーザーが認証されていません");
       }
 
-      // ユーザーの暗号化された秘密キーを取得
-      const { data: userSettings, error: settingsError } = await supabase
-        .from("user_2fa_settings")
-        .select("secret_key")
-        .eq("user_id", user.id)
-        .eq("is_enabled", true)
-        .single();
+      // セキュアなRPC関数でユーザーの暗号化された秘密キーを取得
+      const { data: secretData, error: settingsError } = await supabase.rpc(
+        "get_2fa_secret_secure",
+        {
+          p_user_id: user.id,
+        },
+      );
 
-      if (settingsError || !userSettings?.secret_key) {
+      if (settingsError || !secretData || secretData.length === 0) {
         throw new Error("2FA設定が見つかりません");
       }
+
+      const userSettings = { secret_key: secretData[0].secret_key };
 
       // 秘密キーを復号化
       const decryptedSecret = decryptSecret(userSettings.secret_key);
@@ -312,11 +314,15 @@ export const use2FA = () => {
       // TOTPコードを検証
       const isValid = verifyTOTPCode(decryptedSecret, code);
 
-      // 2FA試行ログを記録
-      await supabase.rpc("log_2fa_attempt", {
+      // セキュアなRPC関数で2FA試行ログを記録
+      await supabase.rpc("log_2fa_attempt_secure", {
         p_user_id: user.id,
         p_attempt_type: "totp",
         p_success: isValid,
+        p_details: {
+          verification_time: new Date().toISOString(),
+          code_length: code.length,
+        },
       });
 
       if (isValid) {
@@ -329,11 +335,15 @@ export const use2FA = () => {
     } catch (error) {
       console.error("TOTP verification error:", error);
 
-      // 失敗ログを記録
-      await supabase.rpc("log_2fa_attempt", {
+      // セキュアなRPC関数で失敗ログを記録
+      await supabase.rpc("log_2fa_attempt_secure", {
         p_user_id: user?.id,
         p_attempt_type: "totp",
         p_success: false,
+        p_details: {
+          error_message: error instanceof Error ? error.message : String(error),
+          failure_time: new Date().toISOString(),
+        },
       });
 
       toast.error("2FA認証中にエラーが発生しました");
@@ -352,17 +362,19 @@ export const use2FA = () => {
         throw new Error("ユーザーが認証されていません");
       }
 
-      // 暗号化されたバックアップコードを取得
-      const { data: userSettings, error: settingsError } = await supabase
-        .from("user_2fa_settings")
-        .select("backup_codes")
-        .eq("user_id", user.id)
-        .eq("is_enabled", true)
-        .single();
+      // セキュアなRPC関数で暗号化されたバックアップコードを取得
+      const { data: backupData, error: settingsError } = await supabase.rpc(
+        "get_2fa_backup_codes_secure",
+        {
+          p_user_id: user.id,
+        },
+      );
 
-      if (settingsError || !userSettings?.backup_codes) {
+      if (settingsError || !backupData || backupData.length === 0) {
         throw new Error("バックアップコードが見つかりません");
       }
+
+      const userSettings = { backup_codes: backupData[0].backup_codes };
 
       // バックアップコードを復号化
       const decryptedCodes = decryptBackupCodes(userSettings.backup_codes);
@@ -374,11 +386,15 @@ export const use2FA = () => {
       );
 
       if (codeIndex === -1) {
-        // ログを記録
-        await supabase.rpc("log_2fa_attempt", {
+        // セキュアなRPC関数でログを記録
+        await supabase.rpc("log_2fa_attempt_secure", {
           p_user_id: user.id,
           p_attempt_type: "backup_code",
           p_success: false,
+          p_details: {
+            invalid_code_attempt: true,
+            attempt_time: new Date().toISOString(),
+          },
         });
 
         toast.error("無効なバックアップコードです");
@@ -391,24 +407,28 @@ export const use2FA = () => {
       );
       const encryptedUpdatedCodes = encryptBackupCodes(updatedCodes);
 
-      // データベースを更新
-      const { error: updateError } = await supabase
-        .from("user_2fa_settings")
-        .update({
-          backup_codes: encryptedUpdatedCodes,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("user_id", user.id);
+      // セキュアなRPC関数でデータベースを更新
+      const { data: updateResult, error: updateError } = await supabase.rpc(
+        "update_2fa_backup_codes_secure",
+        {
+          p_user_id: user.id,
+          p_backup_codes: encryptedUpdatedCodes,
+        },
+      );
 
-      if (updateError) {
+      if (updateError || !updateResult) {
         throw new Error("バックアップコードの更新に失敗しました");
       }
 
-      // 成功ログを記録
-      await supabase.rpc("log_2fa_attempt", {
+      // セキュアなRPC関数で成功ログを記録
+      await supabase.rpc("log_2fa_attempt_secure", {
         p_user_id: user.id,
         p_attempt_type: "backup_code",
         p_success: true,
+        p_details: {
+          codes_remaining: updatedCodes.length,
+          success_time: new Date().toISOString(),
+        },
       });
 
       toast.success("バックアップコードで認証されました");
@@ -425,11 +445,15 @@ export const use2FA = () => {
     } catch (error) {
       console.error("Backup code verification error:", error);
 
-      // 失敗ログを記録
-      await supabase.rpc("log_2fa_attempt", {
+      // セキュアなRPC関数で失敗ログを記録
+      await supabase.rpc("log_2fa_attempt_secure", {
         p_user_id: user?.id,
         p_attempt_type: "backup_code",
         p_success: false,
+        p_details: {
+          error_message: error instanceof Error ? error.message : String(error),
+          failure_time: new Date().toISOString(),
+        },
       });
 
       toast.error("バックアップコード認証に失敗しました");
