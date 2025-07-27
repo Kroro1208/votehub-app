@@ -117,7 +117,41 @@ export const useHandleVotes = (
       throw new Error(`この派生質問は${targetText}者のみ投票できます`);
     }
 
-    // RPC関数を使用して安全に投票処理
+    // 現在の投票データを取得してhasUserVotedを正しく判定
+    const currentVotes = await getVotes(postId);
+    const currentUserVote = currentVotes?.find(
+      (item) => item.user_id === userId,
+    );
+    const currentHasUserVoted = currentUserVote !== undefined;
+
+    // 説得タイム中の投票変更制限をチェック
+    if (persuasionTime && currentHasUserVoted) {
+      // 既に説得タイム中に投票変更済みかチェック
+      if (currentUserVote?.persuasion_vote_changed === true) {
+        throw new Error("説得タイム中の投票変更は1回までです");
+      }
+
+      // 説得タイム中の投票変更処理を使用
+      const { data, error } = await supabase.rpc(
+        "track_persuasion_vote_change",
+        {
+          p_post_id: postId,
+          p_user_id: userId,
+          p_new_vote: voteValue,
+        },
+      );
+
+      if (error) throw new Error(error.message);
+
+      return {
+        action: "updated",
+        data: data,
+        persuasionChanged: true,
+      };
+    }
+
+    // 通常の投票処理
+
     const { data, error } = await supabase.rpc("handle_vote_secure", {
       p_post_id: postId,
       p_user_id: userId,
@@ -129,9 +163,6 @@ export const useHandleVotes = (
     if (!data) {
       throw new Error("投票処理に失敗しました");
     }
-
-    // 説得タイム中の追加処理が必要な場合は、別のRPC関数を作成する必要があります
-    // 現在は基本的な投票処理のみ対応
     return {
       action: data.action,
       data: data.data,
