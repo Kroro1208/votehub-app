@@ -49,7 +49,9 @@ const PostList = ({ filter, showNested = false }: PostListProps) => {
       p_community_ids: communityIds,
     });
 
-    const communityMap = new Map(communities?.map((c: any) => [c.id, c]) || []);
+    const communityMap = new Map(
+      communities?.map((c: { id: number; name: string }) => [c.id, c]) || [],
+    );
 
     // データを統合（N+1クエリを使わず一括処理）
     const postsWithCommunities: PostType[] = data.map((post: PostType) => ({
