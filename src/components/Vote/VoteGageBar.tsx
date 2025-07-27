@@ -15,7 +15,7 @@ const VoteGageBar = ({
 }: BarProps) => {
   return (
     <div className="mt-4 w-full">
-      <div className="text-sm mb-3">
+      <div className="text-sm mb-3 text-black dark:text-white">
         投票結果: {totalVotes}票 (賛成: {upVotes}票 / 反対: {downVotes}票)
       </div>
 

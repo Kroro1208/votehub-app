@@ -34,18 +34,24 @@ export default function NotificationsPage() {
   const hasMoreNotifications = filteredNotifications.length > visibleCount;
 
   const handleNotificationClick = async (
-    notificationId: number,
-    postId: number | null,
+    notification: NotificationType,
     isRead: boolean,
   ) => {
     // Mark as read if not already read
     if (!isRead) {
-      await markAsRead(notificationId);
+      await markAsRead(notification.id);
     }
 
-    // Navigate to post if postId exists
-    if (postId) {
-      navigate(`/post/${postId}`);
+    // Navigate based on notification type
+    if (
+      notification.type === "nested_post_created" &&
+      notification.nested_post_id
+    ) {
+      // 派生質問の通知の場合は派生質問のページに遷移
+      navigate(`/post/${notification.nested_post_id}`);
+    } else if (notification.post_id) {
+      // その他の通知の場合は元の投稿ページに遷移
+      navigate(`/post/${notification.post_id}`);
     }
   };
 
@@ -199,11 +205,7 @@ export default function NotificationsPage() {
                     : "bg-white hover:bg-slate-50"
                 }`}
                 onClick={() =>
-                  handleNotificationClick(
-                    notification.id,
-                    notification.post_id,
-                    notification.read,
-                  )
+                  handleNotificationClick(notification, notification.read)
                 }
               >
                 <CardContent className="p-3 sm:p-4">
@@ -251,9 +253,12 @@ export default function NotificationsPage() {
                           )}
                         </span>
 
-                        {notification.post_id && (
+                        {(notification.post_id ||
+                          notification.nested_post_id) && (
                           <span className="text-xs text-blue-500 hover:text-blue-600 font-medium">
-                            投稿を見る →
+                            {notification.type === "nested_post_created"
+                              ? "派生質問を見る →"
+                              : "投稿を見る →"}
                           </span>
                         )}
                       </div>

@@ -128,6 +128,7 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
           {!isDeadlinePassed() ? (
             <Button
               type="button"
+              variant="outline"
               onClick={() => setShowReply((prev) => !prev)}
               className="flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-transparent border-none p-0 h-auto"
             >

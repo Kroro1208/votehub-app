@@ -73,9 +73,8 @@ const fetchUserVoteForPost = async (
 ): Promise<number | null> => {
   if (!userId) return null;
 
-  const { data, error } = await supabase.rpc("get_user_vote_for_post", {
+  const { data, error } = await supabase.rpc("get_votes_for_post", {
     p_post_id: postId,
-    p_user_id: userId,
   });
 
   if (error) {
@@ -83,7 +82,11 @@ const fetchUserVoteForPost = async (
     return null;
   }
 
-  return data && data.length > 0 ? data[0].vote_type : null;
+  // ユーザーの投票を検索
+  const userVote = data?.find(
+    (vote: { user_id: string; vote: number }) => vote.user_id === userId,
+  );
+  return userVote ? userVote.vote : null;
 };
 
 const fetchCommentById = async (
@@ -170,13 +173,23 @@ const PostDetail = ({ postId }: Props) => {
   });
 
   // ユーザーの親投稿への投票状況を取得（派生質問の場合のみ）
-  const { data: userVoteChoice } = useQuery<number | null, Error>({
+  const { data: userVoteOnParent } = useQuery<number | null, Error>({
     queryKey: ["userVote", data?.parent_post_id, user?.id],
     queryFn: () => {
       if (!data?.parent_post_id) return null;
       return fetchUserVoteForPost(data.parent_post_id, user?.id);
     },
     enabled: !!user?.id && !!data?.parent_post_id,
+  });
+
+  // ユーザーの現在の投稿への投票状況を取得（派生質問表示用）
+  const { data: userVoteChoice } = useQuery<number | null, Error>({
+    queryKey: ["userVote", postId, user?.id],
+    queryFn: () => {
+      if (!postId || !user?.id) return null;
+      return fetchUserVoteForPost(postId, user?.id);
+    },
+    enabled: !!user?.id && !!postId,
   });
 
   // 投稿者かどうかをチェック
@@ -453,7 +466,7 @@ const PostDetail = ({ postId }: Props) => {
         voteDeadline={data.vote_deadline}
         postTitle={data.title}
         targetVoteChoice={data.target_vote_choice}
-        userVoteOnParent={userVoteChoice}
+        userVoteOnParent={userVoteOnParent}
       />
       <CommentSection postId={postId} voteDeadline={data.vote_deadline} />
 

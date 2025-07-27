@@ -14,16 +14,20 @@ export default function NotificationDropdown() {
   const { notifications, unreadCount, markAsRead, markAllAsRead } =
     useNotifications();
 
-  const handleNotificationClick = async (
-    notificationId: number,
-    postId: number | null,
-  ) => {
-    await markAsRead(notificationId);
+  const handleNotificationClick = async (notification: NotificationType) => {
+    await markAsRead(notification.id);
     setIsOpen(false);
 
-    // 投稿ページにリダイレクト
-    if (postId) {
-      navigate(`/post/${postId}`);
+    // 通知タイプに基づいて遷移先を決定
+    if (
+      notification.type === "nested_post_created" &&
+      notification.nested_post_id
+    ) {
+      // 派生質問の通知の場合は派生質問のページに遷移
+      navigate(`/post/${notification.nested_post_id}`);
+    } else if (notification.post_id) {
+      // その他の通知の場合は元の投稿ページに遷移
+      navigate(`/post/${notification.post_id}`);
     }
   };
 
@@ -114,12 +118,7 @@ export default function NotificationDropdown() {
                     className={`p-3 border-b border-gray-800 cursor-pointer hover:bg-gray-800 transition-colors ${
                       !notification.read ? "bg-gray-850" : ""
                     }`}
-                    onClick={() =>
-                      handleNotificationClick(
-                        notification.id,
-                        notification.post_id,
-                      )
-                    }
+                    onClick={() => handleNotificationClick(notification)}
                   >
                     <div className="flex items-start space-x-3">
                       {/* 通知タイプアイコン */}
