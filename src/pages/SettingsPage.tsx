@@ -28,6 +28,7 @@ import {
 } from "../components/ui/card.tsx";
 import { useLanguage } from "../hooks/useLanguage.ts";
 import { Input } from "../components/ui/input.tsx";
+import { SupabaseMFASettings } from "../components/MFA/SupabaseMFASettings.tsx";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -381,6 +382,9 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Security Settings */}
+        <SupabaseMFASettings />
 
         {/* Payment Settings */}
         <Card className="dark:bg-gray-800 dark:border-gray-700">
