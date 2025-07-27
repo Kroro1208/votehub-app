@@ -33,13 +33,11 @@ export const useUserEmpathyPoints = (userId?: string) => {
           console.error("ユーザーポイント取得エラー:", pointsError);
         }
 
-        // 共感ポイントの合計を取得
+        // 共感ポイントの合計を取得（RPC関数使用）
         const { data: empathyTransactions, error: empathyError } =
-          await supabase
-            .from("point_transactions")
-            .select("points")
-            .eq("user_id", userId)
-            .eq("transaction_type", "empathy");
+          await supabase.rpc("get_user_empathy_points", {
+            p_user_id: userId,
+          });
 
         if (empathyError) {
           console.error("共感ポイント取得エラー:", empathyError);

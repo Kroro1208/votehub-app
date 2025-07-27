@@ -24,17 +24,11 @@ interface CommentVote {
   vote: number;
 }
 
-interface VoteResult {
-  action: "deleted" | "updated" | "inserted";
-  data: CommentVote | CommentVote[] | null;
-}
-
-// コメントに対しての投票取得
+// コメントに対しての投票取得（RPC関数使用）
 const getCommentVotes = async (commentId: number): Promise<CommentVote[]> => {
-  const { data, error } = await supabase
-    .from("comment_votes")
-    .select("*")
-    .eq("comment_id", commentId);
+  const { data, error } = await supabase.rpc("get_comment_votes", {
+    p_comment_id: commentId,
+  });
 
   if (error) throw new Error(error.message);
   return data as CommentVote[];
@@ -59,7 +53,7 @@ const CommentVotes = ({ commentId, postId, authorId }: VoteProps) => {
     refetchInterval: false,
   });
 
-  // リアルタイム更新のためのSubscription
+  // リアルタイム更新のため
   useEffect(() => {
     const channel = supabase
       .channel(`comment_votes_${commentId}`)
@@ -88,7 +82,12 @@ const CommentVotes = ({ commentId, postId, authorId }: VoteProps) => {
   const upVotes = votes?.filter((item) => item.vote === 1).length || 0;
   const downVotes = votes?.filter((item) => item.vote === -1).length || 0;
   const totalReactions = upVotes + downVotes; // ❤️と💀の合計
-  const empathyPoints = totalReactions * 0.5; // 共感ポイント計算（両方とも加算）
+
+  // 共感ポイント計算（自分の投票は除外）
+  const otherUserVotes =
+    votes?.filter((item) => item.user_id !== authorId) || [];
+  const otherUserReactions = otherUserVotes.length;
+  const empathyPoints = otherUserReactions * 0.5;
 
   // totalVotesが変更されたらJotaiのstateも更新
   useEffect(() => {
@@ -114,59 +113,24 @@ const CommentVotes = ({ commentId, postId, authorId }: VoteProps) => {
 
   const userVote = votes?.find((item) => item.user_id === user?.id)?.vote;
 
-  // vote関数を最適化: 処理結果を返す(useMutation用)
+  // vote関数をRPC関数で置き換え
   const vote = async (voteValue: number, commentId: number, userId: string) => {
-    // 処理結果を保持する変数
-    let result: VoteResult;
+    const { data, error } = await supabase.rpc("handle_comment_vote", {
+      p_comment_id: commentId,
+      p_user_id: userId,
+      p_vote_value: voteValue,
+    });
 
-    // まず削除を試みる（既存投票がある場合）
-    const { data: deletedData, error: deleteError } = await supabase
-      .from("comment_votes")
-      .delete()
-      .eq("comment_id", commentId)
-      .eq("user_id", userId)
-      .eq("vote", voteValue)
-      .select();
+    if (error) throw new Error(error.message);
 
-    // 削除エラーが404以外の場合のみエラーとして処理
-    if (deleteError && deleteError.code !== "PGRST116") {
-      throw new Error(deleteError.message);
+    if (!data) {
+      throw new Error("投票処理に失敗しました");
     }
 
-    // 削除が成功した場合（同じボタンを2回押した = 取り消し）
-    if (deletedData && deletedData.length > 0) {
-      result = { action: "deleted", data: deletedData };
-      return result;
-    }
-
-    // 削除されなかった場合、他の投票があるかチェック
-    const { data: existingVote } = await supabase
-      .from("comment_votes")
-      .select("*")
-      .eq("comment_id", commentId)
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (existingVote) {
-      // 異なる投票があった場合は更新
-      const { data, error } = await supabase
-        .from("comment_votes")
-        .update({ vote: voteValue })
-        .eq("id", existingVote.id)
-        .select();
-      if (error) throw new Error(error.message);
-      result = { action: "updated", data };
-    } else {
-      // 投票がない場合は新規作成
-      const { data, error } = await supabase
-        .from("comment_votes")
-        .insert({ comment_id: commentId, user_id: userId, vote: voteValue })
-        .select();
-      if (error) throw new Error(error.message);
-      result = { action: "inserted", data };
-    }
-
-    return result;
+    return {
+      action: data.action as "deleted" | "updated" | "inserted",
+      data: data.data,
+    };
   };
 
   const { mutate } = useMutation({
@@ -289,8 +253,8 @@ const CommentVotes = ({ commentId, postId, authorId }: VoteProps) => {
               ${!user ? "cursor-not-allowed opacity-50" : ""}
               ${
                 userVote === 1
-                  ? "bg-green-500 dark:bg-green-500 text-white shadow-lg scale-105"
-                  : "text-gray-300 hover:bg-green-600 hover:text-white"
+                  ? "bg-green-500 dark:bg-green-500 text-white shadow-lg scale-105 border-green-500"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-green-600 hover:text-white border-gray-300 dark:border-gray-600"
               }`}
           title={!user ? "ログインが必要です" : "共感を示す"}
         >
@@ -308,8 +272,8 @@ const CommentVotes = ({ commentId, postId, authorId }: VoteProps) => {
               ${!user ? "cursor-not-allowed opacity-50" : ""}
               ${
                 userVote === -1
-                  ? "bg-red-600 dark:bg-red-500 text-white shadow-lg scale-105"
-                  : "text-black hover:bg-red-600 hover:text-white"
+                  ? "bg-red-600 dark:bg-red-500 text-white shadow-lg scale-105 border-red-600"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-red-600 hover:text-white border-gray-300 dark:border-gray-600"
               }`}
           title={!user ? "ログインが必要です" : "反対意見を示す"}
         >
@@ -319,7 +283,7 @@ const CommentVotes = ({ commentId, postId, authorId }: VoteProps) => {
 
         {/* 共感ポイント表示 - コメント主のみに表示 */}
         {totalReactions > 0 && authorId === user?.id && (
-          <div className="px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800">
+          <div className="px-2 py-1 rounded-md text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
             +{empathyPoints}pt
           </div>
         )}
