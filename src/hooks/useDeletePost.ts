@@ -9,16 +9,6 @@ interface DeletePostData {
 
 const deletePost = async ({ postId, imageUrl }: DeletePostData) => {
   try {
-    const { data: postCheck, error: checkError } = await supabase
-      .from("posts")
-      .select("id, user_id")
-      .eq("id", postId)
-      .single();
-
-    if (checkError) {
-      throw new Error(`投稿が見つかりません: ${checkError.message}`);
-    }
-
     const {
       data: { user },
       error: userError,
@@ -28,44 +18,31 @@ const deletePost = async ({ postId, imageUrl }: DeletePostData) => {
       throw new Error("ユーザー認証に失敗しました");
     }
 
-    if (postCheck.user_id !== user.id) {
-      throw new Error("この投稿を削除する権限がありません");
+    // セキュアなRPC関数で投稿削除を実行
+    const { data: deleteResult, error: deleteError } = await supabase.rpc(
+      "delete_user_post_secure",
+      {
+        p_post_id: postId,
+        p_user_id: user.id,
+      },
+    );
+
+    if (deleteError) {
+      throw new Error(`投稿の削除に失敗しました: ${deleteError.message}`);
     }
 
-    // point_transactionsを削除（CASCADE対象外のため）
-    await supabase
-      .from("point_transactions")
-      .delete()
-      .eq("reference_id", postId)
-      .eq("reference_table", "posts");
-
-    // 投稿を削除（CASCADE DELETEにより関連データも自動削除）
-    const { error: deleteError, count } = await supabase
-      .from("posts")
-      .delete({ count: "exact" })
-      .eq("id", postId)
-      .eq("user_id", user.id);
-
-    if (deleteError || count === 0) {
-      // RPC関数を試行
-      const { data: rpcResult, error: rpcError } = await supabase.rpc(
-        "delete_user_post",
-        {
-          post_id: postId,
-          user_id: user.id,
-        },
-      );
-
-      if (rpcError) {
-        throw new Error(`投稿の削除に失敗しました: ${rpcError.message}`);
-      }
-
-      if (!rpcResult?.success) {
-        throw new Error(
-          `投稿の削除に失敗しました: ${rpcResult?.error || "削除処理が失敗しました"}`,
-        );
-      }
+    if (
+      !deleteResult ||
+      deleteResult.length === 0 ||
+      !deleteResult[0].success
+    ) {
+      const errorMessage =
+        deleteResult?.[0]?.message || "削除処理が失敗しました";
+      throw new Error(`投稿の削除に失敗しました: ${errorMessage}`);
     }
+
+    // RPC関数から返された画像URLを使用（imageUrlより正確）
+    const resultImageUrl = deleteResult[0].image_url || imageUrl;
 
     // 投稿削除後、ユーザーの共感ポイントを再計算
     try {
@@ -78,8 +55,8 @@ const deletePost = async ({ postId, imageUrl }: DeletePostData) => {
     }
 
     // 画像を削除
-    if (imageUrl) {
-      const urlParts = imageUrl.split("/");
+    if (resultImageUrl) {
+      const urlParts = resultImageUrl.split("/");
       const fileName = urlParts[urlParts.length - 1];
       const filePath = fileName.split("?")[0];
 

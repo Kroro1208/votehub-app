@@ -4,6 +4,28 @@ import { useAuth } from "./useAuth.ts";
 import { toast } from "react-toastify";
 import type { BookmarkedPost } from "../types/post.ts";
 
+// RPC関数の戻り値型定義
+interface BookmarkIdResult {
+  post_id: number;
+}
+
+interface PostWithCounts {
+  id: number;
+  title: string;
+  content: string;
+  created_at: string;
+  image_url: string | null;
+  avatar_url: string | null;
+  community_id: number | null;
+  vote_deadline: string | null;
+  user_id: string;
+  parent_post_id: number | null;
+  nest_level: number | null;
+  target_vote_choice: number | null;
+  vote_count: number | null;
+  comment_count: number | null;
+}
+
 export const useBookmarks = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -18,42 +40,33 @@ export const useBookmarks = () => {
     queryFn: async () => {
       if (!user) throw new Error("ユーザーが存在しません");
 
-      const { data, error } = await supabase
-        .from("bookmarks")
-        .select(
-          `
-          post_id,
-          created_at,
-          posts (
-            id,
-            created_at,
-            title,
-            content,
-            image_url,
-            avatar_url,
-            community_id,
-            vote_deadline,
-            user_id,
-            vote_count,
-            tag_id,
-            parent_post_id,
-            nest_level,
-            target_vote_choice
-          )
-        `,
-        )
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+      // ブックマークした投稿IDを取得
+      const { data: bookmarkIds, error: bookmarkError } = await supabase.rpc(
+        "get_user_bookmark_post_ids",
+        {
+          p_user_id: user.id,
+        },
+      );
 
-      if (error) throw new Error(error.message);
+      if (bookmarkError) throw new Error(bookmarkError.message);
 
-      // データを適切な形式に変換
-      return (
-        data?.map((bookmark) => {
-          const post = Array.isArray(bookmark.posts)
-            ? bookmark.posts[0]
-            : bookmark.posts;
-          return {
+      if (!bookmarkIds || bookmarkIds.length === 0) {
+        return [];
+      }
+
+      // 投稿の詳細情報を取得
+      const postIds = bookmarkIds.map((item: BookmarkIdResult) => item.post_id);
+      const { data: posts, error: postsError } = await supabase.rpc(
+        "get_posts_with_counts",
+      );
+
+      if (postsError) throw new Error(postsError.message);
+
+      // ブックマークした投稿のみをフィルタリング
+      const bookmarkedPosts =
+        posts
+          ?.filter((post: PostWithCounts) => postIds.includes(post.id))
+          .map((post: PostWithCounts) => ({
             id: post.id,
             title: post.title,
             content: post.content,
@@ -64,15 +77,19 @@ export const useBookmarks = () => {
             community_id: post.community_id,
             user_id: post.user_id,
             parent_post_id: post.parent_post_id,
-            nest_level: post.nest_level,
+            nest_level: post.nest_level || 0,
             target_vote_choice: post.target_vote_choice,
-            vote_count: post.vote_count,
-            bookmark_created_at: bookmark.created_at,
-            comment_count: 0,
+            vote_count: post.vote_count || 0,
+            bookmark_created_at: new Date().toISOString(), // 簡略化
+            comment_count: post.comment_count || 0,
             popularity_score: 0,
             communities: null,
-          };
-        }) || []
+          })) || [];
+
+      // ブックマーク順序を保持（投稿ID順でソート）
+      return bookmarkedPosts.sort(
+        (a: BookmarkedPost, b: BookmarkedPost) =>
+          postIds.indexOf(a.id) - postIds.indexOf(b.id),
       );
     },
     enabled: !!user,
@@ -95,22 +112,24 @@ export const useBookmarks = () => {
       const isCurrentlyBookmarked = isBookmarked(postId);
 
       if (isCurrentlyBookmarked) {
-        // ブックマーク削除
-        const { error } = await supabase
-          .from("bookmarks")
-          .delete()
-          .eq("user_id", user.id)
-          .eq("post_id", postId);
+        // シンプルなRPC関数でブックマーク削除
+        const { error } = await supabase.rpc("remove_bookmark_simple", {
+          p_user_id: user.id,
+          p_post_id: postId,
+        });
 
         if (error) throw new Error(error.message);
+
         return { action: "removed", postId };
       } else {
-        // ブックマーク追加
-        const { error } = await supabase
-          .from("bookmarks")
-          .insert({ user_id: user.id, post_id: postId });
+        // シンプルなRPC関数でブックマーク追加
+        const { error } = await supabase.rpc("add_bookmark_simple", {
+          p_user_id: user.id,
+          p_post_id: postId,
+        });
 
         if (error) throw new Error(error.message);
+
         return { action: "added", postId };
       }
     },

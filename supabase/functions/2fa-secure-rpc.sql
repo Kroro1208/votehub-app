@@ -18,7 +18,7 @@ BEGIN
   END IF;
 
   -- 自分の2FA設定のみアクセス可能
-  IF auth.uid()::text != p_user_id::text THEN
+  IF auth.uid() != p_user_id THEN
     RAISE EXCEPTION 'Access denied - can only access own 2FA settings';
   END IF;
 
@@ -52,7 +52,7 @@ BEGIN
   END IF;
 
   -- 自分の2FA設定のみアクセス可能
-  IF auth.uid()::text != p_user_id::text THEN
+  IF auth.uid() != p_user_id THEN
     RAISE EXCEPTION 'Access denied - can only access own 2FA settings';
   END IF;
 
@@ -89,7 +89,7 @@ BEGIN
   END IF;
 
   -- 自分の2FA設定のみ更新可能
-  IF auth.uid()::text != p_user_id::text THEN
+  IF auth.uid() != p_user_id THEN
     RAISE EXCEPTION 'Access denied - can only update own 2FA settings';
   END IF;
 
