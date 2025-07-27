@@ -8,6 +8,7 @@ import { useDeletePost } from "../../hooks/useDeletePost.ts";
 import BookmarkButton from "./BookmarkButton.tsx";
 import VoteTickets from "../Vote/VoteTickets.tsx";
 import { useState } from "react";
+import { Button } from "../ui/button.tsx";
 
 interface PostItemType {
   post: PostType;
@@ -215,29 +216,29 @@ const PostItem = ({ post }: PostItemType) => {
               {isPostOwner && (
                 <div className="relative">
                   {!showDeleteConfirm ? (
-                    <button
+                    <Button
                       onClick={handleDeleteClick}
                       disabled={isDeleting}
                       className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
                     >
                       <Trash2 size={14} />
-                    </button>
+                    </Button>
                   ) : (
                     <div className="flex items-center space-x-1 bg-red-50 dark:bg-red-900/20 rounded-lg p-1">
-                      <button
+                      <Button
                         onClick={handleDeleteConfirm}
                         disabled={isDeleting}
                         className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
                       >
                         削除
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={handleDeleteCancel}
                         disabled={isDeleting}
                         className="px-2 py-1 text-xs text-gray-600 hover:text-gray-800 rounded"
                       >
                         ×
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>

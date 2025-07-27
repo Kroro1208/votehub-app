@@ -5,6 +5,7 @@ import { supabase } from "../supabase-client.ts";
 import { PostType } from "../components/Post/PostList.tsx";
 import PostItem from "../components/Post/PostItem.tsx";
 import { ArrowLeft, Tag } from "lucide-react";
+import { Button } from "../components/ui/button.tsx";
 
 interface TagInfo {
   id: number;
@@ -146,7 +147,7 @@ const TagPostsPage = () => {
         {/* ヘッダー */}
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 dark:border-gray-700/50 p-6 mb-6">
           <div className="flex items-center gap-4 mb-4">
-            <button
+            <Button
               onClick={() => navigate(-1)}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               title="戻る"
@@ -155,7 +156,7 @@ const TagPostsPage = () => {
                 size={20}
                 className="text-gray-600 dark:text-gray-300"
               />
-            </button>
+            </Button>
             <div className="flex items-center gap-3">
               <div className="p-3 bg-gradient-to-r from-orange-500 to-red-500 rounded-full">
                 <Tag className="text-white" size={24} />
@@ -201,7 +202,7 @@ const TagPostsPage = () => {
         {/* ソートオプション */}
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 dark:border-gray-700/50 p-4 mb-6">
           <div className="flex gap-2">
-            <button
+            <Button
               onClick={() => setSortBy("newest")}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 sortBy === "newest"
@@ -210,8 +211,8 @@ const TagPostsPage = () => {
               }`}
             >
               新着順
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setSortBy("popular")}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 sortBy === "popular"
@@ -220,8 +221,8 @@ const TagPostsPage = () => {
               }`}
             >
               人気順
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setSortBy("deadline")}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 sortBy === "deadline"
@@ -230,7 +231,7 @@ const TagPostsPage = () => {
               }`}
             >
               期限順
-            </button>
+            </Button>
           </div>
         </div>
 

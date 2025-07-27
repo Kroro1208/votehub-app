@@ -13,10 +13,13 @@ import { FaPeopleLine } from "react-icons/fa6";
 import { IoPricetagsOutline } from "react-icons/io5";
 import { TbFileDescription } from "react-icons/tb";
 import { useLanguage } from "../../hooks/useLanguage.ts";
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import { useState, useRef, useEffect } from "react";
 
 const communitySchema = z.object({
   name: z.string().min(1, "スペース名は必須です"),
   description: z.string().min(1, "スペースの説明は必須です"),
+  icon: z.string().min(1, "アイコンを選択してください"),
 });
 
 type CommunityFormData = z.infer<typeof communitySchema>;
@@ -41,6 +44,8 @@ const CreateCommunity = () => {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CommunityFormData>({
     resolver: zodResolver(communitySchema),
@@ -48,8 +53,141 @@ const CreateCommunity = () => {
     defaultValues: {
       name: "",
       description: "",
+      icon: "🏛️",
     },
   });
+
+  const selectedIcon = watch("icon");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredEmojis, setFilteredEmojis] = useState<string[]>([]);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+
+  // 最適化された日本語キーワードマッピング（50の基本キーワード）
+  const japaneseEmojiMap: Record<string, string[]> = {
+    // 基本感情
+    笑顔: ["😊", "😀", "😁", "😄", "😃", "🙂"],
+    笑: ["😂", "🤣", "😆"],
+    泣: ["😢", "😭", "🥺"],
+    怒: ["😠", "😡", "💢"],
+    驚: ["😲", "😱", "😯"],
+    愛: ["😍", "🥰", "❤️", "💕"],
+
+    // 基本動物
+    猫: ["🐱", "🐈", "😸"],
+    犬: ["🐶", "🐕"],
+    鳥: ["🐦", "🐤", "🐣"],
+    魚: ["🐟", "🐠", "🐡"],
+    ロボット: ["🤖"],
+
+    // 基本食べ物
+    食: ["🍎", "🍕", "🍔", "🍜"],
+    りんご: ["🍎"],
+    ラーメン: ["🍜"],
+    寿司: ["🍣"],
+    コーヒー: ["☕"],
+
+    // 乗り物
+    車: ["🚗", "🚙"],
+    電車: ["🚄", "🚅"],
+    飛行機: ["✈️"],
+
+    // 場所
+    家: ["🏠", "🏡"],
+    学校: ["🏫"],
+    病院: ["🏥"],
+
+    // 職業
+    医者: ["👨‍⚕️", "👩‍⚕️"],
+    先生: ["👨‍🏫", "👩‍🏫"],
+    エンジニア: ["👨‍💻", "👩‍💻"],
+
+    // 物・道具
+    本: ["📚", "📖"],
+    電話: ["📞", "📱"],
+    パソコン: ["💻"],
+    時計: ["⏰", "⌚"],
+
+    // 自然
+    太陽: ["☀️", "🌞"],
+    月: ["🌙", "🌕"],
+    星: ["⭐", "🌟"],
+    雨: ["🌧️", "☔"],
+    花: ["🌸", "🌺", "🌻"],
+
+    // 色
+    赤: ["🔴", "❤️"],
+    青: ["🔵", "💙"],
+    緑: ["🟢", "💚"],
+    黄: ["🟡", "💛"],
+
+    // 記号
+    ハート: ["❤️", "💕", "💖", "💙", "💚", "💛", "💜"],
+    火: ["🔥"],
+    水: ["💧", "🌊"],
+    チェック: ["✅"],
+    バツ: ["❌"],
+
+    // その他
+    お金: ["💰", "💵"],
+    プレゼント: ["🎁"],
+    誕生日: ["🎂", "🎉"],
+  };
+
+  // 最適化された日本語検索フィルター
+  const searchEmojis = (term: string) => {
+    if (!term.trim()) {
+      setFilteredEmojis([]);
+      return;
+    }
+
+    const results = new Set<string>();
+
+    // 完全一致を優先
+    if (japaneseEmojiMap[term]) {
+      japaneseEmojiMap[term].forEach((emoji) => results.add(emoji));
+    }
+
+    // 部分一致（文字が含まれる場合）
+    Object.entries(japaneseEmojiMap).forEach(([keyword, emojis]) => {
+      if (keyword.includes(term)) {
+        emojis.forEach((emoji) => results.add(emoji));
+      }
+    });
+
+    setFilteredEmojis(Array.from(results).slice(0, 24)); // 表示数を制限
+  };
+
+  useEffect(() => {
+    searchEmojis(searchTerm);
+  }, [searchTerm]);
+
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    setValue("icon", emojiData.emoji);
+    setShowEmojiPicker(false);
+  };
+
+  // モーダル表示時のスクロール制御とクリック外で閉じる
+  useEffect(() => {
+    if (showEmojiPicker) {
+      // ページスクロールを無効化
+      document.body.style.overflow = "hidden";
+
+      // ESCキーで閉じる
+      const handleEscKey = (event: KeyboardEvent) => {
+        if (event.key === "Escape") {
+          setShowEmojiPicker(false);
+        }
+      };
+
+      document.addEventListener("keydown", handleEscKey);
+
+      return () => {
+        document.body.style.overflow = "unset";
+        document.removeEventListener("keydown", handleEscKey);
+      };
+    }
+  }, [showEmojiPicker]);
 
   const { mutate, isError, isPending } = useMutation({
     mutationFn: createCommunity,
@@ -86,6 +224,7 @@ const CreateCommunity = () => {
         {/* フォーム */}
         <div className="bg-white dark:bg-dark-surface rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-slate-700">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <Input type="hidden" {...register("icon")} />
             {/* スペース名 */}
             <div className="space-y-2">
               <Label
@@ -120,6 +259,174 @@ const CreateCommunity = () => {
                     />
                   </svg>
                   <p className="text-sm text-red-600">{errors.name.message}</p>
+                </div>
+              )}
+            </div>
+
+            {/* アイコン選択 */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="icon"
+                className="text-sm font-semibold text-gray-700 dark:text-dark-text flex items-center"
+              >
+                <span className="text-2xl mr-2">{selectedIcon}</span>
+                スペースアイコン
+              </Label>
+              <div className="relative">
+                <Button
+                  type="button"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  className="w-full p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors flex items-center justify-between"
+                >
+                  <div className="flex items-center space-x-3">
+                    <span className="text-3xl">{selectedIcon}</span>
+                    <span className="text-gray-700 dark:text-gray-300">
+                      絵文字を選択してください
+                    </span>
+                  </div>
+                  <svg
+                    className={`w-5 h-5 text-gray-400 transition-transform ${showEmojiPicker ? "rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </Button>
+              </div>
+
+              {/* EmojiPicker Modal */}
+              {showEmojiPicker && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                  {/* Background Overlay */}
+                  <div
+                    className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                    onClick={() => setShowEmojiPicker(false)}
+                  />
+
+                  {/* Modal Content */}
+                  <div
+                    ref={emojiPickerRef}
+                    className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-600 max-w-sm w-full mx-4"
+                  >
+                    {/* Modal Header */}
+                    <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-600">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        絵文字を選択
+                      </h3>
+                      <Button
+                        type="button"
+                        onClick={() => setShowEmojiPicker(false)}
+                        className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </Button>
+                    </div>
+
+                    {/* Japanese Search */}
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-600">
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          placeholder="日本語で検索 (例: ロボット, 笑顔)"
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <svg
+                          className="absolute right-3 top-2.5 w-5 h-5 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                          />
+                        </svg>
+                      </div>
+
+                      {/* Search Results */}
+                      {searchTerm && (
+                        <div className="mt-3">
+                          {filteredEmojis.length > 0 ? (
+                            <div>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                検索結果: {filteredEmojis.length}個
+                              </p>
+                              <div className="grid grid-cols-6 gap-2 max-h-40 overflow-y-auto">
+                                {filteredEmojis.map((emoji, index) => (
+                                  <Button
+                                    key={index}
+                                    type="button"
+                                    onClick={() => {
+                                      setValue("icon", emoji);
+                                      setShowEmojiPicker(false);
+                                      setSearchTerm("");
+                                    }}
+                                    className="w-8 h-8 flex items-center justify-center text-xl hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition-colors"
+                                  >
+                                    {emoji}
+                                  </Button>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                              「{searchTerm}」に関連する絵文字が見つかりません
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* EmojiPicker Content */}
+                    <div className="p-2">
+                      <EmojiPicker
+                        onEmojiClick={handleEmojiClick}
+                        width="100%"
+                        height={300}
+                        searchDisabled={true}
+                        skinTonesDisabled={true}
+                        previewConfig={{ showPreview: false }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+              {errors.icon && (
+                <div className="flex items-center mt-2">
+                  <svg
+                    className="h-4 w-4 text-red-500 mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <p className="text-sm text-red-600">{errors.icon.message}</p>
                 </div>
               )}
             </div>

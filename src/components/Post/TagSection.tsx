@@ -156,7 +156,7 @@ const TagSection = ({
             </div>
             <div className="flex flex-wrap gap-2">
               {similarTags.map((tag) => (
-                <button
+                <Button
                   key={tag.id}
                   type="button"
                   onClick={() => onSelectSimilarTag(tag)}
@@ -165,7 +165,7 @@ const TagSection = ({
                   <span className="text-yellow-700 dark:text-yellow-300">
                     #{tag.name}
                   </span>
-                </button>
+                </Button>
               ))}
             </div>
             <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2">
@@ -191,7 +191,7 @@ const TagSection = ({
           </div>
           <div className="flex flex-wrap gap-2">
             {relatedTags.map((tag) => (
-              <button
+              <Button
                 key={tag.id}
                 type="button"
                 onClick={() => setValue("tag_id", tag.id)}
@@ -203,7 +203,7 @@ const TagSection = ({
                 <span className="text-blue-500 dark:text-blue-400 text-[10px]">
                   ({Math.round(tag.relationScore * 100)}%)
                 </span>
-              </button>
+              </Button>
             ))}
           </div>
           <p className="text-xs text-blue-600 dark:text-blue-400">

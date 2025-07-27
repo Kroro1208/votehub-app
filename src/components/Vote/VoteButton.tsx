@@ -138,13 +138,6 @@ const VoteButton = ({
 
   return (
     <div className="flex flex-col gap-3">
-      {/* 投票期限が過ぎている場合の表示 */}
-      {votingExpired && (
-        <div className="w-full text-center py-3 px-4 bg-gray-300 text-gray-600 rounded-lg">
-          <span className="font-semibold">投票期限が終了しました</span>
-        </div>
-      )}
-
       {/* ログインしていない場合のログインボタン表示 */}
       {!user && !votingExpired && (
         <div className="w-full text-center py-6 px-4 bg-blue-50 border border-blue-200 rounded-lg">

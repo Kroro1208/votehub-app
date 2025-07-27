@@ -20,6 +20,7 @@ import VoteDeadline from "./VoteDeadline.tsx";
 import BookmarkButton from "./BookmarkButton.tsx";
 import { isPersuasionTime } from "../../utils/formatTime.tsx";
 import { AIAnalysisSection } from "../AI/AIAnalysisSection.tsx";
+import { Button } from "../ui/button.tsx";
 
 interface Props {
   postId: number;
@@ -357,33 +358,33 @@ const PostDetail = ({ postId }: Props) => {
           {isPostOwner && (
             <div className="relative">
               {!showDeleteConfirm ? (
-                <button
+                <Button
                   onClick={handleDeleteClick}
                   disabled={isDeleting}
                   className="p-3 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50 border border-red-200"
                   title="投稿を削除"
                 >
                   <Trash2 size={20} />
-                </button>
+                </Button>
               ) : (
                 <div className="flex items-center space-x-2 bg-white border border-red-200 rounded-lg p-2">
                   <span className="text-sm text-red-600">
                     投稿を削除しますか？
                   </span>
-                  <button
+                  <Button
                     onClick={handleDeleteConfirm}
                     disabled={isDeleting}
                     className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
                   >
                     {isDeleting ? "削除中..." : "削除"}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={handleDeleteCancel}
                     disabled={isDeleting}
                     className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 rounded border border-gray-300"
                   >
                     キャンセル
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>

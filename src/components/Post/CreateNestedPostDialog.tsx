@@ -31,7 +31,7 @@ const CreateNestedPostDialog = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
             <MessageSquarePlus className="h-5 w-5" />
-            派生投稿を作成
+            派生質問を作成
           </DialogTitle>
           <DialogDescription className="text-gray-600">
             元の投稿から派生した新しい質問を作成します

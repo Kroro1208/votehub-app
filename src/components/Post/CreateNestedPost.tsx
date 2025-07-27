@@ -227,7 +227,7 @@ const CreateNestedPost = ({
                 <div className="p-2 bg-violet-100 rounded-lg">
                   <MessageSquarePlus className="h-6 w-6 text-violet-600" />
                 </div>
-                派生投稿を作成
+                派生質問を作成
               </CardTitle>
               <Button variant="ghost" size="sm" onClick={onCancel}>
                 <X className="h-4 w-4" />
@@ -536,7 +536,7 @@ const CreateNestedPost = ({
               ) : (
                 <div className="flex items-center gap-3">
                   <Upload className="h-5 w-5" />
-                  <span>派生投稿を作成</span>
+                  <span>派生質問を作成</span>
                 </div>
               )}
             </Button>

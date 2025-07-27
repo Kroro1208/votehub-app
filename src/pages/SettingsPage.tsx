@@ -27,6 +27,7 @@ import {
   CardTitle,
 } from "../components/ui/card.tsx";
 import { useLanguage } from "../hooks/useLanguage.ts";
+import { Input } from "../components/ui/input.tsx";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -200,7 +201,7 @@ export default function SettingsPage() {
                     )}
                     <label className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1 cursor-pointer hover:bg-blue-600 transition-colors">
                       <Camera className="w-3 h-3 text-white" />
-                      <input
+                      <Input
                         type="file"
                         accept="image/*"
                         onChange={handleAvatarUpload}
@@ -218,7 +219,7 @@ export default function SettingsPage() {
                   <label className="block text-sm font-medium text-slate-700 dark:text-gray-200 mb-1">
                     表示名
                   </label>
-                  <input
+                  <Input
                     type="text"
                     value={profileData.fullName}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -293,7 +294,7 @@ export default function SettingsPage() {
               </p>
               <div className="space-y-2">
                 <label className="flex items-center space-x-3 cursor-pointer">
-                  <input
+                  <Input
                     type="radio"
                     name="language"
                     value="ja"
@@ -311,7 +312,7 @@ export default function SettingsPage() {
                   </span>
                 </label>
                 <label className="flex items-center space-x-3 cursor-pointer">
-                  <input
+                  <Input
                     type="radio"
                     name="language"
                     value="en"

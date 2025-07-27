@@ -10,14 +10,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GiVote } from "react-icons/gi";
 
-import {
-  Upload,
-  Users,
-  Loader2,
-  FileText,
-  Clock,
-  AlertTriangle,
-} from "lucide-react";
+import { Users, FileText, Clock } from "lucide-react";
 import { Card, CardContent } from "../ui/card.tsx";
 import { Label } from "../ui/label.tsx";
 import { Input } from "../ui/input.tsx";
@@ -28,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select.tsx";
-import { Button } from "../ui/button.tsx";
 import { z } from "zod";
 import { toast } from "react-toastify";
 import { createPostSchema } from "../../utils/schema.tsx";
@@ -304,38 +296,25 @@ const CreatePost = () => {
               />
 
               {/* Submit Button */}
-              <div className="pt-6">
-                <Button
+              <div className="flex flex-col items-center justify-center">
+                <button
                   type="submit"
                   disabled={
                     isSubmitting ||
                     isCheckingLimits ||
                     (postLimitStatus ? !postLimitStatus.can_post : false)
                   }
-                  className="w-full h-16 text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 dark:from-blue-500 dark:via-purple-500 dark:to-indigo-500 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 dark:hover:from-blue-600 dark:hover:via-purple-600 dark:hover:to-indigo-600 text-white transition-all duration-500 rounded-2xl shadow-xl shadow-blue-200/50 dark:shadow-blue-900/50 hover:shadow-blue-300/50 dark:hover:shadow-blue-800/50 hover:scale-[1.02] transform disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="w-32 h-32 flex items-center text-center rounded-full justify-center text-8xl bg-gradient-to-br from-gray-300 via-gray-400 to-gray-600 hover:from-gray-200 hover:via-gray-300 hover:to-gray-500 active:from-gray-400 active:via-gray-500 active:to-gray-700 text-white border-4 border-gray-200 border-t-white border-l-white border-r-gray-500 border-b-gray-600 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-2px_4px_rgba(0,0,0,0.3),0_4px_8px_rgba(0,0,0,0.3)] hover:shadow-[inset_0_2px_4px_rgba(255,255,255,0.4),inset_0_-2px_4px_rgba(0,0,0,0.2),0_6px_12px_rgba(0,0,0,0.4)] active:shadow-[inset_0_-2px_4px_rgba(255,255,255,0.2),inset_0_2px_4px_rgba(0,0,0,0.4),0_2px_4px_rgba(0,0,0,0.2)] active:translate-y-1"
                 >
-                  {isSubmitting ? (
-                    <div className="flex items-center gap-3">
-                      <Loader2 className="h-6 w-6 animate-spin" />
-                      <span>{t("create.post.submitting")}</span>
-                    </div>
-                  ) : isCheckingLimits ? (
-                    <div className="flex items-center gap-3">
-                      <Loader2 className="h-6 w-6 animate-spin" />
-                      <span>制限確認中...</span>
-                    </div>
-                  ) : postLimitStatus && !postLimitStatus.can_post ? (
-                    <div className="flex items-center gap-3">
-                      <AlertTriangle className="h-6 w-6" />
-                      <span>投稿制限到達 - ポイントで制限解除してください</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-3">
-                      <Upload className="h-6 w-6" />
-                      <span>{t("create.post.submit")}</span>
-                    </div>
-                  )}
-                </Button>
+                  {isSubmitting
+                    ? "⏳"
+                    : isCheckingLimits
+                      ? "⏳"
+                      : postLimitStatus && !postLimitStatus.can_post
+                        ? "⚠️"
+                        : "🗳️"}
+                </button>
+                <p className="mt-2">議題を投稿する</p>
               </div>
             </form>
           </CardContent>

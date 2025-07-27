@@ -12,12 +12,14 @@ import {
   Flame,
 } from "lucide-react";
 import Error from "../Error.tsx";
+import { Input } from "../ui/input.tsx";
 
 export interface Community {
   id: number;
   name: string;
   description: string;
   created_at: string;
+  icon?: string;
 }
 
 export interface CommunityWithStats extends Community {
@@ -28,7 +30,7 @@ export const getCommunitites = async (): Promise<CommunityWithStats[]> => {
   // コミュニティの基本情報を取得
   const { data: communities, error: communitiesError } = await supabase
     .from("communities")
-    .select("*")
+    .select("id, name, description, created_at, icon")
     .order("created_at", { ascending: true });
 
   if (communitiesError) throw new globalThis.Error(communitiesError.message);
@@ -97,7 +99,7 @@ const CommunityList = () => {
             size={16}
             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
           />
-          <input
+          <Input
             type="text"
             placeholder="スペースを検索"
             className="w-full pl-10 pr-4 py-2 text-black border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -160,13 +162,10 @@ const CommunityList = () => {
 
                     <div className="flex items-start space-x-4">
                       {/* アバター */}
-                      <div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-md"
-                        style={{
-                          backgroundColor: `hsl(${(space.id * 137.508) % 360}, 70%, 50%)`,
-                        }}
-                      >
-                        {space.name.charAt(0).toUpperCase()}
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md bg-gradient-to-br from-orange-400 to-red-500">
+                        <span className="text-2xl">
+                          {space.icon || space.name.charAt(0).toUpperCase()}
+                        </span>
                       </div>
 
                       {/* コンテンツ */}
@@ -247,13 +246,11 @@ const CommunityList = () => {
 
                   {/* スペース名 */}
                   <div className="flex items-center space-x-3">
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-semibold text-sm"
-                      style={{
-                        backgroundColor: `hsl(${(community.id * 137.508) % 360}, 50%, 45%)`,
-                      }}
-                    >
-                      {community.name.charAt(0).toUpperCase()}
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/20 backdrop-blur-sm">
+                      <span className="text-lg">
+                        {community.icon ||
+                          community.name.charAt(0).toUpperCase()}
+                      </span>
                     </div>
                     <h3 className="font-semibold text-base group-hover:text-slate-200 transition-colors line-clamp-1">
                       {community.name}

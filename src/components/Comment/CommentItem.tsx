@@ -5,6 +5,7 @@ import { ChevronsUp, ChevronsUpDown, MessageSquare, Send } from "lucide-react";
 import CommentVotes from "./CommentVotes.tsx";
 import { supabase } from "../../supabase-client.ts";
 import { useAuth } from "../../hooks/useAuth.ts";
+import { Button } from "../ui/button.tsx";
 
 interface CommentItemProps {
   comment: Comment & {
@@ -120,20 +121,20 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
         {/* アクションボタン */}
         <div className="flex justify-between items-center mt-2">
           {!isDeadlinePassed() ? (
-            <button
+            <Button
               type="button"
               onClick={() => setShowReply((prev) => !prev)}
               className="flex items-center text-sm font-medium text-blue-400 hover:text-blue-300"
             >
               <MessageSquare size={16} className="mr-1" />
               <span>{showReply ? "キャンセル" : "返信する"}</span>
-            </button>
+            </Button>
           ) : (
             <span className="text-sm text-gray-500">投票期限終了</span>
           )}
 
           {comment.children && comment.children.length > 0 && (
-            <button
+            <Button
               type="button"
               onClick={() => setIsCollapsed((prev) => !prev)}
               title={isCollapsed ? "返信を隠す" : "返信を見る"}
@@ -145,7 +146,7 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
                 <ChevronsUp size={18} />
               )}
               <span className="ml-1">{comment.children.length}件の返信</span>
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -178,7 +179,7 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
             </div>
 
             <div className="flex justify-end">
-              <button
+              <Button
                 type="submit"
                 disabled={!newReplytText.trim() || isPending}
                 className={`px-4 py-2 rounded-md font-medium transition-colors flex items-center
@@ -219,7 +220,7 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
                     <span>返信する</span>
                   </>
                 )}
-              </button>
+              </Button>
             </div>
 
             {isError && (

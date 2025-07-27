@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "../hooks/useAuth.ts";
+import { Button } from "./ui/button.tsx";
 
 interface WelcomeSlide {
   title: string;
@@ -96,13 +97,13 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose }) => {
               {currentSlideData.title}
             </h2>
           </div>
-          <button
+          <Button
             type="button"
             onClick={skipOnboarding}
             className="text-gray-500 hover:text-gray-700 transition-colors"
           >
             <X size={24} />
-          </button>
+          </Button>
         </div>
 
         {/* Content */}
@@ -149,7 +150,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose }) => {
 
           {/* Navigation */}
           <div className="flex justify-between items-center">
-            <button
+            <Button
               type="button"
               onClick={prevSlide}
               disabled={currentSlide === 0}
@@ -161,30 +162,30 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose }) => {
             >
               <ChevronLeft size={20} />
               <span>前へ</span>
-            </button>
+            </Button>
 
             <div className="text-sm text-gray-500">
               {currentSlide + 1} / {welcomeSlides.length}
             </div>
 
             {isLastSlide ? (
-              <button
+              <Button
                 type="button"
                 onClick={handleComplete}
                 className="flex items-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300"
               >
                 <span>始める</span>
                 <span>🚀</span>
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
                 type="button"
                 onClick={nextSlide}
                 className="flex items-center space-x-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300"
               >
                 <span>次へ</span>
                 <ChevronRight size={20} />
-              </button>
+              </Button>
             )}
           </div>
         </div>

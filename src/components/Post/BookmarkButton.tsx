@@ -1,6 +1,7 @@
 import { useBookmarks } from "../../hooks/useBookmarks.ts";
 import { useAuth } from "../../hooks/useAuth.ts";
 import { Bookmark, BookmarkCheck } from "lucide-react";
+import { Button } from "../ui/button.tsx";
 
 interface BookmarkButtonProps {
   postId: number;
@@ -28,7 +29,7 @@ const BookmarkButton = ({
   };
 
   return (
-    <button
+    <Button
       type="button"
       onClick={(e) => {
         e.preventDefault();
@@ -47,7 +48,7 @@ const BookmarkButton = ({
       ) : (
         <Bookmark size={iconSizes[size]} />
       )}
-    </button>
+    </Button>
   );
 };
 
