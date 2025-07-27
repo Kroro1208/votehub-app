@@ -126,14 +126,27 @@ export const useHandleVotes = (
 
     // 説得タイム中の投票変更制限をチェック
     if (persuasionTime && currentHasUserVoted) {
-      // 既に説得タイム中に投票変更済みかチェック
-      if (currentUserVote?.persuasion_vote_changed === true) {
+      // サーバーサイドで制限チェック
+      const { data: canVote, error: restrictionError } = await supabase.rpc(
+        "check_persuasion_vote_restriction",
+        {
+          p_post_id: postId,
+          p_user_id: userId,
+        },
+      );
+
+      if (restrictionError) {
+        console.error("制限チェックエラー:", restrictionError);
+        throw new Error("投票制限チェックに失敗しました");
+      }
+
+      if (!canVote) {
         throw new Error("説得タイム中の投票変更は1回までです");
       }
 
-      // 説得タイム中の投票変更処理を使用
+      // 説得タイム中の投票変更処理を使用（制限チェック済み）
       const { data, error } = await supabase.rpc(
-        "track_persuasion_vote_change",
+        "force_persuasion_vote_change",
         {
           p_post_id: postId,
           p_user_id: userId,
@@ -141,7 +154,10 @@ export const useHandleVotes = (
         },
       );
 
-      if (error) throw new Error(error.message);
+      if (error) {
+        console.error("force_persuasion_vote_change エラー:", error);
+        throw new Error(error.message);
+      }
 
       return {
         action: "updated",
@@ -180,6 +196,20 @@ export const useHandleVotes = (
     // 楽観的更新（APIを待たずにUIを先に更新）
     onMutate: async (voteValue) => {
       if (!user) return;
+
+      // 説得タイム中は楽観的更新をスキップ（制限チェックのため）
+      if (persuasionTime) {
+        const currentVotes = queryClient.getQueryData<Vote[]>([
+          "votes",
+          postId,
+        ]);
+        const userVote = currentVotes?.find((v) => v.user_id === user.id);
+
+        // 説得タイム中で既に投票している場合は楽観的更新をスキップ
+        if (userVote) {
+          return { previousVotes: currentVotes, skipOptimistic: true };
+        }
+      }
 
       // 現在のクエリデータをキャンセル
       await queryClient.cancelQueries({ queryKey: ["votes", postId] });
