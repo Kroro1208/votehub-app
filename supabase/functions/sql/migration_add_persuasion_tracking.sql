@@ -28,12 +28,12 @@ CREATE TRIGGER trigger_update_vote_timestamp
     FOR EACH ROW
     EXECUTE FUNCTION update_vote_timestamp();
 
--- 説得タイム中の投票変更を追跡する関数
+-- 説得タイム中の投票変更を追跡する関数（1回制限付き）
 CREATE OR REPLACE FUNCTION track_persuasion_vote_change(
     p_post_id BIGINT,
     p_user_id TEXT,
     p_new_vote INTEGER
-) RETURNS BOOLEAN AS $$
+) RETURNS jsonb AS $$
 DECLARE
     existing_vote RECORD;
     is_persuasion_time BOOLEAN;
@@ -45,9 +45,10 @@ BEGIN
     WHERE id = p_post_id;
     
     -- 説得タイム（期限の1時間前）かどうかをチェック
+    -- UTCで統一して判定
     is_persuasion_time := (
-        NOW() >= (post_deadline - INTERVAL '1 hour') 
-        AND NOW() < post_deadline
+        NOW() AT TIME ZONE 'UTC' >= (post_deadline AT TIME ZONE 'UTC' - INTERVAL '1 hour') 
+        AND NOW() AT TIME ZONE 'UTC' < post_deadline AT TIME ZONE 'UTC'
     );
     
     -- 既存の投票を取得
@@ -55,25 +56,60 @@ BEGIN
     FROM votes 
     WHERE post_id = p_post_id AND user_id = p_user_id;
     
-    -- 説得タイム中かつ既存投票があり、かつ投票値が異なる場合に追跡
-    IF is_persuasion_time AND existing_vote IS NOT NULL AND existing_vote.vote != p_new_vote THEN
-        -- 投票を更新し、変更を追跡
-        UPDATE votes 
-        SET 
-            vote = p_new_vote,
-            persuasion_vote_changed = TRUE,
-            original_vote = COALESCE(original_vote, existing_vote.vote),
-            changed_at = NOW()
-        WHERE id = existing_vote.id;
+    -- 説得タイム中かつ既存投票がある場合（投票値が同じでも制限を適用）
+    IF is_persuasion_time AND existing_vote IS NOT NULL THEN
+        -- 既に説得タイム中に投票を変更している場合はエラー
+        IF existing_vote.persuasion_vote_changed = TRUE THEN
+            RAISE EXCEPTION '説得タイム中の投票変更は1回までです';
+        END IF;
         
-        RETURN TRUE;
+        -- 投票を更新し、変更を追跡（投票値が異なる場合のみ更新）
+        IF existing_vote.vote != p_new_vote THEN
+            UPDATE votes 
+            SET 
+                vote = p_new_vote,
+                persuasion_vote_changed = TRUE,
+                original_vote = COALESCE(original_vote, existing_vote.vote),
+                changed_at = NOW()
+            WHERE id = existing_vote.id;
+        ELSE
+            -- 同じ投票値でも説得タイム中の変更フラグをセット
+            UPDATE votes 
+            SET 
+                persuasion_vote_changed = TRUE,
+                original_vote = COALESCE(original_vote, existing_vote.vote),
+                changed_at = NOW()
+            WHERE id = existing_vote.id;
+        END IF;
+        
+        RETURN jsonb_build_object(
+            'action', 'persuasion_change',
+            'data', jsonb_build_object(
+                'id', existing_vote.id,
+                'post_id', p_post_id,
+                'user_id', p_user_id,
+                'vote', p_new_vote,
+                'persuasion_vote_changed', TRUE,
+                'original_vote', COALESCE(existing_vote.original_vote, existing_vote.vote),
+                'changed_at', NOW()
+            )
+        );
     ELSE
         -- 通常の投票更新
         UPDATE votes 
         SET vote = p_new_vote
         WHERE id = existing_vote.id;
         
-        RETURN FALSE;
+        RETURN jsonb_build_object(
+            'action', 'normal_update',
+            'data', jsonb_build_object(
+                'id', existing_vote.id,
+                'post_id', p_post_id,
+                'user_id', p_user_id,
+                'vote', p_new_vote,
+                'persuasion_vote_changed', FALSE
+            )
+        );
     END IF;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -123,6 +159,11 @@ BEGIN
     ORDER BY change_count DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 関数の権限設定
+GRANT EXECUTE ON FUNCTION track_persuasion_vote_change(BIGINT, TEXT, INTEGER) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_persuasion_vote_stats(BIGINT) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_persuasion_effectiveness_report(BIGINT) TO authenticated;
 
 -- マイグレーション完了
 -- このマイグレーションにより以下が可能になります：
