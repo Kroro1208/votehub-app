@@ -26,7 +26,10 @@ export const usePostLimits = () => {
 
   // 投稿制限状況を取得
   const checkPostLimit = useCallback(
-    async (userId?: string): Promise<PostLimitStatus | null> => {
+    async (
+      userId?: string,
+      forceRefresh?: boolean,
+    ): Promise<PostLimitStatus | null> => {
       if (!userId && !user?.id) return null;
 
       setIsLoading(true);
@@ -34,10 +37,20 @@ export const usePostLimits = () => {
 
       try {
         const targetUserId = userId || user?.id;
+        const currentDate = new Date().toISOString().split("T")[0];
+
+        // 強制リフレッシュまたは日付が変わった場合の処理
+        if (forceRefresh) {
+          // 日次リセットを実行
+          await supabase.rpc("ensure_daily_reset", {
+            p_user_id: targetUserId,
+            p_current_date: currentDate,
+          });
+        }
 
         const { data, error } = await supabase.rpc("check_user_post_limit", {
           p_user_id: targetUserId,
-          p_post_date: new Date().toISOString().split("T")[0],
+          p_post_date: currentDate,
         });
 
         if (error) {
@@ -58,8 +71,8 @@ export const usePostLimits = () => {
         const defaultStatus: PostLimitStatus = {
           can_post: true,
           current_count: 0,
-          daily_limit: 3,
-          remaining_posts: 3,
+          daily_limit: 10,
+          remaining_posts: 10,
           membership_type: "free",
         };
         setPostLimitStatus(defaultStatus);
@@ -169,7 +182,7 @@ export const usePostLimits = () => {
         membership_type: membershipType,
         daily_post_limit:
           membershipType === "free"
-            ? 2
+            ? 10
             : membershipType === "standard"
               ? 5
               : membershipType === "platinum"
@@ -258,8 +271,25 @@ export const usePostLimits = () => {
   // ユーザーログイン時に投稿制限状況を自動取得
   useEffect(() => {
     if (user?.id) {
-      checkPostLimit();
+      checkPostLimit(user.id, true); // 初回は強制リフレッシュ
     }
+  }, [user?.id, checkPostLimit]);
+
+  // 日付変更検知用のInterval
+  useEffect(() => {
+    if (!user?.id) return;
+
+    let lastCheckDate = new Date().toDateString();
+
+    const intervalId = setInterval(() => {
+      const currentDate = new Date().toDateString();
+      if (currentDate !== lastCheckDate) {
+        lastCheckDate = currentDate;
+        checkPostLimit(user.id, true); // 日付変更時は強制リフレッシュ
+      }
+    }, 60000); // 1分ごとにチェック
+
+    return () => clearInterval(intervalId);
   }, [user?.id, checkPostLimit]);
 
   return {

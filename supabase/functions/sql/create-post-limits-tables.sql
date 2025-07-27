@@ -71,13 +71,13 @@ BEGIN
     -- 会員情報が存在しない場合は無料会員として作成
     IF v_membership_type IS NULL THEN
         INSERT INTO user_memberships (user_id, membership_type, daily_post_limit)
-        VALUES (p_user_id, 'free', 3)
+        VALUES (p_user_id, 'free', 10)
         ON CONFLICT (user_id) DO UPDATE SET 
             membership_type = EXCLUDED.membership_type,
             daily_post_limit = EXCLUDED.daily_post_limit;
         
         v_membership_type := 'free';
-        v_daily_limit := 3;
+        v_daily_limit := 10;
     END IF;
     
     -- 今日の投稿数を取得
@@ -207,11 +207,11 @@ BEGIN
     -- 既存の会員グレード設定を更新
     UPDATE user_memberships 
     SET daily_post_limit = CASE 
-        WHEN membership_type = 'free' THEN 3
+        WHEN membership_type = 'free' THEN 10
         WHEN membership_type = 'standard' THEN 5
         WHEN membership_type = 'platinum' THEN 15
         WHEN membership_type = 'diamond' THEN 999999
-        ELSE 3
+        ELSE 10
     END,
     priority_tickets = CASE 
         WHEN membership_type = 'free' THEN 0
