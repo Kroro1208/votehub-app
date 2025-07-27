@@ -180,14 +180,15 @@ const CommunityItem = ({ communityId }: Props) => {
                 <p className="text-slate-500 dark:text-gray-400 text-lg mb-8 max-w-md mx-auto">
                   このコミュニティで最初の投稿をしてみませんか？きっと素晴らしい議論が始まるはずです。
                 </p>
-                <button
+                <Button
+                  variant="default"
                   onClick={() =>
                     navigate(`/create?community_id=${communityId}`)
                   }
-                  className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-violet-500 to-purple-600 dark:from-violet-600 dark:to-purple-700 text-white font-bold rounded-2xl hover:from-violet-600 hover:to-purple-700 dark:hover:from-violet-700 dark:hover:to-purple-800 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+                  className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-violet-500 to-purple-600 dark:from-violet-600 dark:to-purple-700 text-white font-bold rounded hover:from-violet-600 hover:to-purple-700 dark:hover:from-violet-700 dark:hover:to-purple-800 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
                 >
                   <span className="text-lg">最初の投稿を作成</span>
-                </button>
+                </Button>
               </div>
             </div>
           </div>

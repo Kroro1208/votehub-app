@@ -90,24 +90,26 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
   };
 
   return (
-    <div className="mt-4 pl-4 border-l-2 border-gray-700">
-      <div className="mb-3 bg-gray-800 rounded-lg p-4 shadow-sm">
+    <div className="mt-4 pl-4 border-l-2 border-gray-300 dark:border-gray-700">
+      <div className="mb-3 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
         {/* コメントヘッダー */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex gap-5">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-green-700 flex items-center justify-center text-white font-medium">
+              <div className="w-8 h-8 rounded-full bg-green-600 dark:bg-green-700 flex items-center justify-center text-white font-medium">
                 {comment.author.charAt(0).toUpperCase()}
               </div>
-              <span className="font-medium text-white">{comment.author}</span>
+              <span className="font-medium text-gray-900 dark:text-white">
+                {comment.author}
+              </span>
             </div>
             {/* コメント本文 */}
-            <p className="text-gray-200 my-2 whitespace-pre-wrap">
+            <p className="text-gray-700 dark:text-gray-200 my-2 whitespace-pre-wrap">
               {comment.content}
             </p>
           </div>
           <div className="flex flex-col gap-2 items-center">
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-gray-500 dark:text-gray-400">
               {formatDate(comment.created_at)}
             </span>
             <CommentVotes
@@ -124,13 +126,15 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
             <Button
               type="button"
               onClick={() => setShowReply((prev) => !prev)}
-              className="flex items-center text-sm font-medium text-blue-400 hover:text-blue-300"
+              className="flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-transparent border-none p-0 h-auto"
             >
               <MessageSquare size={16} className="mr-1" />
               <span>{showReply ? "キャンセル" : "返信する"}</span>
             </Button>
           ) : (
-            <span className="text-sm text-gray-500">投票期限終了</span>
+            <span className="text-sm text-gray-600 dark:text-gray-500">
+              投票期限終了
+            </span>
           )}
 
           {comment.children && comment.children.length > 0 && (
@@ -138,7 +142,7 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
               type="button"
               onClick={() => setIsCollapsed((prev) => !prev)}
               title={isCollapsed ? "返信を隠す" : "返信を見る"}
-              className="flex items-center text-sm font-medium text-gray-400 hover:text-gray-300"
+              className="flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 bg-transparent border-none p-0 h-auto"
             >
               {isCollapsed ? (
                 <ChevronsUpDown size={18} />
@@ -156,7 +160,7 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
         <div className="ml-4 mb-4">
           <form onSubmit={handleReplySubmit} className="space-y-3">
             <div
-              className={`relative border ${isFocused ? "border-green-500" : "border-gray-600"} rounded-lg transition-all duration-200`}
+              className={`relative border ${isFocused ? "border-green-500" : "border-gray-300 dark:border-gray-600"} rounded-lg transition-all duration-200`}
             >
               <textarea
                 value={newReplytText}
@@ -170,10 +174,10 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
                 }}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
-                className="w-full bg-gray-700 text-white p-3 rounded-lg resize-none outline-none placeholder-gray-400 text-sm"
+                className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white p-3 rounded-lg resize-none outline-none placeholder-gray-500 dark:placeholder-gray-400 text-sm border-none"
               />
 
-              <div className="absolute bottom-2 right-3 text-xs text-gray-400">
+              <div className="absolute bottom-2 right-3 text-xs text-gray-500 dark:text-gray-400">
                 {newReplytText.length}/500
               </div>
             </div>
@@ -185,7 +189,7 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
                 className={`px-4 py-2 rounded-md font-medium transition-colors flex items-center
                 ${
                   !newReplytText.trim() || isPending
-                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    ? "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                     : "bg-green-600 hover:bg-green-700 text-white"
                 }`}
               >
@@ -224,7 +228,7 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
             </div>
 
             {isError && (
-              <div className="mt-2 p-3 bg-red-900/30 border border-red-700 rounded-md text-red-400 text-sm">
+              <div className="mt-2 p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-md text-red-700 dark:text-red-400 text-sm">
                 コメント登録中にエラーが発生しました。再度お試しください。
               </div>
             )}

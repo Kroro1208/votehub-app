@@ -334,7 +334,7 @@ const PostDetail = ({ postId }: Props) => {
   if (error) return <div>{error.message}</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-white dark:bg-gray-900 min-h-screen p-6 transition-colors">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           {data?.avatar_url && (
@@ -344,11 +344,11 @@ const PostDetail = ({ postId }: Props) => {
                 width={48}
                 src={avatarUrl || undefined}
                 alt="投稿者のアバター"
-                className="w-12 h-12 rounded-full object-cover border-2 border-gray-200 hover:border-green-400 transition-colors cursor-pointer"
+                className="w-12 h-12 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600 hover:border-green-400 dark:hover:border-green-400 transition-colors cursor-pointer"
               />
             </Link>
           )}
-          <h2 className="text-6xl font-bold bg-gradient-to-r from-green-600 to-green-200 bg-clip-text text-transparent">
+          <h2 className="text-6xl font-bold bg-gradient-to-r from-green-600 to-green-200 dark:from-green-400 dark:to-green-100 bg-clip-text text-transparent">
             {data.title}
           </h2>
         </div>
@@ -359,29 +359,32 @@ const PostDetail = ({ postId }: Props) => {
             <div className="relative">
               {!showDeleteConfirm ? (
                 <Button
+                  variant="outline"
                   onClick={handleDeleteClick}
                   disabled={isDeleting}
-                  className="p-3 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50 border border-red-200"
+                  className="p-3 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors disabled:opacity-50 border border-red-200 dark:border-red-600 dark:bg-gray-800"
                   title="投稿を削除"
                 >
                   <Trash2 size={20} />
                 </Button>
               ) : (
-                <div className="flex items-center space-x-2 bg-white border border-red-200 rounded-lg p-2">
-                  <span className="text-sm text-red-600">
+                <div className="flex items-center space-x-2 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-600 rounded-lg p-2">
+                  <span className="text-sm text-red-600 dark:text-red-400">
                     投稿を削除しますか？
                   </span>
                   <Button
+                    variant="outline"
                     onClick={handleDeleteConfirm}
                     disabled={isDeleting}
-                    className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
+                    className="px-3 py-1 text-sm bg-red-500 dark:bg-red-600 text-white rounded hover:bg-red-600 dark:hover:bg-red-700 disabled:opacity-50"
                   >
                     {isDeleting ? "削除中..." : "削除"}
                   </Button>
                   <Button
+                    variant="outline"
                     onClick={handleDeleteCancel}
                     disabled={isDeleting}
-                    className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 rounded border border-gray-300"
+                    className="px-3 py-1 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700"
                   >
                     キャンセル
                   </Button>
@@ -410,7 +413,7 @@ const PostDetail = ({ postId }: Props) => {
           <img
             src={data.image_url ?? undefined}
             alt={data.title}
-            className="rounded-lg object-contain w-full h-auto max-h-96 shadow-lg"
+            className="rounded-lg object-contain w-full h-auto max-h-96 shadow-lg dark:shadow-gray-700"
           />
         </div>
 
@@ -419,23 +422,25 @@ const PostDetail = ({ postId }: Props) => {
           <PostContentDisplay content={data?.content} />
         </div>
       </div>
-      <p className="text-gray-500 text-sm">
+      <p className="text-gray-500 dark:text-gray-400 text-sm">
         {new Date(data?.created_at).toLocaleDateString()}
       </p>
 
       {/* 最も投票されたコメントがある場合は表示 */}
       {mostVotedComment && mostVotedInfo.votes > 0 && (
-        <div className="mt-8 p-4 bg-orange-50 border border-green-200 rounded-lg">
-          <h3 className="text-xl font-semibold text-orange-500 mb-2">
+        <div className="mt-8 p-4 bg-orange-50 dark:bg-orange-900/20 border border-green-200 dark:border-green-600 rounded-lg">
+          <h3 className="text-xl font-semibold text-orange-500 dark:text-orange-400 mb-2">
             一番参考にされているコメント
           </h3>
-          <div className="bg-white p-3 rounded shadow-sm">
-            <p className="text-gray-700">{mostVotedComment.content}</p>
+          <div className="bg-white dark:bg-gray-800 p-3 rounded shadow-sm dark:shadow-gray-700">
+            <p className="text-gray-700 dark:text-gray-300">
+              {mostVotedComment.content}
+            </p>
             <div className="flex justify-between mt-2">
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
                 {new Date(mostVotedComment.created_at).toLocaleDateString()}
               </span>
-              <span className="text-xs font-semibold text-green-600">
+              <span className="text-xs font-semibold text-green-600 dark:text-green-400">
                 {mostVotedInfo.votes} votes
               </span>
             </div>

@@ -15,6 +15,7 @@ import { TbFileDescription } from "react-icons/tb";
 import { useLanguage } from "../../hooks/useLanguage.ts";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { useState, useRef, useEffect } from "react";
+import { XIcon } from "lucide-react";
 
 const communitySchema = z.object({
   name: z.string().min(1, "スペース名は必須です"),
@@ -274,6 +275,7 @@ const CreateCommunity = () => {
               </Label>
               <div className="relative">
                 <Button
+                  variant="outline"
                   type="button"
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                   className="w-full p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors flex items-center justify-between"
@@ -284,19 +286,6 @@ const CreateCommunity = () => {
                       絵文字を選択してください
                     </span>
                   </div>
-                  <svg
-                    className={`w-5 h-5 text-gray-400 transition-transform ${showEmojiPicker ? "rotate-180" : ""}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
                 </Button>
               </div>
 
@@ -322,21 +311,9 @@ const CreateCommunity = () => {
                       <Button
                         type="button"
                         onClick={() => setShowEmojiPicker(false)}
-                        className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        className="p-2 text-gray-400 dark:hover:text-gray-300 rounded-lg dark:hover:bg-gray-700 transition-colors"
                       >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
+                        <XIcon size={20} />
                       </Button>
                     </div>
 
@@ -350,19 +327,6 @@ const CreateCommunity = () => {
                           placeholder="日本語で検索 (例: ロボット, 笑顔)"
                           className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
-                        <svg
-                          className="absolute right-3 top-2.5 w-5 h-5 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                          />
-                        </svg>
                       </div>
 
                       {/* Search Results */}
@@ -383,7 +347,7 @@ const CreateCommunity = () => {
                                       setShowEmojiPicker(false);
                                       setSearchTerm("");
                                     }}
-                                    className="w-8 h-8 flex items-center justify-center text-xl hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition-colors"
+                                    className="w-8 h-8 flex items-center justify-center text-xl dark:hover:bg-gray-600 rounded transition-colors"
                                   >
                                     {emoji}
                                   </Button>

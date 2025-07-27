@@ -8,7 +8,8 @@ import {
   mostVotedCommentAtomFamily,
   updateCommentVotes,
 } from "../../stores/CommentVoteAtom.ts";
-import { Heart, Skull } from "lucide-react";
+import { Button } from "../ui/button.tsx";
+import { FaRegArrowAltCircleDown, FaRegArrowAltCircleUp } from "react-icons/fa";
 
 interface VoteProps {
   commentId: number;
@@ -278,8 +279,9 @@ const CommentVotes = ({ commentId, postId, authorId }: VoteProps) => {
   return (
     <div className="relative">
       <div className="flex gap-3 items-center">
-        <button
+        <Button
           type="button"
+          variant="outline"
           disabled={isVoting || !user}
           onClick={() => mutate(1)}
           className={`cursor-pointer px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 relative
@@ -287,16 +289,17 @@ const CommentVotes = ({ commentId, postId, authorId }: VoteProps) => {
               ${!user ? "cursor-not-allowed opacity-50" : ""}
               ${
                 userVote === 1
-                  ? "bg-red-500 text-white shadow-lg scale-105"
-                  : "bg-gray-700 text-gray-300 hover:bg-red-600 hover:text-white"
+                  ? "bg-green-500 dark:bg-green-500 text-white shadow-lg scale-105"
+                  : "text-gray-300 hover:bg-green-600 hover:text-white"
               }`}
           title={!user ? "ログインが必要です" : "共感を示す"}
         >
-          <Heart size={16} className={userVote === 1 ? "fill-current" : ""} />
+          <FaRegArrowAltCircleUp />
           <span className="font-medium">{upVotes}</span>
-        </button>
+        </Button>
 
-        <button
+        <Button
+          variant="outline"
           type="button"
           disabled={isVoting || !user}
           onClick={() => mutate(-1)}
@@ -305,14 +308,14 @@ const CommentVotes = ({ commentId, postId, authorId }: VoteProps) => {
               ${!user ? "cursor-not-allowed opacity-50" : ""}
               ${
                 userVote === -1
-                  ? "bg-gray-600 text-white shadow-lg scale-105"
-                  : "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white"
+                  ? "bg-red-600 dark:bg-red-500 text-white shadow-lg scale-105"
+                  : "text-black hover:bg-red-600 hover:text-white"
               }`}
           title={!user ? "ログインが必要です" : "反対意見を示す"}
         >
-          <Skull size={16} className={userVote === -1 ? "fill-current" : ""} />
+          <FaRegArrowAltCircleDown />
           <span className="font-medium">{downVotes}</span>
-        </button>
+        </Button>
 
         {/* 共感ポイント表示 - コメント主のみに表示 */}
         {totalReactions > 0 && authorId === user?.id && (

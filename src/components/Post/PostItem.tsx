@@ -217,6 +217,7 @@ const PostItem = ({ post }: PostItemType) => {
                 <div className="relative">
                   {!showDeleteConfirm ? (
                     <Button
+                      variant="outline"
                       onClick={handleDeleteClick}
                       disabled={isDeleting}
                       className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
@@ -226,6 +227,7 @@ const PostItem = ({ post }: PostItemType) => {
                   ) : (
                     <div className="flex items-center space-x-1 bg-red-50 dark:bg-red-900/20 rounded-lg p-1">
                       <Button
+                        variant="outline"
                         onClick={handleDeleteConfirm}
                         disabled={isDeleting}
                         className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
@@ -233,6 +235,7 @@ const PostItem = ({ post }: PostItemType) => {
                         削除
                       </Button>
                       <Button
+                        variant="outline"
                         onClick={handleDeleteCancel}
                         disabled={isDeleting}
                         className="px-2 py-1 text-xs text-gray-600 hover:text-gray-800 rounded"

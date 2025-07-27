@@ -31,6 +31,7 @@ const BookmarkButton = ({
   return (
     <Button
       type="button"
+      variant="outline"
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();

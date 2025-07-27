@@ -177,10 +177,13 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
   const commentCount = userComments?.length || 0;
 
   return (
-    <div className="mt-10 bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-700">
+    <div className="mt-10 bg-gray-50 dark:bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-gray-700">
       <div className="flex items-center gap-2 mb-6">
-        <MessageSquareText className="text-green-400" size={24} />
-        <h3 className="text-xl font-semibold text-green-400">
+        <MessageSquareText
+          className="text-green-600 dark:text-green-400"
+          size={24}
+        />
+        <h3 className="text-xl font-semibold text-green-600 dark:text-green-400">
           コメント {commentCount > 0 && `(${commentCount})`}
         </h3>
       </div>
@@ -189,13 +192,15 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
       {user ? (
         <div className="mb-8">
           {isDeadlinePassed() ? (
-            <div className="py-8 px-6 bg-gray-700/30 rounded-lg border border-gray-600 text-center">
+            <div className="py-8 px-6 bg-gray-100 dark:bg-gray-700/30 rounded-lg border border-gray-300 dark:border-gray-600 text-center">
               <MessageSquareText
                 size={32}
-                className="mx-auto mb-3 text-gray-500"
+                className="mx-auto mb-3 text-gray-400 dark:text-gray-500"
               />
-              <p className="text-gray-300 mb-1">投票期限が終了しています</p>
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-700 dark:text-gray-300 mb-1">
+                投票期限が終了しています
+              </p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">
                 この投稿の期限が過ぎているため、新しいコメントを投稿することはできません。
               </p>
             </div>
@@ -203,7 +208,9 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div
                 className={`relative border ${
-                  isFocused ? "border-green-500" : "border-gray-600"
+                  isFocused
+                    ? "border-green-500"
+                    : "border-gray-300 dark:border-gray-600"
                 } rounded-lg transition-all duration-200 shadow-sm`}
               >
                 <textarea
@@ -218,17 +225,17 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
                   }}
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
-                  className="w-full bg-gray-700 text-white p-4 rounded-lg resize-none outline-none placeholder-gray-400"
+                  className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-lg resize-none outline-none placeholder-gray-500 dark:placeholder-gray-400 border-none"
                 />
 
-                <div className="absolute bottom-2 right-3 text-xs text-gray-400">
+                <div className="absolute bottom-2 right-3 text-xs text-gray-500 dark:text-gray-400">
                   {newCommentText.length}/500
                 </div>
               </div>
 
               <div className="flex justify-between items-center">
-                <div className="text-xs text-gray-400">
-                  <span className="text-green-400 font-medium">
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  <span className="text-green-600 dark:text-green-400 font-medium">
                     {user.email?.split("@")[0] || "匿名ユーザー"}
                   </span>{" "}
                   として投稿します
@@ -240,7 +247,7 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
                   className={`px-5 py-2 rounded-md font-medium transition-all duration-200 flex items-center gap-2
                     ${
                       !newCommentText.trim() || isPending
-                        ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                        ? "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                         : "bg-green-600 hover:bg-green-700 text-white"
                     }`}
                 >
@@ -259,7 +266,7 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
               </div>
 
               {isError && (
-                <div className="p-3 bg-red-900/30 border border-red-700 rounded-md text-red-400 text-sm flex items-center gap-2">
+                <div className="p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-md text-red-700 dark:text-red-400 text-sm flex items-center gap-2">
                   <AlertCircle size={16} />
                   <span>
                     コメント登録中にエラーが発生しました。再度お試しください。
@@ -270,9 +277,12 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
           )}
         </div>
       ) : (
-        <div className="py-8 px-6 bg-gray-700/30 rounded-lg border border-gray-600 text-center mb-8">
-          <MessageSquareText size={32} className="mx-auto mb-3 text-gray-500" />
-          <p className="text-gray-300 mb-3">
+        <div className="py-8 px-6 bg-gray-100 dark:bg-gray-700/30 rounded-lg border border-gray-300 dark:border-gray-600 text-center mb-8">
+          <MessageSquareText
+            size={32}
+            className="mx-auto mb-3 text-gray-400 dark:text-gray-500"
+          />
+          <p className="text-gray-700 dark:text-gray-300 mb-3">
             コメントするにはログインしてください
           </p>
           <button
@@ -289,9 +299,12 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
       {/* コメント表示部分 */}
       <div className="space-y-2">
         {commentCount > 0 && (
-          <div className="flex items-center gap-2 mb-4 pt-4 border-t border-gray-600">
-            <MessageSquareText className="text-gray-400" size={20} />
-            <h4 className="text-lg font-medium text-gray-300">
+          <div className="flex items-center gap-2 mb-4 pt-4 border-t border-gray-300 dark:border-gray-600">
+            <MessageSquareText
+              className="text-gray-600 dark:text-gray-400"
+              size={20}
+            />
+            <h4 className="text-lg font-medium text-gray-800 dark:text-gray-300">
               ユーザーコメント ({commentCount})
             </h4>
           </div>
@@ -299,17 +312,25 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
 
         {commentIsPending ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="animate-spin text-green-400" size={32} />
-            <span className="ml-3 text-gray-400">コメントを読み込み中...</span>
+            <Loader2
+              className="animate-spin text-green-600 dark:text-green-400"
+              size={32}
+            />
+            <span className="ml-3 text-gray-600 dark:text-gray-400">
+              コメントを読み込み中...
+            </span>
           </div>
         ) : error ? (
-          <div className="p-4 bg-red-900/30 border border-red-700 rounded-md text-red-400 text-center">
+          <div className="p-4 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-md text-red-700 dark:text-red-400 text-center">
             <AlertCircle size={24} className="mx-auto mb-2" />
             <p>{error.message}</p>
           </div>
         ) : commentTree.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
-            <MessageSquareText size={32} className="mx-auto mb-3 opacity-50" />
+          <div className="text-center py-8 text-gray-600 dark:text-gray-400">
+            <MessageSquareText
+              size={32}
+              className="mx-auto mb-3 opacity-50 text-gray-500 dark:text-gray-400"
+            />
             <p>まだコメントはありません。最初のコメントを投稿しましょう！</p>
           </div>
         ) : (
