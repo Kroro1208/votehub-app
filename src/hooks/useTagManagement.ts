@@ -192,10 +192,12 @@ export const useTagManagement = (
           setSimilarTags([]);
         } else {
           // RPC関数の結果を適切な形式に変換
-          const similarTagsData = (tags || []).map((tag: any) => ({
-            id: tag.id,
-            name: tag.name,
-          }));
+          const similarTagsData = (tags || []).map(
+            (tag: { id: number; name: string }) => ({
+              id: tag.id,
+              name: tag.name,
+            }),
+          );
           setSimilarTags(similarTagsData);
         }
       } catch (error) {

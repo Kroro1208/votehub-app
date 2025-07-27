@@ -34,9 +34,9 @@ class SecurityAuditor {
   private alerts: AnomalyAlert[] = [];
 
   /**
-   * 包括的なセキュリティ監査を実行（RPC関数使用）
+   * セキュリティ監査を実行
    */
-  async runComprehensiveSecurityAudit(): Promise<any> {
+  async runComprehensiveSecurityAudit(): Promise<SecurityAuditReport> {
     try {
       const { data: auditResult, error } =
         await supabase.rpc("run_security_audit");
@@ -178,10 +178,12 @@ class SecurityAuditor {
           description: `Suspicious voting activity detected for ${suspiciousUsers.length} users`,
           timestamp: new Date().toISOString(),
           data: {
-            suspiciousUsers: suspiciousUsers.map((user: any) => ({
-              userId: user.user_id,
-              count: user.vote_count,
-            })),
+            suspiciousUsers: suspiciousUsers.map(
+              (user: { user_id: string; vote_count: number }) => ({
+                userId: user.user_id,
+                count: user.vote_count,
+              }),
+            ),
           },
         });
       }

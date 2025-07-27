@@ -215,18 +215,27 @@ export const searchTags = async (
     }
 
     // RPC関数の結果をTagStats型に変換
-    const tagStats: TagStats[] = tags.map((tag: any) => ({
-      id: tag.id,
-      name: tag.name,
-      community_id: tag.community_id,
-      created_at: tag.created_at,
-      post_count: Number(tag.post_count) || 0,
-      vote_count: 0, // RPC関数で投票数計算を追加する場合はここで設定
-      popularity_score: Number(tag.post_count) * 2, // 簡易計算
-      community: tag.community_name
-        ? { id: tag.community_id, name: tag.community_name }
-        : null,
-    }));
+    const tagStats: TagStats[] = tags.map(
+      (tag: {
+        id: number;
+        name: string;
+        community_id: number | null;
+        created_at: string;
+        post_count: string | number;
+        community_name?: string;
+      }) => ({
+        id: tag.id,
+        name: tag.name,
+        community_id: tag.community_id,
+        created_at: tag.created_at,
+        post_count: Number(tag.post_count) || 0,
+        vote_count: 0, // RPC関数で投票数計算を追加する場合はここで設定
+        popularity_score: Number(tag.post_count) * 2, // 簡易計算
+        community: tag.community_name
+          ? { id: tag.community_id, name: tag.community_name }
+          : null,
+      }),
+    );
 
     // 最小値フィルタリング
     return tagStats.filter(
@@ -243,7 +252,6 @@ export const searchTags = async (
 export const getTopTags = async (
   communityId?: number,
   limit: number = 10,
-  sortBy: "post_count" | "vote_count" | "popularity_score" = "popularity_score",
 ): Promise<TagStats[]> => {
   try {
     // 人気タグランキング専用のRPC関数を使用
@@ -264,22 +272,36 @@ export const getTopTags = async (
 
     // コミュニティでフィルタリング（必要な場合）
     const filteredTags = communityId
-      ? tags.filter((tag: any) => tag.community_id === communityId)
+      ? tags.filter(
+          (tag: { community_id: number | null }) =>
+            tag.community_id === communityId,
+        )
       : tags;
 
     // TagStats型に変換
-    return filteredTags.map((tag: any) => ({
-      id: tag.id,
-      name: tag.name,
-      community_id: tag.community_id,
-      created_at: new Date().toISOString(), // RPC関数にcreated_atがない場合のフォールバック
-      post_count: Number(tag.post_count) || 0,
-      vote_count: Number(tag.total_votes) || 0,
-      popularity_score: Number(tag.popularity_score) || 0,
-      community: tag.community_name
-        ? { id: tag.community_id, name: tag.community_name }
-        : null,
-    }));
+    return filteredTags.map(
+      (tag: {
+        id: number;
+        name: string;
+        community_id: number | null;
+        created_at: string;
+        post_count: string | number;
+        popularity_score?: number;
+        total_votes?: number;
+        community_name?: string;
+      }) => ({
+        id: tag.id,
+        name: tag.name,
+        community_id: tag.community_id,
+        created_at: new Date().toISOString(), // RPC関数にcreated_atがない場合のフォールバック
+        post_count: Number(tag.post_count) || 0,
+        vote_count: Number(tag.total_votes) || 0,
+        popularity_score: Number(tag.popularity_score) || 0,
+        community: tag.community_name
+          ? { id: tag.community_id, name: tag.community_name }
+          : null,
+      }),
+    );
   } catch (error) {
     console.error("人気タグ取得エラー:", error);
     throw error;
