@@ -26,6 +26,7 @@ import { calculateAllExistingScores } from "../utils/calculateExistingScores.ts"
 import { Button } from "../components/ui/button.tsx";
 import { RefreshCw } from "lucide-react";
 import { toast } from "react-toastify";
+import { useLanguage } from "../hooks/useLanguage.ts";
 
 interface UserStats {
   postCount: number;
@@ -108,6 +109,7 @@ const getUserStats = async (userId: string): Promise<UserStats> => {
 const ProfilePage = () => {
   const { userId } = useParams<{ userId: string }>();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const targetUserId = userId || user?.id;
   const isOwnProfile = !userId || userId === user?.id;
@@ -160,19 +162,19 @@ const ProfilePage = () => {
 
   // スコア計算の実行
   const handleCalculateScores = async () => {
-    toast.info("スコア計算を開始しています...");
+    toast.info(t("profile.page.score.calculating"));
 
     try {
       const result = await calculateAllExistingScores();
 
       if (result.qualityResult.success && result.empathyResult.success) {
-        toast.success("スコア計算が完了しました！ページを更新してください。");
+        toast.success(t("profile.page.score.success"));
       } else {
-        toast.error("スコア計算中にエラーが発生しました。");
+        toast.error(t("profile.page.score.error"));
       }
     } catch (error) {
       console.error("Score calculation error:", error);
-      toast.error("スコア計算に失敗しました。");
+      toast.error(t("profile.page.score.failed"));
     }
   };
 
@@ -181,10 +183,10 @@ const ProfilePage = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            プロフィールが見つかりません
+            {t("profile.page.not.found.title")}
           </h2>
           <p className="text-gray-500">
-            ログインしてプロフィールを表示してください
+            {t("profile.page.not.found.description")}
           </p>
         </div>
       </div>
@@ -208,11 +210,11 @@ const ProfilePage = () => {
     ? user?.user_metadata?.full_name ||
       user?.user_metadata?.user_name ||
       user?.email ||
-      "ユーザー"
+      t("profile.page.user.fallback")
     : userProfile?.user_metadata?.full_name ||
       userProfile?.user_metadata?.user_name ||
       userProfile?.user_metadata?.email ||
-      "ユーザー";
+      t("profile.page.user.fallback");
   const avatarUrl = isOwnProfile
     ? user?.user_metadata?.avatar_url
     : userProfile?.user_metadata?.avatar_url;
@@ -244,7 +246,7 @@ const ProfilePage = () => {
                 {displayName}
                 {isOwnProfile && (
                   <span className="ml-2 text-lg font-normal text-gray-500">
-                    (あなた)
+                    {t("profile.page.you")}
                   </span>
                 )}
               </h1>
@@ -271,7 +273,7 @@ const ProfilePage = () => {
                   className="inline-flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
                 >
                   <Settings size={14} />
-                  <span>設定と編集</span>
+                  <span>{t("profile.page.settings.edit")}</span>
                 </Link>
               )}
 
@@ -284,7 +286,9 @@ const ProfilePage = () => {
                   <div className="text-2xl font-bold text-gray-900">
                     {userStats?.postCount || 0}
                   </div>
-                  <div className="text-sm text-gray-500">投稿</div>
+                  <div className="text-sm text-gray-500">
+                    {t("profile.page.posts.count")}
+                  </div>
                 </div>
 
                 <div className="text-center p-3 bg-gray-100 rounded-lg">
@@ -294,7 +298,9 @@ const ProfilePage = () => {
                   <div className="text-2xl font-bold text-gray-900">
                     {userStats?.totalVotes || 0}
                   </div>
-                  <div className="text-sm text-gray-500">投票</div>
+                  <div className="text-sm text-gray-500">
+                    {t("profile.page.votes.count")}
+                  </div>
                 </div>
 
                 <div className="text-center p-3 bg-gray-100 rounded-lg">
@@ -304,7 +310,9 @@ const ProfilePage = () => {
                   <div className="text-2xl font-bold text-gray-900">
                     {userStats?.totalComments || 0}
                   </div>
-                  <div className="text-sm text-gray-500">コメント</div>
+                  <div className="text-sm text-gray-500">
+                    {t("profile.page.comments.count")}
+                  </div>
                 </div>
 
                 {/* 共感ランキング */}
@@ -316,7 +324,9 @@ const ProfilePage = () => {
                     <div className="text-2xl font-bold text-gray-900">
                       #{empathyData.empathy_rank}
                     </div>
-                    <div className="text-sm text-gray-500">共感ランク</div>
+                    <div className="text-sm text-gray-500">
+                      {t("profile.page.empathy.rank")}
+                    </div>
                   </div>
                 )}
 
@@ -335,7 +345,9 @@ const ProfilePage = () => {
                         )
                       : "---"}
                   </div>
-                  <div className="text-sm text-gray-500">参加</div>
+                  <div className="text-sm text-gray-500">
+                    {t("profile.page.joined")}
+                  </div>
                 </div>
               </div>
             </div>
@@ -350,10 +362,10 @@ const ProfilePage = () => {
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
             >
               <RefreshCw size={16} />
-              既存投稿のスコア計算
+              {t("profile.page.calculate.scores")}
             </Button>
             <p className="text-sm text-gray-500 mt-2">
-              ※ 過去の投稿の品質度スコアと共感ポイントを計算します
+              {t("profile.page.calculate.scores.description")}
             </p>
           </div>
         )}
@@ -375,7 +387,9 @@ const ProfilePage = () => {
         {/* 投稿一覧 */}
         <div className="bg-yellow-100 rounded-2xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            {isOwnProfile ? "あなたの投稿" : `${displayName}の投稿`}
+            {isOwnProfile
+              ? t("profile.page.your.posts")
+              : `${displayName}${t("profile.page.user.posts")}`}
           </h2>
 
           {userPosts && userPosts.length > 0 ? (
@@ -390,12 +404,12 @@ const ProfilePage = () => {
                 <TrendingUp size={32} className="text-gray-400" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                まだ投稿がありません
+                {t("profile.page.no.posts.title")}
               </h3>
               <p className="text-gray-500">
                 {isOwnProfile
-                  ? "最初の投稿を作成してみましょう！"
-                  : "このユーザーはまだ投稿していません"}
+                  ? t("profile.page.no.posts.own")
+                  : t("profile.page.no.posts.other")}
               </p>
             </div>
           )}

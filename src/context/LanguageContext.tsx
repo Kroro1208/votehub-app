@@ -298,6 +298,32 @@ export const translations = {
     "account.email": "メールアドレス",
     "account.joined": "登録日",
 
+    // Profile page
+    "profile.page.not.found.title": "プロフィールが見つかりません",
+    "profile.page.not.found.description":
+      "ログインしてプロフィールを表示してください",
+    "profile.page.you": "(あなた)",
+    "profile.page.settings.edit": "設定と編集",
+    "profile.page.posts.count": "投稿",
+    "profile.page.votes.count": "投票",
+    "profile.page.comments.count": "コメント",
+    "profile.page.empathy.rank": "共感ランク",
+    "profile.page.joined": "参加",
+    "profile.page.calculate.scores": "既存投稿のスコア計算",
+    "profile.page.calculate.scores.description":
+      "※ 過去の投稿の品質度スコアと共感ポイントを計算します",
+    "profile.page.your.posts": "あなたの投稿",
+    "profile.page.user.posts": "の投稿",
+    "profile.page.no.posts.title": "まだ投稿がありません",
+    "profile.page.no.posts.own": "最初の投稿を作成してみましょう！",
+    "profile.page.no.posts.other": "このユーザーはまだ投稿していません",
+    "profile.page.score.calculating": "スコア計算を開始しています...",
+    "profile.page.score.success":
+      "スコア計算が完了しました！ページを更新してください。",
+    "profile.page.score.error": "スコア計算中にエラーが発生しました。",
+    "profile.page.score.failed": "スコア計算に失敗しました。",
+    "profile.page.user.fallback": "ユーザー",
+
     // Common
     "common.back": "戻る",
     "common.edit": "編集",
@@ -594,6 +620,31 @@ export const translations = {
     "account.title": "Account Information",
     "account.email": "Email Address",
     "account.joined": "Joined",
+
+    // Profile page
+    "profile.page.not.found.title": "Profile not found",
+    "profile.page.not.found.description": "Please log in to view profile",
+    "profile.page.you": "(You)",
+    "profile.page.settings.edit": "Settings & Edit",
+    "profile.page.posts.count": "Posts",
+    "profile.page.votes.count": "Votes",
+    "profile.page.comments.count": "Comments",
+    "profile.page.empathy.rank": "Empathy Rank",
+    "profile.page.joined": "Joined",
+    "profile.page.calculate.scores": "Calculate Existing Post Scores",
+    "profile.page.calculate.scores.description":
+      "※ Calculate quality scores and empathy points for past posts",
+    "profile.page.your.posts": "Your Posts",
+    "profile.page.user.posts": "'s Posts",
+    "profile.page.no.posts.title": "No posts yet",
+    "profile.page.no.posts.own": "Create your first post!",
+    "profile.page.no.posts.other": "This user hasn't posted anything yet",
+    "profile.page.score.calculating": "Starting score calculation...",
+    "profile.page.score.success":
+      "Score calculation completed! Please refresh the page.",
+    "profile.page.score.error": "An error occurred during score calculation.",
+    "profile.page.score.failed": "Score calculation failed.",
+    "profile.page.user.fallback": "User",
 
     // Common
     "common.back": "Back",
