@@ -9,7 +9,7 @@ interface LanguageContextType {
 }
 
 export const LanguageContext = createContext<LanguageContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export const translations = {
@@ -23,7 +23,7 @@ export const translations = {
     "nav.space": "スペース",
     "nav.settings": "設定",
     "nav.notifications": "通知",
-    "nav.create": "投票作成",
+    "nav.create": "投稿作成",
 
     // Settings
     "settings.title": "設定",
@@ -61,7 +61,7 @@ export const translations = {
     "message.language.en": "Language set to English",
 
     // Home Page
-    "home.title": "投票中の質問",
+    "home.title": "議題一覧",
     "home.no.posts": "投稿がありません",
     "home.no.posts.description": "新しい投稿を作成してみましょう！",
     "home.stats.voting": "投票中",
