@@ -258,9 +258,10 @@ export const getEmpathyRankInfo = (
   const defaultRank = rankInfo || EMPATHY_RANKS[EMPATHY_RANKS.length - 1]; // デフォルトは'new'
 
   // 翻訳されたdescriptionを取得
-  const translationKey = `empathy.rank.${defaultRank.rank}`;
+  const translationKey =
+    `empathy.rank.${defaultRank.rank}` as keyof typeof translations.ja;
   const description =
-    (translations[language] as any)[translationKey] || defaultRank.description;
+    translations[language][translationKey] || defaultRank.description;
 
   return {
     ...defaultRank,
@@ -286,9 +287,10 @@ export const getPointsToNextRank = (
   const pointsNeeded = nextRankData.min_points - currentPoints;
 
   // 翻訳されたnextRankを取得
-  const translationKey = `empathy.rank.${nextRankData.rank}`;
+  const translationKey =
+    `empathy.rank.${nextRankData.rank}` as keyof typeof translations.ja;
   const description =
-    (translations[language] as any)[translationKey] || nextRankData.description;
+    translations[language][translationKey] || nextRankData.description;
 
   const nextRank =
     pointsNeeded > 0
