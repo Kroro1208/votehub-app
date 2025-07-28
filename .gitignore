@@ -24,3 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 .mcp.json
+
+# Documentation with sensitive information
+AWS_DEPLOYMENT_ARCHITECTURE.md
