@@ -72,6 +72,25 @@ export const translations = {
     "home.tabs.popular": "人気",
     "home.tabs.recent": "新着",
 
+    // Home Header Status
+    "home.header.title": "リアルタイム投票状況",
+
+    // Right Panel
+    "right.panel.trend.topics": "トレンドトピック",
+    "right.panel.loading": "読み込み中...",
+    "right.panel.data.error": "データ取得エラー",
+    "right.panel.no.trend.tags": "トレンドタグがありません",
+    "right.panel.top.users": "トップユーザー",
+    "right.panel.view.all": "全て見る →",
+    "right.panel.error.occurred": "エラーが発生しました",
+    "right.panel.no.ranking.data": "ランキングデータがありません",
+    "right.panel.user.fallback": "ユーザー",
+    "right.panel.points": "pt",
+    "right.panel.votes": "票",
+    "right.panel.ending.soon": "終了間近",
+    "right.panel.remaining": "残り",
+    "right.panel.no.urgent.posts": "終了間近の投稿はありません",
+
     // Create Post Page
     "create.post.title": "新しい投稿を作成",
     "create.post.question": "質問",
@@ -145,6 +164,23 @@ export const translations = {
     "create.post.error.tag.retry":
       "タグ作成に失敗しました。もう一度お試しください。",
     "create.post.publish": "投稿を公開する",
+    "create.post.submit.post": "議題を投稿する",
+
+    // Grade Panel
+    "grade.panel.membership.free": "無料会員",
+    "grade.panel.membership.standard": "スタンダード",
+    "grade.panel.membership.platinum": "プラチナ",
+    "grade.panel.membership.diamond": "ダイヤモンド",
+    "grade.panel.daily.posts": "本日の投稿",
+    "grade.panel.remaining": "残り",
+    "grade.panel.times": "回",
+    "grade.panel.limit.reached": "制限到達",
+    "grade.panel.post.limit.reached": "投稿制限到達",
+    "grade.panel.remove.with.points": "30ポイントで解除",
+    "grade.panel.today.posts": "今日の投稿数",
+    "grade.panel.limit.count": "制限数",
+    "grade.panel.remaining.posts": "残り投稿",
+    "grade.panel.remove.limit.failed": "制限解除に失敗しました",
 
     // Space Page
     "space.title": "スペース",
@@ -324,6 +360,52 @@ export const translations = {
     "profile.page.score.failed": "スコア計算に失敗しました。",
     "profile.page.user.fallback": "ユーザー",
 
+    // Quality Score Display
+    "quality.score.title": "品質度スコア",
+    "quality.score.no.posts": "まだ投稿がありません",
+    "quality.score.no.posts.description":
+      "投稿を作成すると品質度スコアが表示されます",
+    "quality.score.rank.super": "スーパー",
+    "quality.score.rank.excellent": "エクセレント",
+    "quality.score.rank.good": "グッド",
+    "quality.score.rank.average": "アベレージ",
+    "quality.score.rank.needs.work": "ニーズワーク",
+    "quality.score.rank.beginner": "ビギナー",
+    "quality.score.rank.unrated": "未評価",
+    "quality.score.average": "平均スコア",
+    "quality.score.highest": "最高スコア",
+    "quality.score.evaluated.posts": "評価済み投稿",
+    "quality.score.rank.distribution": "ランク分布",
+    "quality.score.recent.scores": "最新のスコア",
+
+    // Empathy Points Display
+    "empathy.points.title": "共感ポイント",
+    "empathy.points.loading": "共感ポイントを取得中...",
+    "empathy.points.points": "ポイント",
+    "empathy.points.ranking": "ランキング",
+    "empathy.points.next.rank": "次のランクまで",
+    "empathy.points.current.rank": "現在のランク",
+    "empathy.points.next.rank.progress": "次のランクへの進捗",
+    "empathy.points.score.breakdown": "スコア内訳",
+    "empathy.points.post.evaluation": "投稿評価",
+    "empathy.points.comment.evaluation": "コメント評価",
+    "empathy.points.participation.continuity": "参加継続",
+    "empathy.points.community.contribution": "コミュニティ貢献",
+    "empathy.points.interaction": "相互作用",
+    "empathy.points.last.updated": "最終更新",
+
+    // Empathy Ranks
+    "empathy.rank.legend": "レジェンド",
+    "empathy.rank.master": "マスター",
+    "empathy.rank.expert": "エキスパート",
+    "empathy.rank.active": "アクティブ",
+    "empathy.rank.contributor": "コントリビューター",
+    "empathy.rank.participant": "パーティシパント",
+    "empathy.rank.new": "ニューカマー",
+    "empathy.rank.position": "位",
+    "empathy.rank.people": "人",
+    "empathy.rank.to": "まで",
+
     // Common
     "common.back": "戻る",
     "common.edit": "編集",
@@ -392,6 +474,25 @@ export const translations = {
     "home.tabs.urgent": "Urgent",
     "home.tabs.popular": "Popular",
     "home.tabs.recent": "Recent",
+
+    // Home Header Status
+    "home.header.title": "Real-time Voting Status",
+
+    // Right Panel
+    "right.panel.trend.topics": "Trending Topics",
+    "right.panel.loading": "Loading...",
+    "right.panel.data.error": "Data fetch error",
+    "right.panel.no.trend.tags": "No trending tags available",
+    "right.panel.top.users": "Top Users",
+    "right.panel.view.all": "View All →",
+    "right.panel.error.occurred": "An error occurred",
+    "right.panel.no.ranking.data": "No ranking data available",
+    "right.panel.user.fallback": "User",
+    "right.panel.points": "pt",
+    "right.panel.votes": "votes",
+    "right.panel.ending.soon": "Ending Soon",
+    "right.panel.remaining": "Remaining",
+    "right.panel.no.urgent.posts": "No posts ending soon",
 
     // Create Post Page
     "create.post.title": "Create New Post",
@@ -464,6 +565,23 @@ export const translations = {
       "Database error occurred while creating tag.",
     "create.post.error.tag.retry": "Failed to create tag. Please try again.",
     "create.post.publish": "Publish Post",
+    "create.post.submit.post": "Submit Question",
+
+    // Grade Panel
+    "grade.panel.membership.free": "Free Member",
+    "grade.panel.membership.standard": "Standard",
+    "grade.panel.membership.platinum": "Platinum",
+    "grade.panel.membership.diamond": "Diamond",
+    "grade.panel.daily.posts": "Today's Posts",
+    "grade.panel.remaining": "remaining",
+    "grade.panel.times": "times",
+    "grade.panel.limit.reached": "limit reached",
+    "grade.panel.post.limit.reached": "Post Limit Reached",
+    "grade.panel.remove.with.points": "Remove with 30 Points",
+    "grade.panel.today.posts": "Today's Posts",
+    "grade.panel.limit.count": "Limit",
+    "grade.panel.remaining.posts": "Remaining Posts",
+    "grade.panel.remove.limit.failed": "Failed to remove limit",
 
     // Space Page
     "space.title": "Spaces",
@@ -645,6 +763,52 @@ export const translations = {
     "profile.page.score.error": "An error occurred during score calculation.",
     "profile.page.score.failed": "Score calculation failed.",
     "profile.page.user.fallback": "User",
+
+    // Quality Score Display
+    "quality.score.title": "Quality Score",
+    "quality.score.no.posts": "No posts yet",
+    "quality.score.no.posts.description":
+      "Quality score will be displayed once you create posts",
+    "quality.score.rank.super": "Super",
+    "quality.score.rank.excellent": "Excellent",
+    "quality.score.rank.good": "Good",
+    "quality.score.rank.average": "Average",
+    "quality.score.rank.needs.work": "Needs Work",
+    "quality.score.rank.beginner": "Beginner",
+    "quality.score.rank.unrated": "Unrated",
+    "quality.score.average": "Average Score",
+    "quality.score.highest": "Highest Score",
+    "quality.score.evaluated.posts": "Evaluated Posts",
+    "quality.score.rank.distribution": "Rank Distribution",
+    "quality.score.recent.scores": "Recent Scores",
+
+    // Empathy Points Display
+    "empathy.points.title": "Empathy Points",
+    "empathy.points.loading": "Loading empathy points...",
+    "empathy.points.points": "Points",
+    "empathy.points.ranking": "Ranking",
+    "empathy.points.next.rank": "To Next Rank",
+    "empathy.points.current.rank": "Current Rank",
+    "empathy.points.next.rank.progress": "Progress to Next Rank",
+    "empathy.points.score.breakdown": "Score Breakdown",
+    "empathy.points.post.evaluation": "Post Evaluation",
+    "empathy.points.comment.evaluation": "Comment Evaluation",
+    "empathy.points.participation.continuity": "Participation Continuity",
+    "empathy.points.community.contribution": "Community Contribution",
+    "empathy.points.interaction": "Interaction",
+    "empathy.points.last.updated": "Last Updated",
+
+    // Empathy Ranks
+    "empathy.rank.legend": "Legend",
+    "empathy.rank.master": "Master",
+    "empathy.rank.expert": "Expert",
+    "empathy.rank.active": "Active",
+    "empathy.rank.contributor": "Contributor",
+    "empathy.rank.participant": "Participant",
+    "empathy.rank.new": "Newcomer",
+    "empathy.rank.position": "th",
+    "empathy.rank.people": "",
+    "empathy.rank.to": "to",
 
     // Common
     "common.back": "Back",

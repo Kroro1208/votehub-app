@@ -118,7 +118,7 @@ const CreatePost = () => {
     if (result?.success) {
       toast.success(result.message);
     } else {
-      toast.error(result?.message || "制限解除に失敗しました");
+      toast.error(result?.message || t("grade.panel.remove.limit.failed"));
     }
   };
 
@@ -314,7 +314,7 @@ const CreatePost = () => {
                         ? "⚠️"
                         : "🗳️"}
                 </button>
-                <p className="mt-2">議題を投稿する</p>
+                <p className="mt-2">{t("create.post.submit.post")}</p>
               </div>
             </form>
           </CardContent>

@@ -4,6 +4,7 @@ import {
   getEmpathyRankInfo,
   getPointsToNextRank,
 } from "../../hooks/useEmpathyScore.ts";
+import { useLanguage } from "../../hooks/useLanguage.ts";
 
 interface EmpathyPointsDisplayProps {
   empathyData: EmpathyPointsData | null;
@@ -18,6 +19,7 @@ const EmpathyPointsDisplay = ({
   isLoading,
   isRankingLoading,
 }: EmpathyPointsDisplayProps) => {
+  const { t, language } = useLanguage();
   if (isLoading) {
     return (
       <div className="bg-gradient-to-br from-pink-50 to-red-50 rounded-xl border border-pink-100 p-6 animate-pulse">
@@ -34,52 +36,55 @@ const EmpathyPointsDisplay = ({
           <div className="p-2 bg-gray-100 rounded-lg">
             <Heart size={20} className="text-gray-500" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">共感ポイント</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            {t("empathy.points.title")}
+          </h3>
         </div>
         <div className="text-center py-8">
           <div className="text-gray-400 mb-2">
             <Heart size={32} className="mx-auto" />
           </div>
-          <p className="text-gray-500">共感ポイントを取得中...</p>
+          <p className="text-gray-500">{t("empathy.points.loading")}</p>
         </div>
       </div>
     );
   }
 
-  const rankInfo = getEmpathyRankInfo(empathyData.empathy_rank);
+  const rankInfo = getEmpathyRankInfo(empathyData.empathy_rank, language);
   const { nextRank, pointsNeeded } = getPointsToNextRank(
     empathyData.total_empathy_points,
     empathyData.empathy_rank,
+    language,
   );
 
   const getScoreBreakdown = () => {
     return [
       {
-        label: "投稿評価",
+        label: t("empathy.points.post.evaluation"),
         value: empathyData.post_evaluation_score,
         icon: TrendingUp,
         color: "text-blue-500",
       },
       {
-        label: "コメント評価",
+        label: t("empathy.points.comment.evaluation"),
         value: empathyData.comment_evaluation_score,
         icon: Heart,
         color: "text-pink-500",
       },
       {
-        label: "参加継続",
+        label: t("empathy.points.participation.continuity"),
         value: empathyData.participation_continuity_score,
         icon: Users,
         color: "text-green-500",
       },
       {
-        label: "コミュニティ貢献",
+        label: t("empathy.points.community.contribution"),
         value: empathyData.community_contribution_score,
         icon: Crown,
         color: "text-purple-500",
       },
       {
-        label: "相互作用",
+        label: t("empathy.points.interaction"),
         value: empathyData.interaction_score,
         icon: Star,
         color: "text-orange-500",
@@ -95,7 +100,9 @@ const EmpathyPointsDisplay = ({
         <div className="p-2 bg-pink-100 rounded-lg">
           <Heart size={20} className="text-pink-600" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900">共感ポイント</h3>
+        <h3 className="text-lg font-semibold text-gray-900">
+          {t("empathy.points.title")}
+        </h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -107,7 +114,9 @@ const EmpathyPointsDisplay = ({
               <div className="text-2xl font-bold text-gray-900">
                 {empathyData.total_empathy_points.toLocaleString()}
               </div>
-              <div className="text-sm text-gray-600">ポイント</div>
+              <div className="text-sm text-gray-600">
+                {t("empathy.points.points")}
+              </div>
             </div>
           </div>
           <div
@@ -122,16 +131,22 @@ const EmpathyPointsDisplay = ({
         <div className="space-y-3">
           {!isRankingLoading && rankingData && (
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">ランキング</span>
+              <span className="text-sm text-gray-600">
+                {t("empathy.points.ranking")}
+              </span>
               <span className="font-semibold">
-                {rankingData.position}位 / {rankingData.totalUsers}人
+                {rankingData.position}
+                {t("empathy.rank.position")} / {rankingData.totalUsers}
+                {t("empathy.rank.people")}
               </span>
             </div>
           )}
 
           {nextRank && (
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">次のランクまで</span>
+              <span className="text-sm text-gray-600">
+                {t("empathy.points.next.rank")}
+              </span>
               <span className="font-semibold">
                 {pointsNeeded.toLocaleString()}pt
               </span>
@@ -139,7 +154,9 @@ const EmpathyPointsDisplay = ({
           )}
 
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">現在のランク</span>
+            <span className="text-sm text-gray-600">
+              {t("empathy.points.current.rank")}
+            </span>
             <span className="font-semibold">{empathyData.empathy_rank}</span>
           </div>
         </div>
@@ -149,9 +166,12 @@ const EmpathyPointsDisplay = ({
       {nextRank && (
         <div className="mt-6 pt-6 border-t border-pink-200">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-gray-600">次のランクへの進捗</span>
+            <span className="text-sm text-gray-600">
+              {t("empathy.points.next.rank.progress")}
+            </span>
             <span className="text-sm font-medium">
-              {nextRank.description}まで{pointsNeeded.toLocaleString()}pt
+              {pointsNeeded.toLocaleString()}pt {t("empathy.rank.to")}{" "}
+              {nextRank.description}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -167,7 +187,9 @@ const EmpathyPointsDisplay = ({
 
       {/* スコア内訳 */}
       <div className="mt-6 pt-6 border-t border-pink-200">
-        <h4 className="text-sm font-semibold text-gray-700 mb-3">スコア内訳</h4>
+        <h4 className="text-sm font-semibold text-gray-700 mb-3">
+          {t("empathy.points.score.breakdown")}
+        </h4>
         <div className="space-y-2">
           {scoreBreakdown.map((item) => (
             <div
@@ -193,7 +215,7 @@ const EmpathyPointsDisplay = ({
       {/* 最終更新日 */}
       <div className="mt-6 pt-6 border-t border-pink-200">
         <div className="flex justify-between items-center text-sm text-gray-500">
-          <span>最終更新</span>
+          <span>{t("empathy.points.last.updated")}</span>
           <span>
             {new Date(empathyData.updated_at).toLocaleDateString("ja-JP", {
               year: "numeric",

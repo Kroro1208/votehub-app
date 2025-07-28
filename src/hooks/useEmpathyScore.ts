@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../supabase-client.ts";
+import { translations } from "../context/LanguageContext.tsx";
 
 export interface EmpathyPointsData {
   id: number;
@@ -249,15 +250,29 @@ export const updateEmpathyRankings = async (): Promise<boolean> => {
 };
 
 // ランク情報を取得するユーティリティ関数
-export const getEmpathyRankInfo = (rank: string): EmpathyRankInfo => {
+export const getEmpathyRankInfo = (
+  rank: string,
+  language: "ja" | "en" = "ja",
+): EmpathyRankInfo => {
   const rankInfo = EMPATHY_RANKS.find((r) => r.rank === rank);
-  return rankInfo || EMPATHY_RANKS[EMPATHY_RANKS.length - 1]; // デフォルトは'new'
+  const defaultRank = rankInfo || EMPATHY_RANKS[EMPATHY_RANKS.length - 1]; // デフォルトは'new'
+
+  // 翻訳されたdescriptionを取得
+  const translationKey = `empathy.rank.${defaultRank.rank}`;
+  const description =
+    (translations[language] as any)[translationKey] || defaultRank.description;
+
+  return {
+    ...defaultRank,
+    description,
+  };
 };
 
 // 次のランクまでのポイントを計算するユーティリティ関数
 export const getPointsToNextRank = (
   currentPoints: number,
   currentRank: string,
+  language: "ja" | "en" = "ja",
 ): { nextRank: EmpathyRankInfo | null; pointsNeeded: number } => {
   const currentRankIndex = EMPATHY_RANKS.findIndex(
     (r) => r.rank === currentRank,
@@ -267,11 +282,24 @@ export const getPointsToNextRank = (
     return { nextRank: null, pointsNeeded: 0 };
   }
 
-  const nextRank = EMPATHY_RANKS[currentRankIndex - 1];
-  const pointsNeeded = nextRank.min_points - currentPoints;
+  const nextRankData = EMPATHY_RANKS[currentRankIndex - 1];
+  const pointsNeeded = nextRankData.min_points - currentPoints;
+
+  // 翻訳されたnextRankを取得
+  const translationKey = `empathy.rank.${nextRankData.rank}`;
+  const description =
+    (translations[language] as any)[translationKey] || nextRankData.description;
+
+  const nextRank =
+    pointsNeeded > 0
+      ? {
+          ...nextRankData,
+          description,
+        }
+      : null;
 
   return {
-    nextRank: pointsNeeded > 0 ? nextRank : null,
+    nextRank,
     pointsNeeded: Math.max(0, pointsNeeded),
   };
 };

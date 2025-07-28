@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../supabase-client.ts";
 import { Link } from "react-router";
 import { Crown, Trophy, Medal, Award } from "lucide-react";
+import { useLanguage } from "../hooks/useLanguage.ts";
 
 interface TopUserRankingData {
   user_id: string;
@@ -25,6 +26,7 @@ const fetchTopUserRanking = async (): Promise<TopUserRankingData[]> => {
 };
 
 const RightPanel = () => {
+  const { t } = useLanguage();
   const posts = useAtomValue(postsAtom);
   const {
     data: tagRanking,
@@ -65,7 +67,9 @@ const RightPanel = () => {
       <Link to={`/post/${post.id}`} className="block group">
         <div className="text-sm">
           <p className="text-slate-800 font-medium">{post.title}</p>
-          <p className="text-orange-600 text-xs">残り {timeRemaining}</p>
+          <p className="text-orange-600 text-xs">
+            {t("right.panel.remaining")} {timeRemaining}
+          </p>
         </div>
       </Link>
     );
@@ -75,14 +79,14 @@ const RightPanel = () => {
     <div className="fixed right-6 top-32 w-72 hidden xl:block">
       <div className="bg-yellow-100 rounded-xl shadow-sm border border-slate-200 p-4 mb-2">
         <h3 className="font-semibold text-slate-800 mb-3">
-          🔥 トレンドトピック
+          🔥 {t("right.panel.trend.topics")}
         </h3>
         <div>
           {isTagLoading ? (
-            <p className="text-sm text-slate-500">読み込み中...</p>
+            <p className="text-sm text-slate-500">{t("right.panel.loading")}</p>
           ) : tagError ? (
             <div className="text-sm text-red-500">
-              <p>データ取得エラー</p>
+              <p>{t("right.panel.data.error")}</p>
               <p className="text-xs">{tagError.message}</p>
             </div>
           ) : tagRanking && tagRanking.length > 0 ? (
@@ -96,12 +100,15 @@ const RightPanel = () => {
                   #{tag.name}
                 </span>
                 <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full group-hover:bg-orange-100 group-hover:text-orange-600 transition-colors">
-                  {tag.vote_count}票
+                  {tag.vote_count}
+                  {t("right.panel.votes")}
                 </span>
               </Link>
             ))
           ) : (
-            <p className="text-sm text-slate-500">トレンドタグがありません</p>
+            <p className="text-sm text-slate-500">
+              {t("right.panel.no.trend.tags")}
+            </p>
           )}
         </div>
       </div>
@@ -110,20 +117,22 @@ const RightPanel = () => {
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-slate-800 flex items-center gap-2">
             <Crown size={16} className="text-yellow-600" />
-            トップユーザー
+            {t("right.panel.top.users")}
           </h3>
           <Link
             to="/user-ranking"
             className="text-xs text-slate-600 hover:text-slate-800 transition-colors"
           >
-            全て見る →
+            {t("right.panel.view.all")}
           </Link>
         </div>
         <div className="space-y-2">
           {isUserLoading ? (
-            <p className="text-sm text-slate-500">読み込み中...</p>
+            <p className="text-sm text-slate-500">{t("right.panel.loading")}</p>
           ) : userError ? (
-            <p className="text-sm text-red-500">エラーが発生しました</p>
+            <p className="text-sm text-red-500">
+              {t("right.panel.error.occurred")}
+            </p>
           ) : topUsers && topUsers.length > 0 ? (
             topUsers.map((user: TopUserRankingData, index: number) => {
               const getRankDisplay = (rank: number) => {
@@ -162,7 +171,8 @@ const RightPanel = () => {
                           to={`/profile/${user.user_id}`}
                           className="text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors truncate"
                         >
-                          {user.user_metadata?.full_name || "ユーザー"}
+                          {user.user_metadata?.full_name ||
+                            t("right.panel.user.fallback")}
                         </Link>
                         {/* 1-3位にはトロフィーも追加表示 */}
                         {index < 3 && (
@@ -172,7 +182,8 @@ const RightPanel = () => {
                         )}
                       </div>
                       <p className="text-xs text-slate-500">
-                        {user.total_score.toLocaleString()}pt
+                        {user.total_score.toLocaleString()}
+                        {t("right.panel.points")}
                       </p>
                     </div>
                   </div>
@@ -181,21 +192,25 @@ const RightPanel = () => {
             })
           ) : (
             <p className="text-sm text-slate-500">
-              ランキングデータがありません
+              {t("right.panel.no.ranking.data")}
             </p>
           )}
         </div>
       </div>
 
       <div className="bg-yellow-100 rounded-xl shadow-sm border border-slate-200 p-4">
-        <h3 className="font-semibold text-slate-800 mb-3">⏰ 終了間近</h3>
+        <h3 className="font-semibold text-slate-800 mb-3">
+          ⏰ {t("right.panel.ending.soon")}
+        </h3>
         <div className="space-y-3">
           {urgentPost.length > 0 ? (
             urgentPost.map((post) => (
               <UrgentPostItem key={post.id} post={post} />
             ))
           ) : (
-            <p className="text-sm text-slate-500">終了間近の投稿はありません</p>
+            <p className="text-sm text-slate-500">
+              {t("right.panel.no.urgent.posts")}
+            </p>
           )}
         </div>
       </div>

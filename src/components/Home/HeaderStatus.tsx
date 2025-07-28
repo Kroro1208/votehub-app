@@ -19,7 +19,7 @@ const HeaderStatus = () => {
         <div className="flex items-center mb-6">
           <Vote className="w-8 h-8 text-white mr-3" />
           <h1 className="text-3xl font-bold text-white">
-            {t("home.title")} - リアルタイム投票状況
+            {t("home.title")} - {t("home.header.title")}
           </h1>
         </div>
 
@@ -50,7 +50,7 @@ const HeaderStatus = () => {
                   {statsLoading ? "..." : homeStats?.todayParticipation || 0}
                 </p>
                 <p className="text-xs text-emerald-200 uppercase tracking-wide">
-                  今日の参加
+                  {t("home.stats.today.participation")}
                 </p>
               </div>
             </div>
@@ -67,7 +67,7 @@ const HeaderStatus = () => {
                   {statsLoading ? "..." : homeStats?.activeUsers || 0}
                 </p>
                 <p className="text-xs text-orange-200 uppercase tracking-wide">
-                  アクティブユーザー
+                  {t("home.stats.active.users")}
                 </p>
               </div>
             </div>

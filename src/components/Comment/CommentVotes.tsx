@@ -81,7 +81,7 @@ const CommentVotes = ({ commentId, postId, authorId }: VoteProps) => {
 
   const upVotes = votes?.filter((item) => item.vote === 1).length || 0;
   const downVotes = votes?.filter((item) => item.vote === -1).length || 0;
-  const totalReactions = upVotes + downVotes; // ❤️と💀の合計
+  const totalReactions = upVotes + downVotes;
 
   // 共感ポイント計算（自分の投票は除外）
   const otherUserVotes =
