@@ -1,8 +1,11 @@
+import { useLanguage } from "../hooks/useLanguage.ts";
+
 interface ErrorProps {
   error: Error | null;
 }
 
 const ErrorMessage = ({ error }: ErrorProps) => {
+  const { t } = useLanguage();
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full text-center border-l-4 border-red-500">
@@ -22,7 +25,7 @@ const ErrorMessage = ({ error }: ErrorProps) => {
           />
         </svg>
         <h2 className="text-2xl font-bold text-gray-800 mb-2">
-          エラーが発生しました
+          {t("common.error.occurred")}
         </h2>
         <p className="text-gray-600">{error?.message}</p>
       </div>

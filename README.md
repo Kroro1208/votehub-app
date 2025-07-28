@@ -2,9 +2,7 @@
 
 ## プロジェクト概要
 
-https://github.com/Kroro1208/votehub-app/issues/72#issue-3269550137
-
-開発状況に関しては[こちら](.claude/Claude.md)を参照
+[Demo動画](https://github.com/Kroro1208/votehub-app/issues/72#issue-3269550137)
 
 ユーザーがスペースを作成し、2択の投票形式で議論を行うリアルタイム投票プラットフォーム。説得タイム機能とポイントシステムを備えた次世代型議論アプリ。
 

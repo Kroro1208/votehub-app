@@ -317,6 +317,24 @@ export const translations = {
     "profile.bio.description": "自己紹介",
     "profile.bio.example": "あなたについて教えてください...",
 
+    // Comments Section
+    "comment.title": "コメント",
+    "comment.voting.ended": "投票期限が終了しています",
+    "comment.voting.ended.desc":
+      "この投稿の期限が過ぎているため、新しいコメントを投稿することはできません。",
+    "comment.placeholder.main": "この投稿についてコメントを書く...",
+    "comment.anonymous.user": "匿名ユーザー",
+    "comment.post.as": "として投稿します",
+    "comment.submitting": "投稿中",
+    "comment.submit": "コメントを投稿",
+    "comment.error.failed":
+      "コメント登録中にエラーが発生しました。再度お試しください。",
+    "comment.login.required": "コメントするにはログインしてください",
+    "comment.user.comments": "ユーザーコメント",
+    "comment.loading": "コメントを読み込み中...",
+    "comment.no.comments":
+      "まだコメントはありません。最初のコメントを投稿しましょう！",
+
     // Payment section
     "payment.title": "支払い・サブスクリプション",
     "payment.description": "プレミアム機能やサブスクリプションの管理",
@@ -414,6 +432,58 @@ export const translations = {
     "common.loading": "読み込み中...",
     "common.error": "エラー",
     "common.updating": "更新中...",
+    "common.error.occurred": "エラーが発生しました",
+    "common.login": "ログイン",
+    "common.login.required": "ログインが必要です",
+    "common.login.failed": "ログインに失敗しました",
+
+    // Vote Button
+    "vote.button.login.required": "投票するにはログインが必要です",
+    "vote.button.agree": "賛成",
+    "vote.button.disagree": "反対",
+    "vote.button.voted.agree": "投票済み（賛成）",
+    "vote.button.voted.disagree": "投票済み（反対）",
+    "vote.button.derived.permission":
+      "この派生質問は{targetText}者のみ投票できます",
+    "vote.button.original.vote.required":
+      "元の投稿に{targetText}投票すると投票権限が得られます",
+    "vote.button.persuasion.time":
+      "説得タイム中！投票を変更できます（1度限り）",
+    "vote.button.persuasion.completed": "説得タイム中の投票変更完了",
+    "vote.button.deadline": "投票期限",
+
+    // Comments (Legacy - moved to Comments Section above)
+    "comment.placeholder.reply": "返信を入力...",
+    "comment.persuade.failed":
+      "説得コメントの投稿に失敗しました。もう一度お試しください。",
+    "comment.persuade.empty": "説得コメントを入力してください。",
+    "comment.vote.empathy": "共感を示す",
+    "comment.vote.oppose": "反対意見を示す",
+
+    // AI Analysis
+    "ai.analysis.completed": "AI分析が完了しました！",
+    "ai.analysis.failed": "AI分析の実行に失敗しました",
+
+    // Tag Stats
+    "tag.stats.popularity.very.high": "非常に人気",
+    "tag.stats.popularity.high": "人気",
+    "tag.stats.popularity.medium": "普通",
+    "tag.stats.popularity.low": "少し人気",
+    "tag.stats.popularity.very.low": "活動少",
+    "tag.stats.post.count": "投稿数",
+    "tag.stats.vote.count": "投票数",
+    "tag.stats.popularity": "人気度",
+    "tag.stats.reaction.rate": "反応率",
+    "tag.stats.avg.votes.per.post": "投稿あたり平均投票数",
+    "tag.stats.popularity.score.formula": "人気度スコア",
+    "tag.stats.activity.level": "活動レベル",
+
+    // Common Stats
+    "common.statistics": "統計情報",
+    "common.created.date": "作成日",
+    "common.high": "高",
+    "common.medium": "中",
+    "common.low": "低",
   },
   en: {
     // Navigation
@@ -566,6 +636,23 @@ export const translations = {
     "create.post.error.tag.retry": "Failed to create tag. Please try again.",
     "create.post.publish": "Publish Post",
     "create.post.submit.post": "Submit Question",
+
+    // Comments Section
+    "comment.title": "Comments",
+    "comment.voting.ended": "Voting has ended",
+    "comment.voting.ended.desc":
+      "Since this post's deadline has passed, you cannot post new comments.",
+    "comment.placeholder.main": "Write a comment about this post...",
+    "comment.anonymous.user": "Anonymous User",
+    "comment.post.as": "will post as",
+    "comment.submitting": "Submitting",
+    "comment.submit": "Post Comment",
+    "comment.error.failed":
+      "An error occurred while registering the comment. Please try again.",
+    "comment.login.required": "Please log in to comment",
+    "comment.user.comments": "User Comments",
+    "comment.loading": "Loading comments...",
+    "comment.no.comments": "No comments yet. Post the first comment!",
 
     // Grade Panel
     "grade.panel.membership.free": "Free Member",
@@ -818,5 +905,58 @@ export const translations = {
     "common.loading": "Loading...",
     "common.error": "Error",
     "common.updating": "Updating...",
+    "common.error.occurred": "An error occurred",
+    "common.login": "Login",
+    "common.login.required": "Login required",
+    "common.login.failed": "Login failed",
+
+    // Vote Button
+    "vote.button.login.required": "Login required to vote",
+    "vote.button.agree": "Agree",
+    "vote.button.disagree": "Disagree",
+    "vote.button.voted.agree": "Voted (Agree)",
+    "vote.button.voted.disagree": "Voted (Disagree)",
+    "vote.button.derived.permission":
+      "Only {targetText} voters can vote on this derived question",
+    "vote.button.original.vote.required":
+      "Vote {targetText} on the original post to gain voting rights",
+    "vote.button.persuasion.time":
+      "Persuasion time! You can change your vote (once only)",
+    "vote.button.persuasion.completed":
+      "Vote change during persuasion time completed",
+    "vote.button.deadline": "Vote Deadline",
+
+    // Comments (Legacy - moved to Comments Section above)
+    "comment.placeholder.reply": "Enter reply...",
+    "comment.persuade.failed":
+      "Failed to post persuasive comment. Please try again.",
+    "comment.persuade.empty": "Please enter a persuasive comment.",
+    "comment.vote.empathy": "Show empathy",
+    "comment.vote.oppose": "Show opposition",
+
+    // AI Analysis
+    "ai.analysis.completed": "AI analysis completed!",
+    "ai.analysis.failed": "AI analysis execution failed",
+
+    // Tag Stats
+    "tag.stats.popularity.very.high": "Very Popular",
+    "tag.stats.popularity.high": "Popular",
+    "tag.stats.popularity.medium": "Medium",
+    "tag.stats.popularity.low": "Slightly Popular",
+    "tag.stats.popularity.very.low": "Low Activity",
+    "tag.stats.post.count": "Posts",
+    "tag.stats.vote.count": "Votes",
+    "tag.stats.popularity": "Popularity",
+    "tag.stats.reaction.rate": "Reaction Rate",
+    "tag.stats.avg.votes.per.post": "Average votes per post",
+    "tag.stats.popularity.score.formula": "Popularity Score",
+    "tag.stats.activity.level": "Activity Level",
+
+    // Common Stats
+    "common.statistics": "Statistics",
+    "common.created.date": "Created",
+    "common.high": "High",
+    "common.medium": "Medium",
+    "common.low": "Low",
   },
 };

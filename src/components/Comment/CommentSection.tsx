@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { supabase } from "../../supabase-client.ts";
 import { useAuth } from "../../hooks/useAuth.ts";
+import { useLanguage } from "../../hooks/useLanguage.ts";
 
 interface PostProps {
   postId: number;
@@ -39,7 +40,7 @@ const createComment = async (
   author?: string,
 ) => {
   if (!userId || !author) {
-    throw new Error("コメントするにはログインが必要です");
+    throw new Error("Login required to comment");
   }
 
   const { data, error } = await supabase.rpc("create_comment_secure", {
@@ -66,6 +67,7 @@ const getComment = async (postId: number): Promise<Comment[]> => {
 const CommentSection = ({ postId, voteDeadline }: PostProps) => {
   const [newCommentText, setNewCommentText] = useState<string>("");
   const { user, signInWithGoogle } = useAuth();
+  const { t } = useLanguage();
   const [isFocused, setIsFocused] = useState(false);
 
   const queryClient = useQueryClient();
@@ -116,7 +118,7 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
       const effectiveUserName =
         user?.user_metadata?.user_name ||
         user?.email?.split("@")[0] ||
-        "匿名ユーザー";
+        "Anonymous User";
 
       return createComment(newComment, postId, user?.id, effectiveUserName);
     },
@@ -185,7 +187,7 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
           size={24}
         />
         <h3 className="text-xl font-semibold text-green-600 dark:text-green-400">
-          コメント {commentCount > 0 && `(${commentCount})`}
+          {t("comment.title")} {commentCount > 0 && `(${commentCount})`}
         </h3>
       </div>
 
@@ -199,10 +201,10 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
                 className="mx-auto mb-3 text-gray-400 dark:text-gray-500"
               />
               <p className="text-gray-700 dark:text-gray-300 mb-1">
-                投票期限が終了しています
+                {t("comment.voting.ended")}
               </p>
               <p className="text-gray-500 dark:text-gray-400 text-sm">
-                この投稿の期限が過ぎているため、新しいコメントを投稿することはできません。
+                {t("comment.voting.ended.desc")}
               </p>
             </div>
           ) : (
@@ -217,7 +219,7 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
                 <textarea
                   value={newCommentText}
                   rows={3}
-                  placeholder="この投稿についてコメントを書く..."
+                  placeholder={t("comment.placeholder.main")}
                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
                     const value = (
                       e.target as HTMLTextAreaElement & { value: string }
@@ -237,9 +239,9 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
               <div className="flex justify-between items-center">
                 <div className="text-xs text-gray-600 dark:text-gray-400">
                   <span className="text-green-600 dark:text-green-400 font-medium">
-                    {user.email?.split("@")[0] || "匿名ユーザー"}
+                    {user.email?.split("@")[0] || t("comment.anonymous.user")}
                   </span>{" "}
-                  として投稿します
+                  {t("comment.post.as")}
                 </div>
 
                 <button
@@ -255,12 +257,12 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
                   {isPending ? (
                     <>
                       <Loader2 className="animate-spin" size={18} />
-                      <span>投稿中</span>
+                      <span>{t("comment.submitting")}</span>
                     </>
                   ) : (
                     <>
                       <Send size={18} />
-                      <span>コメントを投稿</span>
+                      <span>{t("comment.submit")}</span>
                     </>
                   )}
                 </button>
@@ -269,9 +271,7 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
               {isError && (
                 <div className="p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-md text-red-700 dark:text-red-400 text-sm flex items-center gap-2">
                   <AlertCircle size={16} />
-                  <span>
-                    コメント登録中にエラーが発生しました。再度お試しください。
-                  </span>
+                  <span>{t("comment.error.failed")}</span>
                 </div>
               )}
             </form>
@@ -284,7 +284,7 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
             className="mx-auto mb-3 text-gray-400 dark:text-gray-500"
           />
           <p className="text-gray-700 dark:text-gray-300 mb-3">
-            コメントするにはログインしてください
+            {t("comment.login.required")}
           </p>
           <button
             type="button"
@@ -292,7 +292,7 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
             className="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white text-sm transition-colors inline-flex items-center gap-2"
           >
             <LogIn size={16} />
-            <span>ログイン</span>
+            <span>{t("common.login")}</span>
           </button>
         </div>
       )}
@@ -306,7 +306,7 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
               size={20}
             />
             <h4 className="text-lg font-medium text-gray-800 dark:text-gray-300">
-              ユーザーコメント ({commentCount})
+              {t("comment.user.comments")} ({commentCount})
             </h4>
           </div>
         )}
@@ -318,7 +318,7 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
               size={32}
             />
             <span className="ml-3 text-gray-600 dark:text-gray-400">
-              コメントを読み込み中...
+              {t("comment.loading")}
             </span>
           </div>
         ) : error ? (
@@ -332,7 +332,7 @@ const CommentSection = ({ postId, voteDeadline }: PostProps) => {
               size={32}
               className="mx-auto mb-3 opacity-50 text-gray-500 dark:text-gray-400"
             />
-            <p>まだコメントはありません。最初のコメントを投稿しましょう！</p>
+            <p>{t("comment.no.comments")}</p>
           </div>
         ) : (
           commentTree.map((comment) => (

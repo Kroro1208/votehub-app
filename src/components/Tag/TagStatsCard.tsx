@@ -1,6 +1,7 @@
 import { useTagStatsById } from "../../hooks/useTagStats.ts";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card.tsx";
 import { Badge } from "../ui/badge.tsx";
+import { useLanguage } from "../../hooks/useLanguage.ts";
 import {
   Hash,
   MessageSquare,
@@ -22,6 +23,7 @@ export const TagStatsCard: React.FC<TagStatsCardProps> = ({
   compact = false,
 }) => {
   const { data: tagStats, isLoading, error } = useTagStatsById(tagId);
+  const { t } = useLanguage();
 
   if (isLoading) {
     return (
@@ -40,7 +42,7 @@ export const TagStatsCard: React.FC<TagStatsCardProps> = ({
     return (
       <Card className={`${compact ? "w-64" : "w-full"}`}>
         <CardContent className="p-4">
-          <p className="text-red-500 text-sm">データの取得に失敗しました</p>
+          <p className="text-red-500 text-sm">{t("common.error.occurred")}</p>
         </CardContent>
       </Card>
     );
@@ -55,11 +57,11 @@ export const TagStatsCard: React.FC<TagStatsCardProps> = ({
   };
 
   const getPopularityLabel = (score: number) => {
-    if (score >= 100) return "非常に人気";
-    if (score >= 50) return "人気";
-    if (score >= 20) return "普通";
-    if (score >= 5) return "少し人気";
-    return "活動少";
+    if (score >= 100) return t("tag.stats.popularity.very.high");
+    if (score >= 50) return t("tag.stats.popularity.high");
+    if (score >= 20) return t("tag.stats.popularity.medium");
+    if (score >= 5) return t("tag.stats.popularity.low");
+    return t("tag.stats.popularity.very.low");
   };
 
   const formatDate = (dateString: string) => {
@@ -145,7 +147,7 @@ export const TagStatsCard: React.FC<TagStatsCardProps> = ({
           <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
             <MessageSquare className="h-5 w-5 text-blue-600" />
             <div>
-              <p className="text-sm font-medium">投稿数</p>
+              <p className="text-sm font-medium">{t("tag.stats.post.count")}</p>
               <p className="text-lg font-bold text-blue-600">
                 {tagStats.post_count}
               </p>
@@ -155,7 +157,7 @@ export const TagStatsCard: React.FC<TagStatsCardProps> = ({
           <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
             <Users className="h-5 w-5 text-green-600" />
             <div>
-              <p className="text-sm font-medium">投票数</p>
+              <p className="text-sm font-medium">{t("tag.stats.vote.count")}</p>
               <p className="text-lg font-bold text-green-600">
                 {tagStats.vote_count}
               </p>
@@ -165,7 +167,7 @@ export const TagStatsCard: React.FC<TagStatsCardProps> = ({
           <div className="flex items-center gap-2 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
             <BarChart3 className="h-5 w-5 text-purple-600" />
             <div>
-              <p className="text-sm font-medium">人気度</p>
+              <p className="text-sm font-medium">{t("tag.stats.popularity")}</p>
               <p className="text-lg font-bold text-purple-600">
                 {tagStats.popularity_score}pt
               </p>
@@ -175,7 +177,9 @@ export const TagStatsCard: React.FC<TagStatsCardProps> = ({
           <div className="flex items-center gap-2 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
             <TrendingUp className="h-5 w-5 text-orange-600" />
             <div>
-              <p className="text-sm font-medium">反応率</p>
+              <p className="text-sm font-medium">
+                {t("tag.stats.reaction.rate")}
+              </p>
               <p className="text-lg font-bold text-orange-600">
                 {getEngagementRate()}
               </p>
@@ -185,16 +189,18 @@ export const TagStatsCard: React.FC<TagStatsCardProps> = ({
 
         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
           <Calendar className="h-4 w-4" />
-          <span>作成日: {formatDate(tagStats.created_at)}</span>
+          <span>
+            {t("common.created.date")}: {formatDate(tagStats.created_at)}
+          </span>
         </div>
 
         <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            統計情報
+            {t("common.statistics")}
           </h4>
           <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
             <p>
-              • 投稿あたり平均投票数:{" "}
+              • {t("tag.stats.avg.votes.per.post")}:{" "}
               {tagStats.post_count > 0
                 ? Math.round(
                     (tagStats.vote_count / tagStats.post_count) * 100,
@@ -202,15 +208,17 @@ export const TagStatsCard: React.FC<TagStatsCardProps> = ({
                 : 0}
             </p>
             <p>
-              • 人気度スコア: 投稿数 × 2 + 投票数 = {tagStats.popularity_score}
+              • {t("tag.stats.popularity.score.formula")}:{" "}
+              {t("tag.stats.post.count")} × 2 + {t("tag.stats.vote.count")} ={" "}
+              {tagStats.popularity_score}
             </p>
             <p>
-              • 活動レベル:{" "}
+              • {t("tag.stats.activity.level")}:{" "}
               {tagStats.popularity_score >= 50
-                ? "高"
+                ? t("common.high")
                 : tagStats.popularity_score >= 20
-                  ? "中"
-                  : "低"}
+                  ? t("common.medium")
+                  : t("common.low")}
             </p>
           </div>
         </div>

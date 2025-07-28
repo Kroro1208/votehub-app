@@ -9,6 +9,7 @@ import VoteConfirmModal from "./VoteConfirmModal.tsx";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useAuth } from "../../hooks/useAuth.ts";
+import { useLanguage } from "../../hooks/useLanguage.ts";
 
 interface PostProps {
   postId: number;
@@ -28,6 +29,7 @@ const VoteButton = ({
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingVote, setPendingVote] = useState<number | null>(null);
   const { user, signInWithGoogle } = useAuth();
+  const { t } = useLanguage();
 
   const {
     mutate,
@@ -81,7 +83,7 @@ const VoteButton = ({
     try {
       signInWithGoogle();
     } catch {
-      toast.error("ログインに失敗しました");
+      toast.error(t("common.login.failed"));
     }
   };
 
@@ -89,14 +91,19 @@ const VoteButton = ({
   const handleVoteClick = (voteValue: number) => {
     // ユーザーがログインしていない場合
     if (!user) {
-      toast.error("投票するにはログインが必要です");
+      toast.error(t("vote.button.login.required"));
       return;
     }
 
     // 派生質問の投票権限チェック
     if (!hasVotingPermission) {
-      const targetText = targetVoteChoice === 1 ? "賛成" : "反対";
-      toast.error(`この派生質問は${targetText}者のみ投票できます`);
+      const targetText =
+        targetVoteChoice === 1
+          ? t("vote.button.agree")
+          : t("vote.button.disagree");
+      toast.error(
+        t("vote.button.derived.permission").replace("{targetText}", targetText),
+      );
       return;
     }
 
@@ -133,7 +140,7 @@ const VoteButton = ({
     setShowConfirmModal(false);
     setPendingVote(null);
   };
-  if (isPending) return <div>読み込み中...</div>;
+  if (isPending) return <div>{t("common.loading")}</div>;
   if (error) return <div>{error.message}</div>;
 
   return (
@@ -142,14 +149,14 @@ const VoteButton = ({
       {!user && !votingExpired && (
         <div className="w-full text-center py-6 px-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-blue-700 mb-3 font-medium">
-            投票するにはログインが必要です
+            {t("vote.button.login.required")}
           </p>
           <Button
             onClick={handleLogin}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 mx-auto"
           >
             <LogIn size={18} />
-            <span>ログイン</span>
+            <span>{t("common.login")}</span>
           </Button>
         </div>
       )}
@@ -161,11 +168,18 @@ const VoteButton = ({
         targetVoteChoice !== null && (
           <div className="w-full text-center py-6 px-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-yellow-700 mb-2 font-medium">
-              この派生質問は{targetVoteChoice === 1 ? "賛成" : "反対"}
-              者のみ投票できます
+              {t("vote.button.derived.permission").replace(
+                "{targetText}",
+                targetVoteChoice === 1
+                  ? t("vote.button.agree")
+                  : t("vote.button.disagree"),
+              )}
             </p>
             <p className="text-yellow-600 text-sm">
-              元の投稿に{targetVoteChoice === 1 ? "賛成" : "反対"}
+              元の投稿に
+              {targetVoteChoice === 1
+                ? t("vote.button.agree")
+                : t("vote.button.disagree")}
               投票すると投票権限が得られます
             </p>
           </div>
@@ -194,7 +208,7 @@ const VoteButton = ({
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <TbArrowBigUpLine size={26} className="relative z-10" />
-              <span className="relative z-10">賛成</span>
+              <span className="relative z-10">{t("vote.button.agree")}</span>
               <span className="relative z-10 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold">
                 {upVotes}
               </span>
@@ -219,7 +233,7 @@ const VoteButton = ({
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <TbArrowBigDownLine size={26} className="relative z-10" />
-              <span className="relative z-10">反対</span>
+              <span className="relative z-10">{t("vote.button.disagree")}</span>
               <span className="relative z-10 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold">
                 {downVotes}
               </span>
@@ -231,7 +245,11 @@ const VoteButton = ({
         {hasUserVoted && !persuasionTime && (
           <div className="flex items-center justify-center gap-2 px-5 py-3 bg-blue-100 text-blue-700 rounded-lg border border-blue-200 font-medium h-12 min-w-[200px]">
             <CheckCircle size={20} />
-            <span>投票済み（{userVote === 1 ? "賛成" : "反対"}）</span>
+            <span>
+              {userVote === 1
+                ? t("vote.button.voted.agree")
+                : t("vote.button.voted.disagree")}
+            </span>
           </div>
         )}
         {/* 説得タイム中の通知 */}
@@ -239,8 +257,8 @@ const VoteButton = ({
           <div className="w-full text-center py-3 px-4 bg-orange-100 text-orange-700 rounded-lg border border-orange-200">
             <span className="font-semibold">
               {hasPersuasionVoteChanged
-                ? "説得タイム中の投票変更完了"
-                : "説得タイム中！投票を変更できます（1度限り）"}
+                ? t("vote.button.persuasion.completed")
+                : t("vote.button.persuasion.time")}
             </span>
           </div>
         )}
@@ -258,7 +276,7 @@ const VoteButton = ({
       {/* 投票期限の表示 */}
       {voteDeadline && (
         <div className="text-sm text-gray-500 mt-2 text-center">
-          投票期限:{" "}
+          {t("vote.button.deadline")}:{" "}
           {new Date(voteDeadline).toLocaleDateString("ja-JP", {
             year: "numeric",
             month: "long",
@@ -274,8 +292,12 @@ const VoteButton = ({
         isOpen={showConfirmModal}
         onClose={handleCancelVote}
         onConfirm={handleConfirmVote}
-        voteType={pendingVote === 1 ? "賛成" : "反対"}
-        currentVote={userVote === 1 ? "賛成" : "反対"}
+        voteType={
+          pendingVote === 1 ? t("vote.button.agree") : t("vote.button.disagree")
+        }
+        currentVote={
+          userVote === 1 ? t("vote.button.agree") : t("vote.button.disagree")
+        }
       />
     </div>
   );
