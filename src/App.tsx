@@ -7,11 +7,7 @@ import "./index.css";
 import Loading from "./components/Loading.tsx";
 
 function App() {
-  console.log("App component rendering");
-  console.log("Routes:", AppRoutes.getAllRoutes());
-
   const renderRoute = (routeDefinition: RouteDefinition) => {
-    console.log("Rendering route:", routeDefinition.path);
     const Component = lazy(routeDefinition.component);
 
     return (
