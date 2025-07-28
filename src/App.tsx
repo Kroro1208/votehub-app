@@ -35,10 +35,7 @@ function App() {
     <div className="min-h-screen bg-black dark:bg-dark-bg text-gray-100 dark:text-dark-text transition-all duration-700 pt-20">
       <Navbar />
       <div className="container mx-auto px-4 py6">
-        <Routes>
-          <Route path="/test" element={<div>Test Route Works!</div>} />
-          {AppRoutes.getAllRoutes().map(renderRoute)}
-        </Routes>
+        <Routes>{AppRoutes.getAllRoutes().map(renderRoute)}</Routes>
       </div>
     </div>
   );
