@@ -9,13 +9,13 @@ interface LanguageContextType {
 }
 
 export const LanguageContext = createContext<LanguageContextType | undefined>(
-  undefined,
+  undefined
 );
 
 export const translations = {
   ja: {
     // Navigation
-    "nav.home": "投票中",
+    "nav.home": "投票場",
     "nav.trending": "人気の投票",
     "nav.results": "結果発表",
     "nav.bookmarks": "ブックマーク",
@@ -23,7 +23,7 @@ export const translations = {
     "nav.space": "スペース",
     "nav.settings": "設定",
     "nav.notifications": "通知",
-    "nav.create": "投票を作成",
+    "nav.create": "投票作成",
 
     // Settings
     "settings.title": "設定",
@@ -148,7 +148,7 @@ export const translations = {
 
     // Space Page
     "space.title": "スペース",
-    "space.create": "スペースを作成",
+    "space.create": "スペース作成",
     "space.description":
       "興味のあるトピックで仲間と繋がり、意見を交換し、一緒に投票を楽しみましょう",
     "space.no.communities": "コミュニティがありません",
