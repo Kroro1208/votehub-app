@@ -1,4 +1,5 @@
 import { createContext } from "react";
+import Loading from "../components/Loading";
 
 export type Language = "ja" | "en";
 
@@ -341,7 +342,7 @@ export const translations = {
     "common.edit": "Edit",
     "common.save": "Save",
     "common.cancel": "Cancel",
-    "common.loading": "Loading...",
+    "common.loading": <Loading />,
     "common.error": "Error",
   },
 };

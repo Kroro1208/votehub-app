@@ -21,6 +21,7 @@ import BookmarkButton from "./BookmarkButton.tsx";
 import { isPersuasionTime } from "../../utils/formatTime.tsx";
 import { AIAnalysisSection } from "../AI/AIAnalysisSection.tsx";
 import { Button } from "../ui/button.tsx";
+import Loading from "../Loading.tsx";
 
 interface Props {
   postId: number;
@@ -343,7 +344,8 @@ const PostDetail = ({ postId }: Props) => {
 
   const avatarUrl = data?.avatar_url;
 
-  if (isPending) return <div>Loading...</div>;
+  if (isPending) return <Loading />;
+
   if (error) return <div>{error.message}</div>;
 
   return (
