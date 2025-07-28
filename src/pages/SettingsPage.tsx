@@ -163,13 +163,13 @@ export default function SettingsPage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-slate-800 dark:text-gray-100">
-                    {profileData.fullName || "未設定"}
+                    {profileData.fullName || t("profile.not.set")}
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-gray-300 mb-2">
                     {user?.email}
                   </p>
                   <p className="text-sm text-slate-600 dark:text-gray-300">
-                    {profileData.bio || "自己紹介が設定されていません"}
+                    {profileData.bio || t("profile.bio.empty")}
                   </p>
                 </div>
                 <Button
@@ -211,14 +211,14 @@ export default function SettingsPage() {
                     </label>
                   </div>
                   <div className="text-sm text-slate-600 dark:text-gray-300">
-                    <p>プロフィール画像をクリックして変更</p>
+                    <p>{t("profile.image.change.instruction")}</p>
                   </div>
                 </div>
 
                 {/* Name Input */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-gray-200 mb-1">
-                    表示名
+                    {t("profile.name.display")}
                   </label>
                   <Input
                     type="text"
@@ -233,14 +233,14 @@ export default function SettingsPage() {
                       });
                     }}
                     className="w-full px-3 py-2 border border-slate-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
-                    placeholder="あなたの名前"
+                    placeholder={t("profile.name.example")}
                   />
                 </div>
 
                 {/* Bio Input */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-gray-200 mb-1">
-                    自己紹介
+                    {t("profile.bio.description")}
                   </label>
                   <textarea
                     value={profileData.bio}
@@ -252,7 +252,7 @@ export default function SettingsPage() {
                     }}
                     rows={3}
                     className="w-full px-3 py-2 border border-slate-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
-                    placeholder="あなたについて教えてください..."
+                    placeholder={t("profile.bio.example")}
                   />
                 </div>
 
@@ -264,7 +264,9 @@ export default function SettingsPage() {
                     className="flex items-center space-x-1"
                   >
                     <Save className="w-4 h-4" />
-                    <span>{isUpdating ? "更新中..." : "保存"}</span>
+                    <span>
+                      {isUpdating ? t("common.updating") : t("common.save")}
+                    </span>
                   </Button>
                   <Button
                     onClick={() => setIsEditingProfile(false)}
@@ -272,7 +274,7 @@ export default function SettingsPage() {
                     className="flex items-center space-x-1"
                   >
                     <X className="w-4 h-4" />
-                    <span>キャンセル</span>
+                    <span>{t("common.cancel")}</span>
                   </Button>
                 </div>
               </div>
@@ -391,38 +393,38 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 dark:text-gray-100">
               <CreditCard className="w-5 h-5" />
-              <span>支払い・サブスクリプション</span>
+              <span>{t("payment.title")}</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <p className="text-sm text-slate-600 dark:text-gray-300">
-                プレミアム機能やサブスクリプションの管理
+                {t("payment.description")}
               </p>
               <div className="bg-slate-50 dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-medium text-slate-700 dark:text-gray-200">
-                      現在のプラン
+                      {t("payment.current.plan")}
                     </h4>
                     <p className="text-sm text-slate-600 dark:text-gray-300">
-                      無料プラン
+                      {t("payment.free.plan")}
                     </p>
                   </div>
                   <Button variant="outline" size="sm" disabled>
-                    近日公開
+                    {t("payment.coming.soon")}
                   </Button>
                 </div>
               </div>
               <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                 <h4 className="font-medium text-blue-800 dark:text-blue-300 mb-2">
-                  プレミアム機能
+                  {t("payment.premium.title")}
                 </h4>
                 <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                  <li>• 無制限の投稿作成</li>
-                  <li>• 高度な分析機能</li>
-                  <li>• 優先サポート</li>
-                  <li>• 広告非表示</li>
+                  <li>• {t("payment.premium.unlimited")}</li>
+                  <li>• {t("payment.premium.analytics")}</li>
+                  <li>• {t("payment.premium.support")}</li>
+                  <li>• {t("payment.premium.no.ads")}</li>
                 </ul>
               </div>
             </div>
@@ -434,14 +436,14 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 dark:text-gray-100">
               <Mail className="w-5 h-5" />
-              <span>アカウント情報</span>
+              <span>{t("account.title")}</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-200 mb-1">
-                  メールアドレス
+                  {t("account.email")}
                 </label>
                 <div className="text-slate-600 dark:text-gray-300 bg-slate-50 dark:bg-gray-700 px-3 py-2 rounded-md">
                   {user?.email}
@@ -449,7 +451,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-200 mb-1">
-                  登録日
+                  {t("account.joined")}
                 </label>
                 <div className="text-slate-600 dark:text-gray-300 bg-slate-50 dark:bg-gray-700 px-3 py-2 rounded-md flex items-center space-x-2">
                   <Calendar className="w-4 h-4" />

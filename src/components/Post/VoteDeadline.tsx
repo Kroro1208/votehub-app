@@ -55,24 +55,69 @@ const VoteDeadline = ({
     },
   });
 
-  // 1秒ごとに時間を更新（1分を切った場合のみ）
+  // 動的インターバル：残り時間に応じて更新頻度を調整
   useEffect(() => {
     if (!data.vote_deadline || votingExpired) return;
 
-    const interval = setInterval(() => {
+    const updateTime = () => {
       const newTimeRemaining = getTimeRemainingObject(data.vote_deadline);
       const newVotingExpired = isVotingExpired(data.vote_deadline);
 
       setTimeRemaining(newTimeRemaining);
       setVotingExpired(newVotingExpired);
 
-      // 投票が終了したらインターバルをクリア
-      if (newVotingExpired) {
-        clearInterval(interval);
-      }
-    }, 1000);
+      return { newTimeRemaining, newVotingExpired };
+    };
 
-    return () => clearInterval(interval);
+    // 初回更新
+    const { newVotingExpired } = updateTime();
+
+    if (newVotingExpired) return;
+
+    let intervalId: NodeJS.Timeout;
+
+    const scheduleNextUpdate = () => {
+      const current = getTimeRemainingObject(data.vote_deadline);
+
+      // null チェック
+      if (!current) return;
+
+      // 動的インターバル設定
+      let updateInterval: number;
+
+      if (current.days > 0) {
+        // 1日以上：10分間隔
+        updateInterval = 10 * 60 * 1000;
+      } else if (current.hours > 1) {
+        // 1時間以上：5分間隔
+        updateInterval = 5 * 60 * 1000;
+      } else if (current.minutes > 10) {
+        // 10分以上：1分間隔
+        updateInterval = 60 * 1000;
+      } else if (current.minutes > 1) {
+        // 1分以上：30秒間隔
+        updateInterval = 30 * 1000;
+      } else {
+        // 1分未満：1秒間隔（最も重要な時間帯のみ）
+        updateInterval = 1000;
+      }
+
+      intervalId = setTimeout(() => {
+        const { newVotingExpired } = updateTime();
+
+        if (!newVotingExpired) {
+          scheduleNextUpdate(); // 再帰的にスケジュール
+        }
+      }, updateInterval);
+    };
+
+    scheduleNextUpdate();
+
+    return () => {
+      if (intervalId) {
+        clearTimeout(intervalId);
+      }
+    };
   }, [data.vote_deadline, votingExpired]);
   return (
     <div>

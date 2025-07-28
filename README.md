@@ -2,7 +2,7 @@
 
 ## プロジェクト概要
 
-![デモ動画](public/demo.MP4)
+![デモ動画](public/demo.mov)
 
 開発状況に関しては[こちら](.claude/Claude.md)を参照
 

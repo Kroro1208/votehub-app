@@ -19,6 +19,7 @@ import {
 } from "../ui/dialog";
 import { useSupabaseMFA } from "../../hooks/useSupabaseMFA";
 import { toast } from "react-toastify";
+import { useLanguage } from "../../hooks/useLanguage";
 import {
   Shield,
   Smartphone,
@@ -30,6 +31,7 @@ import {
 } from "lucide-react";
 
 export const SupabaseMFASettings = () => {
+  const { t } = useLanguage();
   const {
     mfaFactors,
     isFactorsLoading,
@@ -85,18 +87,18 @@ export const SupabaseMFASettings = () => {
 
   const handleVerifySetup = async () => {
     if (!enrollData || !verificationCode) {
-      toast.error("認証コードを入力してください");
+      toast.error(t("mfa.error.code.required"));
       return;
     }
 
     if (verificationCode.length !== 6) {
-      toast.error("認証コードは6桁で入力してください");
+      toast.error(t("mfa.error.code.length"));
       return;
     }
 
     // 数値のみチェック
     if (!/^\d{6}$/.test(verificationCode)) {
-      toast.error("認証コードは6桁の数字で入力してください");
+      toast.error(t("mfa.error.code.format"));
       return;
     }
 
@@ -111,7 +113,7 @@ export const SupabaseMFASettings = () => {
   };
 
   const handleDisableMFA = async (factorId: string) => {
-    if (window.confirm("MFAを無効化してもよろしいですか？")) {
+    if (window.confirm(t("mfa.disable.confirm"))) {
       unenrollMFA({ factorId });
     }
   };
@@ -133,7 +135,7 @@ export const SupabaseMFASettings = () => {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-4">
-            <div className="text-sm text-gray-500">読み込み中...</div>
+            <div className="text-sm text-gray-500">{t("common.loading")}</div>
           </div>
         </CardContent>
       </Card>
@@ -146,10 +148,10 @@ export const SupabaseMFASettings = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 dark:text-gray-100">
             <Shield className="h-5 w-5" />
-            2段階認証（MFA）
+            {t("mfa.title")}
           </CardTitle>
           <CardDescription className="dark:text-gray-300">
-            Supabase公式のMFA機能を使用してアカウントのセキュリティを強化
+            {t("mfa.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -160,22 +162,23 @@ export const SupabaseMFASettings = () => {
                 <Smartphone className="h-5 w-5 text-blue-500 mt-1" />
                 <div>
                   <h4 className="font-medium text-blue-800 dark:text-blue-300">
-                    認証アプリが必要です
+                    {t("mfa.setup.required")}
                   </h4>
                   <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-                    Google Authenticator、Authy、Microsoft Authenticator
-                    などの認証アプリをスマートフォンにインストールしてください。
+                    {t("mfa.setup.install")}
                   </p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <h4 className="font-medium dark:text-gray-200">設定手順:</h4>
+                <h4 className="font-medium dark:text-gray-200">
+                  {t("mfa.setup.steps")}
+                </h4>
                 <ol className="text-sm space-y-1 list-decimal list-inside text-gray-600 dark:text-gray-400">
-                  <li>認証アプリをスマートフォンにインストール</li>
-                  <li>「MFAを設定」ボタンをクリック</li>
-                  <li>QRコードをスキャンまたは秘密キーを入力</li>
-                  <li>アプリに表示される6桁のコードを入力</li>
+                  <li>{t("mfa.setup.step1")}</li>
+                  <li>{t("mfa.setup.step2")}</li>
+                  <li>{t("mfa.setup.step3")}</li>
+                  <li>{t("mfa.setup.step4")}</li>
                 </ol>
               </div>
 
@@ -184,7 +187,7 @@ export const SupabaseMFASettings = () => {
                 disabled={isEnrolling}
                 className="w-full bg-blue-600 hover:bg-blue-700"
               >
-                {isEnrolling ? "設定準備中..." : "MFAを設定"}
+                {isEnrolling ? t("mfa.setup.preparing") : t("mfa.setup.button")}
               </Button>
             </div>
           ) : (
@@ -194,10 +197,10 @@ export const SupabaseMFASettings = () => {
                 <CheckCircle className="h-5 w-5 text-green-500 mt-1" />
                 <div>
                   <h4 className="font-medium text-green-800 dark:text-green-300">
-                    MFAが有効化されています
+                    {t("mfa.enabled")}
                   </h4>
                   <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                    あなたのアカウントは2段階認証で保護されています。
+                    {t("mfa.enabled.description")}
                   </p>
                 </div>
               </div>
@@ -205,7 +208,7 @@ export const SupabaseMFASettings = () => {
               {mfaFactors && mfaFactors.length > 0 && (
                 <div className="space-y-2">
                   <h4 className="font-medium dark:text-gray-200">
-                    登録済みの認証方法:
+                    {t("mfa.registered.methods")}
                   </h4>
                   {mfaFactors.map((factor) => (
                     <div
@@ -216,7 +219,7 @@ export const SupabaseMFASettings = () => {
                         <Key className="h-4 w-4 text-gray-500" />
                         <div>
                           <div className="text-sm font-medium dark:text-gray-200">
-                            {factor.friendly_name || "認証アプリ"}
+                            {factor.friendly_name || t("mfa.app.name")}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">
                             {factor.factor_type?.toUpperCase()} -{" "}
@@ -232,7 +235,9 @@ export const SupabaseMFASettings = () => {
                         className="flex items-center gap-1 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                       >
                         <Trash2 className="h-3 w-3" />
-                        {isUnenrolling ? "削除中..." : "削除"}
+                        {isUnenrolling
+                          ? t("common.updating")
+                          : t("mfa.disable")}
                       </Button>
                     </div>
                   ))}
@@ -249,11 +254,9 @@ export const SupabaseMFASettings = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <QrCode className="h-5 w-5 text-blue-500" />
-              MFA認証アプリを設定
+              {t("mfa.modal.title")}
             </DialogTitle>
-            <DialogDescription>
-              認証アプリでQRコードをスキャンし、表示されるコードを入力してください
-            </DialogDescription>
+            <DialogDescription>{t("mfa.modal.description")}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -262,7 +265,7 @@ export const SupabaseMFASettings = () => {
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    MFA設定を準備中...
+                    {t("mfa.modal.preparing")}
                   </p>
                 </div>
               </div>
@@ -286,7 +289,8 @@ export const SupabaseMFASettings = () => {
                         onClick={() => setShowQRCode(false)}
                         className="text-xs"
                       >
-                        QRコードをスキャンできない場合はこちら
+                        {t("common.manual.entry") ||
+                          "QRコードをスキャンできない場合はこちら"}
                       </Button>
                     </div>
                   </>
@@ -294,7 +298,7 @@ export const SupabaseMFASettings = () => {
                   <div className="space-y-3">
                     <div className="text-center">
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        認証アプリに以下のキーを手動で入力してください:
+                        {t("mfa.modal.manual.key")}
                       </p>
                       <code className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded break-all block">
                         {enrollData.totp.secret}
@@ -307,7 +311,7 @@ export const SupabaseMFASettings = () => {
                         onClick={() => setShowQRCode(true)}
                         className="text-xs"
                       >
-                        QRコードに戻る
+                        {t("common.back") || "QRコードに戻る"}
                       </Button>
                     </div>
                   </div>
@@ -318,7 +322,9 @@ export const SupabaseMFASettings = () => {
             {!isEnrolling && enrollData && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="verification-code">認証コード（6桁）</Label>
+                  <Label htmlFor="verification-code">
+                    {t("mfa.modal.code.label")}
+                  </Label>
                   <Input
                     ref={inputRef}
                     id="verification-code"
@@ -329,7 +335,7 @@ export const SupabaseMFASettings = () => {
                       const value = e.target.value.replace(/\D/g, "");
                       setVerificationCode(value);
                     }}
-                    placeholder="123456"
+                    placeholder={t("mfa.modal.code.placeholder")}
                     className="text-center text-lg font-mono"
                     disabled={false}
                     autoComplete="off"
@@ -340,10 +346,7 @@ export const SupabaseMFASettings = () => {
                 <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                   <AlertTriangle className="h-4 w-4 text-yellow-500 mt-0.5" />
                   <div className="text-xs text-yellow-800 dark:text-yellow-300">
-                    <p className="mb-1">
-                      認証アプリに表示される6桁のコードは30秒ごとに変更されます。
-                    </p>
-                    <p>設定完了まで、コードの有効期限にご注意ください。</p>
+                    <p className="mb-1">{t("mfa.modal.code.note")}</p>
                   </div>
                 </div>
               </>
@@ -352,7 +355,7 @@ export const SupabaseMFASettings = () => {
 
           <DialogFooter>
             <Button variant="outline" onClick={handleCloseModal}>
-              キャンセル
+              {t("common.cancel")}
             </Button>
             <Button
               onClick={handleVerifySetup}
@@ -363,7 +366,9 @@ export const SupabaseMFASettings = () => {
               }
               className="bg-green-600 hover:bg-green-700"
             >
-              {isVerifyingEnroll ? "検証中..." : "認証して有効化"}
+              {isVerifyingEnroll
+                ? t("mfa.modal.verifying")
+                : t("mfa.modal.verify")}
             </Button>
           </DialogFooter>
         </DialogContent>

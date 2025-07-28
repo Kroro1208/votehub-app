@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { supabase } from "../supabase-client.ts";
 import { NotificationType } from "../types/notification.ts";
 import { useAuth } from "./useAuth.ts";
@@ -7,6 +7,29 @@ import { useAuth } from "./useAuth.ts";
 export const useNotifications = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // デバウンス用のタイマー管理
+  const invalidationTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // キャッシュ無効化をデバウンス処理
+  const debouncedInvalidateCache = useCallback(() => {
+    // 既存のタイマーをクリア
+    if (invalidationTimerRef.current) {
+      clearTimeout(invalidationTimerRef.current);
+    }
+
+    // 500ms後に実行（複数の変更が短時間に発生した場合は最後の1回のみ実行）
+    invalidationTimerRef.current = setTimeout(() => {
+      if (user?.id) {
+        queryClient.invalidateQueries({
+          queryKey: ["notifications", user.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["unread-notifications-count", user.id],
+        });
+      }
+    }, 500);
+  }, [user?.id, queryClient]);
 
   // リアルタイム通知更新
   useEffect(() => {
@@ -23,21 +46,20 @@ export const useNotifications = () => {
           filter: `user_id=eq.${user.id}`,
         },
         () => {
-          // 通知データが変更されたらキャッシュを無効化
-          queryClient.invalidateQueries({
-            queryKey: ["notifications", user.id],
-          });
-          queryClient.invalidateQueries({
-            queryKey: ["unread-notifications-count", user.id],
-          });
+          // デバウンス処理されたキャッシュ無効化を実行
+          debouncedInvalidateCache();
         },
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
+      // クリーンアップ時にタイマーもクリア
+      if (invalidationTimerRef.current) {
+        clearTimeout(invalidationTimerRef.current);
+      }
     };
-  }, [user?.id, queryClient]);
+  }, [user?.id, debouncedInvalidateCache]);
 
   // 通知一覧を取得
   const {
@@ -84,57 +106,80 @@ export const useNotifications = () => {
     enabled: !!user?.id,
   });
 
-  // 通知を既読にする
-  const markAsRead = async (notificationId: number) => {
-    if (!user?.id) return false;
+  // 通知を既読にする（楽観的更新 + デバウンス処理）
+  const markAsRead = useCallback(
+    async (notificationId: number) => {
+      if (!user?.id) return false;
 
-    const { data, error } = await supabase
-      .from("notifications")
-      .update({ read: true })
-      .eq("id", notificationId)
-      .eq("user_id", user.id);
+      // 楽観的更新：UIを即座に更新
+      queryClient.setQueryData(
+        ["notifications", user.id],
+        (oldData: NotificationType[] | undefined) =>
+          oldData?.map((notification) =>
+            notification.id === notificationId
+              ? { ...notification, read: true }
+              : notification,
+          ) || [],
+      );
 
-    if (error) throw error;
+      // 未読数も楽観的に更新
+      queryClient.setQueryData(
+        ["unread-notifications-count", user.id],
+        (oldCount: number | undefined) => Math.max(0, (oldCount || 0) - 1),
+      );
 
-    // キャッシュを更新
-    queryClient.invalidateQueries({ queryKey: ["notifications", user.id] });
-    queryClient.invalidateQueries({
-      queryKey: ["unread-notifications-count", user.id],
-    });
+      try {
+        const { data, error } = await supabase
+          .from("notifications")
+          .update({ read: true })
+          .eq("id", notificationId)
+          .eq("user_id", user.id);
 
-    return data;
-  };
+        if (error) throw error;
+        return data;
+      } catch (error) {
+        // エラー時はキャッシュをリセット
+        debouncedInvalidateCache();
+        throw error;
+      }
+    },
+    [user?.id, queryClient, debouncedInvalidateCache],
+  );
 
-  // 全ての通知を既読にする
-  const markAllAsRead = async () => {
+  // 全ての通知を既読にする（楽観的更新）
+  const markAllAsRead = useCallback(async () => {
     if (!user?.id) return 0;
 
-    const { data, error } = await supabase
-      .from("notifications")
-      .update({ read: true })
-      .eq("user_id", user.id)
-      .eq("read", false);
+    // 楽観的更新：全通知を既読状態に更新
+    queryClient.setQueryData(
+      ["notifications", user.id],
+      (oldData: NotificationType[] | undefined) =>
+        oldData?.map((notification) => ({ ...notification, read: true })) || [],
+    );
 
-    if (error) throw error;
+    // 未読数を0に更新
+    queryClient.setQueryData(["unread-notifications-count", user.id], 0);
 
-    // キャッシュを更新
-    queryClient.invalidateQueries({ queryKey: ["notifications", user.id] });
-    queryClient.invalidateQueries({
-      queryKey: ["unread-notifications-count", user.id],
-    });
+    try {
+      const { data, error } = await supabase
+        .from("notifications")
+        .update({ read: true })
+        .eq("user_id", user.id)
+        .eq("read", false);
 
-    return data;
-  };
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      // エラー時はキャッシュをリセット
+      debouncedInvalidateCache();
+      throw error;
+    }
+  }, [user?.id, queryClient, debouncedInvalidateCache]);
 
-  // 手動でキャッシュを更新する
-  const refetch = () => {
-    if (!user?.id) return;
-
-    queryClient.invalidateQueries({ queryKey: ["notifications", user.id] });
-    queryClient.invalidateQueries({
-      queryKey: ["unread-notifications-count", user.id],
-    });
-  };
+  // 手動でキャッシュを更新する（デバウンス処理済み）
+  const refetch = useCallback(() => {
+    debouncedInvalidateCache();
+  }, [debouncedInvalidateCache]);
 
   return {
     notifications: notifications || [],

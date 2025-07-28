@@ -238,6 +238,66 @@ export const translations = {
     "post.nested.details.placeholder": "詳細を入力してください",
     "post.nested.target.placeholder": "対象を選択してください",
 
+    // 2FA/MFA
+    "mfa.title": "2段階認証（MFA）",
+    "mfa.description":
+      "Supabase公式のMFA機能を使用してアカウントのセキュリティを強化",
+    "mfa.setup.required": "認証アプリが必要です",
+    "mfa.setup.install":
+      "Google Authenticator、Microsoft Authenticator、Authyなどの認証アプリをスマートフォンにインストールしてください。",
+    "mfa.setup.steps": "設定手順:",
+    "mfa.setup.step1": "認証アプリをスマートフォンにインストール",
+    "mfa.setup.step2": "「MFAを設定」ボタンをクリック",
+    "mfa.setup.step3": "QRコードをスキャンまたは手動でキーを入力",
+    "mfa.setup.step4": "認証アプリに表示される6桁のコードを入力",
+    "mfa.setup.button": "MFAを設定",
+    "mfa.setup.preparing": "設定準備中...",
+    "mfa.enabled": "MFAが有効化されています",
+    "mfa.enabled.description":
+      "あなたのアカウントは2段階認証で保護されています。",
+    "mfa.registered.methods": "登録済みの認証方法:",
+    "mfa.app.name": "認証アプリ",
+    "mfa.disable": "無効化",
+    "mfa.disable.confirm": "MFAを無効化してもよろしいですか？",
+    "mfa.modal.title": "MFA認証アプリを設定",
+    "mfa.modal.description":
+      "認証アプリでQRコードをスキャンし、表示されるコードを入力してください",
+    "mfa.modal.preparing": "MFA設定を準備中...",
+    "mfa.modal.manual.key": "認証アプリに以下のキーを手動で入力してください:",
+    "mfa.modal.code.label": "認証コード（6桁）",
+    "mfa.modal.code.placeholder": "123456",
+    "mfa.modal.code.note":
+      "認証アプリに表示される6桁のコードは30秒ごとに変更されます。",
+    "mfa.modal.verify": "認証して有効化",
+    "mfa.modal.verifying": "検証中...",
+    "mfa.error.code.required": "認証コードを入力してください",
+    "mfa.error.code.length": "認証コードは6桁で入力してください",
+    "mfa.error.code.format": "認証コードは6桁の数字で入力してください",
+
+    // Profile form labels and placeholders
+    "profile.image.change.instruction": "プロフィール画像をクリックして変更",
+    "profile.name.display": "表示名",
+    "profile.name.example": "あなたの名前",
+    "profile.bio.description": "自己紹介",
+    "profile.bio.example": "あなたについて教えてください...",
+
+    // Payment section
+    "payment.title": "支払い・サブスクリプション",
+    "payment.description": "プレミアム機能やサブスクリプションの管理",
+    "payment.current.plan": "現在のプラン",
+    "payment.free.plan": "無料プラン",
+    "payment.coming.soon": "近日公開",
+    "payment.premium.title": "プレミアム機能",
+    "payment.premium.unlimited": "無制限の投稿作成",
+    "payment.premium.analytics": "高度な分析機能",
+    "payment.premium.support": "優先サポート",
+    "payment.premium.no.ads": "広告非表示",
+
+    // Account information
+    "account.title": "アカウント情報",
+    "account.email": "メールアドレス",
+    "account.joined": "登録日",
+
     // Common
     "common.back": "戻る",
     "common.edit": "編集",
@@ -472,6 +532,68 @@ export const translations = {
     "post.nested.disagree.placeholder": "Enter opposing opinion",
     "post.nested.details.placeholder": "Enter details",
     "post.nested.target.placeholder": "Select target",
+
+    // 2FA/MFA
+    "mfa.title": "Two-Factor Authentication (MFA)",
+    "mfa.description":
+      "Enhance your account security using Supabase's official MFA feature",
+    "mfa.setup.required": "Authentication app required",
+    "mfa.setup.install":
+      "Please install an authentication app like Google Authenticator, Microsoft Authenticator, or Authy on your smartphone.",
+    "mfa.setup.steps": "Setup steps:",
+    "mfa.setup.step1": "Install authentication app on your smartphone",
+    "mfa.setup.step2": 'Click "Setup MFA" button',
+    "mfa.setup.step3": "Scan QR code or manually enter the key",
+    "mfa.setup.step4":
+      "Enter the 6-digit code displayed in your authentication app",
+    "mfa.setup.button": "Setup MFA",
+    "mfa.setup.preparing": "Preparing setup...",
+    "mfa.enabled": "MFA is enabled",
+    "mfa.enabled.description":
+      "Your account is protected with two-factor authentication.",
+    "mfa.registered.methods": "Registered authentication methods:",
+    "mfa.app.name": "Authentication App",
+    "mfa.disable": "Disable",
+    "mfa.disable.confirm": "Are you sure you want to disable MFA?",
+    "mfa.modal.title": "Setup MFA Authentication App",
+    "mfa.modal.description":
+      "Scan the QR code with your authentication app and enter the displayed code",
+    "mfa.modal.preparing": "Preparing MFA setup...",
+    "mfa.modal.manual.key":
+      "Manually enter the following key in your authentication app:",
+    "mfa.modal.code.label": "Authentication Code (6 digits)",
+    "mfa.modal.code.placeholder": "123456",
+    "mfa.modal.code.note":
+      "The 6-digit code displayed in your authentication app changes every 30 seconds.",
+    "mfa.modal.verify": "Verify and Enable",
+    "mfa.modal.verifying": "Verifying...",
+    "mfa.error.code.required": "Please enter the authentication code",
+    "mfa.error.code.length": "Authentication code must be 6 digits",
+    "mfa.error.code.format": "Authentication code must be 6 numeric digits",
+
+    // Profile form labels and placeholders
+    "profile.image.change.instruction": "Click profile image to change",
+    "profile.name.display": "Display Name",
+    "profile.name.example": "Your name",
+    "profile.bio.description": "Bio",
+    "profile.bio.example": "Tell us about yourself...",
+
+    // Payment section
+    "payment.title": "Payment & Subscription",
+    "payment.description": "Manage premium features and subscriptions",
+    "payment.current.plan": "Current Plan",
+    "payment.free.plan": "Free Plan",
+    "payment.coming.soon": "Coming Soon",
+    "payment.premium.title": "Premium Features",
+    "payment.premium.unlimited": "Unlimited post creation",
+    "payment.premium.analytics": "Advanced analytics",
+    "payment.premium.support": "Priority support",
+    "payment.premium.no.ads": "Ad-free experience",
+
+    // Account information
+    "account.title": "Account Information",
+    "account.email": "Email Address",
+    "account.joined": "Joined",
 
     // Common
     "common.back": "Back",
