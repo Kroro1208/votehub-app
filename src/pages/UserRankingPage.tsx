@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { supabase } from "../supabase-client.ts";
 import { useAuth } from "../hooks/useAuth.ts";
+import { useLanguage } from "../hooks/useLanguage.ts";
 import { Trophy, Crown, Medal, Award, Star, TrendingUp } from "lucide-react";
 import Loading from "../components/Loading.tsx";
 import ErrorMessage from "../components/ErrorMessage.tsx";
@@ -35,6 +36,7 @@ const fetchUserRanking = async (): Promise<UserRankingData[]> => {
 
 const UserRankingPage = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const {
@@ -108,14 +110,14 @@ const UserRankingPage = () => {
               <Trophy size={32} className="text-white" />
             </div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              ユーザー総合ランキング
+              {t("ranking.title")}
             </h1>
             <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full">
               <Star size={32} className="text-white" />
             </div>
           </div>
           <p className="text-gray-600 dark:text-gray-300 text-lg">
-            品質度スコア + 共感ポイントの総合評価ランキング
+            {t("ranking.description")}
           </p>
         </div>
 
@@ -129,10 +131,10 @@ const UserRankingPage = () => {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-purple-700 dark:text-purple-300">
-                    あなたの順位
+                    {t("ranking.your.rank")}
                   </h3>
                   <p className="text-purple-600 dark:text-purple-400">
-                    現在の総合ランキング
+                    {t("ranking.description")}
                   </p>
                 </div>
               </div>
@@ -197,7 +199,8 @@ const UserRankingPage = () => {
                           <h3
                             className={`text-lg font-semibold ${styling.text} truncate`}
                           >
-                            {ranking.user_metadata?.full_name || "ユーザー"}
+                            {ranking.user_metadata?.full_name ||
+                              t("ranking.user.fallback")}
                           </h3>
                           {isCurrentUser && (
                             <span className="text-sm bg-green-500 px-2 items-center rounded-md text-center flex-shrink-0">
@@ -209,7 +212,9 @@ const UserRankingPage = () => {
                           <span>
                             {ranking.empathy_rank} {ranking.badge_icon}
                           </span>
-                          <span>品質度: {ranking.quality_rank}</span>
+                          <span>
+                            {t("ranking.quality.score")}: {ranking.quality_rank}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -229,10 +234,12 @@ const UserRankingPage = () => {
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400">
                       <div>
-                        品質: {ranking.quality_score.toLocaleString()}pt
+                        {t("ranking.quality.score")}:{" "}
+                        {ranking.quality_score.toLocaleString()}pt
                       </div>
                       <div>
-                        共感: {ranking.empathy_points.toLocaleString()}pt
+                        {t("ranking.empathy.points")}:{" "}
+                        {ranking.empathy_points.toLocaleString()}pt
                       </div>
                     </div>
                   </div>
@@ -251,10 +258,10 @@ const UserRankingPage = () => {
                 className="text-gray-400 dark:text-gray-500 mx-auto mb-4"
               />
               <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
-                ランキングデータがありません
+                {t("ranking.empty.title")}
               </h3>
               <p className="text-gray-500 dark:text-gray-400">
-                投稿やコメントでポイントを獲得すると、ランキングに表示されます
+                {t("ranking.empty.description")}
               </p>
             </div>
           ))}

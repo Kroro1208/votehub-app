@@ -1,5 +1,4 @@
 import { createContext } from "react";
-import Loading from "../components/Loading";
 
 export type Language = "ja" | "en";
 
@@ -172,6 +171,73 @@ export const translations = {
     "create.space.error.retry": "もう一度お試しください",
     "create.space.footer": "作成したスペースは後から編集できます",
 
+    // Auth
+    "auth.login.required": "ログインが必要です",
+    "auth.sign.out": "ログアウト",
+    "auth.sign.up": "新規登録",
+
+    // Bookmarks
+    "bookmarks.title": "ブックマーク",
+    "bookmarks.description": "保存した投稿を確認できます",
+    "bookmarks.empty.title": "ブックマークがありません",
+    "bookmarks.empty.description": "気になる投稿をブックマークしてみましょう！",
+
+    // Ranking
+    "ranking.title": "ユーザーランキング",
+    "ranking.description": "コミュニティで活躍しているユーザーをチェック！",
+    "ranking.your.rank": "あなたの順位",
+    "ranking.user.fallback": "名無しユーザー",
+    "ranking.quality.score": "品質スコア",
+    "ranking.empathy.points": "共感ポイント",
+    "ranking.empty.title": "ユーザーがいません",
+    "ranking.empty.description": "まだユーザーが参加していません",
+
+    // Posts
+    "posts.count": "投稿",
+    "votes.count": "票",
+    "comments.count": "コメント",
+
+    // Sort
+    "sort.new": "新着順",
+    "sort.popular": "人気順",
+    "sort.deadline": "期限順",
+
+    // Profile
+    "profile.not.set": "未設定",
+    "profile.bio.empty": "自己紹介がありません",
+    "profile.image.change": "画像を変更",
+    "profile.name.label": "表示名",
+    "profile.name.placeholder": "表示名を入力してください",
+    "profile.bio.label": "自己紹介",
+    "profile.bio.placeholder": "自己紹介を入力してください",
+
+    // Welcome
+    "welcome.slide1.title": "投票コミュニティへようこそ！",
+    "welcome.slide1.description": "みんなで議論し、投票で決めよう",
+    "welcome.slide1.feature1": "リアルタイム投票",
+    "welcome.slide1.feature2": "コミュニティ機能",
+    "welcome.slide1.feature3": "意見交換",
+    "welcome.slide2.title": "スペースを作成しよう",
+    "welcome.slide2.description": "興味のあるトピックでコミュニティを作成",
+    "welcome.slide2.feature1": "トピック別議論",
+    "welcome.slide2.feature2": "メンバー管理",
+    "welcome.slide2.feature3": "投票管理",
+    "welcome.slide3.title": "さあ、始めましょう！",
+    "welcome.slide3.description": "今すぐ参加して投票を楽しもう",
+    "welcome.navigation.previous": "前へ",
+    "welcome.navigation.next": "次へ",
+    "welcome.navigation.start": "始める",
+
+    // Comments
+    "comment.placeholder": "コメントを入力してください...",
+
+    // Nested Posts
+    "post.nested.title.placeholder": "タイトルを入力してください",
+    "post.nested.agree.placeholder": "賛成意見を入力してください",
+    "post.nested.disagree.placeholder": "反対意見を入力してください",
+    "post.nested.details.placeholder": "詳細を入力してください",
+    "post.nested.target.placeholder": "対象を選択してください",
+
     // Common
     "common.back": "戻る",
     "common.edit": "編集",
@@ -179,6 +245,7 @@ export const translations = {
     "common.cancel": "キャンセル",
     "common.loading": "読み込み中...",
     "common.error": "エラー",
+    "common.updating": "更新中...",
   },
   en: {
     // Navigation
@@ -337,12 +404,82 @@ export const translations = {
     "create.space.error.retry": "Please try again",
     "create.space.footer": "Created spaces can be edited later",
 
+    // Auth
+    "auth.login.required": "Login is required",
+    "auth.sign.out": "Sign Out",
+    "auth.sign.up": "Sign Up",
+
+    // Bookmarks
+    "bookmarks.title": "Bookmarks",
+    "bookmarks.description": "View your saved posts",
+    "bookmarks.empty.title": "No bookmarks yet",
+    "bookmarks.empty.description":
+      "Bookmark interesting posts to see them here!",
+
+    // Ranking
+    "ranking.title": "User Ranking",
+    "ranking.description": "Check out the most active users in the community!",
+    "ranking.your.rank": "Your Rank",
+    "ranking.user.fallback": "Anonymous User",
+    "ranking.quality.score": "Quality Score",
+    "ranking.empathy.points": "Empathy Points",
+    "ranking.empty.title": "No users found",
+    "ranking.empty.description": "No users have joined yet",
+
+    // Posts
+    "posts.count": "posts",
+    "votes.count": "votes",
+    "comments.count": "comments",
+
+    // Sort
+    "sort.new": "Newest",
+    "sort.popular": "Popular",
+    "sort.deadline": "Deadline",
+
+    // Profile
+    "profile.not.set": "Not set",
+    "profile.bio.empty": "No bio available",
+    "profile.image.change": "Change image",
+    "profile.name.label": "Display Name",
+    "profile.name.placeholder": "Enter your display name",
+    "profile.bio.label": "Bio",
+    "profile.bio.placeholder": "Enter your bio",
+
+    // Welcome
+    "welcome.slide1.title": "Welcome to Voting Community!",
+    "welcome.slide1.description": "Discuss together and decide by voting",
+    "welcome.slide1.feature1": "Real-time voting",
+    "welcome.slide1.feature2": "Community features",
+    "welcome.slide1.feature3": "Opinion exchange",
+    "welcome.slide2.title": "Create Spaces",
+    "welcome.slide2.description":
+      "Create communities on topics you're interested in",
+    "welcome.slide2.feature1": "Topic-based discussions",
+    "welcome.slide2.feature2": "Member management",
+    "welcome.slide2.feature3": "Vote management",
+    "welcome.slide3.title": "Let's get started!",
+    "welcome.slide3.description": "Join now and enjoy voting",
+    "welcome.navigation.previous": "Previous",
+    "welcome.navigation.next": "Next",
+    "welcome.navigation.start": "Get Started",
+
+    // Comments
+    "comment.placeholder": "Enter your comment...",
+
+    // Nested Posts
+    "post.nested.title.placeholder": "Enter title",
+    "post.nested.agree.placeholder": "Enter supporting opinion",
+    "post.nested.disagree.placeholder": "Enter opposing opinion",
+    "post.nested.details.placeholder": "Enter details",
+    "post.nested.target.placeholder": "Select target",
+
     // Common
     "common.back": "Back",
     "common.edit": "Edit",
     "common.save": "Save",
     "common.cancel": "Cancel",
-    "common.loading": <Loading />,
+    "common.loading": "Loading...",
     "common.error": "Error",
+    "common.updating": "Updating...",
   },
 };

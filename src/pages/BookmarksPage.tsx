@@ -1,5 +1,6 @@
 import { useBookmarks } from "../hooks/useBookmarks.ts";
 import { useAuth } from "../hooks/useAuth.ts";
+import { useLanguage } from "../hooks/useLanguage.ts";
 import Loading from "../components/Loading.tsx";
 import ErrorMessage from "../components/ErrorMessage.tsx";
 import PostItem from "../components/Post/PostItem.tsx";
@@ -7,6 +8,7 @@ import { Bookmark, BookmarkCheck } from "lucide-react";
 
 const BookmarksPage = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { bookmarkedPosts, isBookmarksLoading, bookmarksError } =
     useBookmarks();
 
@@ -15,11 +17,9 @@ const BookmarksPage = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            ログインが必要です
+            {t("auth.login.required")}
           </h2>
-          <p className="text-gray-500">
-            ブックマークを表示するにはログインしてください
-          </p>
+          <p className="text-gray-500">{t("bookmarks.description")}</p>
         </div>
       </div>
     );
@@ -38,10 +38,10 @@ const BookmarksPage = () => {
               <BookmarkCheck size={24} className="text-white" />
             </div>
             <h1 className="text-3xl font-bold text-slate-900">
-              お気に入りブックマーク
+              {t("bookmarks.title")}
             </h1>
           </div>
-          <p className="text-slate-600 ml-13">保存した投稿を確認できます</p>
+          <p className="text-slate-600 ml-13">{t("bookmarks.description")}</p>
         </div>
 
         {/* Content */}
@@ -66,10 +66,10 @@ const BookmarksPage = () => {
               <Bookmark size={40} className="text-yellow-500" />
             </div>
             <h3 className="text-2xl font-semibold text-slate-900 mb-3">
-              ブックマークがありません
+              {t("bookmarks.empty.title")}
             </h3>
             <p className="text-slate-600 mb-6">
-              気になる投稿を見つけたら、ブックマークボタンを押して保存しましょう！
+              {t("bookmarks.empty.description")}
             </p>
           </div>
         )}

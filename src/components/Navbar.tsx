@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { CgMenuGridO } from "react-icons/cg";
 import { RiCloseLargeFill } from "react-icons/ri";
 import { useAuth } from "../hooks/useAuth.ts";
+import { useLanguage } from "../hooks/useLanguage.ts";
 import { VscSignOut } from "react-icons/vsc";
 import { FaRegUser } from "react-icons/fa";
 import { Button } from "./ui/button.tsx";
@@ -13,6 +14,7 @@ import { Coins } from "lucide-react";
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { signInWithGoogle, signOut, user } = useAuth();
+  const { t } = useLanguage();
   const { points, isLoading: pointsLoading } = useUserPoints();
 
   const displayName = user?.user_metadata.user_name || user?.email;
@@ -29,31 +31,31 @@ export default function Navbar() {
                 to="/"
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
-                Home
+                {t("nav.home")}
               </Link>
               <Link
                 to="/create"
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
-                Create Post
+                {t("nav.create")}
               </Link>
               <Link
                 to="/space"
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
-                Space
+                {t("nav.space")}
               </Link>
               <Link
                 to="/space/create"
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
-                Create Space
+                {t("space.create")}
               </Link>
               <Link
                 to="/user-ranking"
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
-                UserRanking
+                {t("ranking.title")}
               </Link>
             </div>
 
@@ -98,7 +100,9 @@ export default function Navbar() {
                       onClick={signOut}
                       className="cursor-pointer flex gap-3 items-center justify-center bg-red-500 px-3 py-1 rounded"
                     >
-                      <span className="text-gray-300">SignOut</span>
+                      <span className="text-gray-300">
+                        {t("auth.sign.out")}
+                      </span>
                       <VscSignOut size={25} />
                     </Button>
                   </div>
@@ -109,7 +113,7 @@ export default function Navbar() {
                   onClick={signInWithGoogle}
                   className="cursor-pointer bg-blue-500 px-3 py-1 rounded"
                 >
-                  <span className="text-gray-300">SignUp</span>
+                  <span className="text-gray-300">{t("auth.sign.up")}</span>
                 </Button>
               )}
             </div>
@@ -145,31 +149,31 @@ export default function Navbar() {
                   to="/"
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
                 >
-                  Home
+                  {t("nav.home")}
                 </Link>
                 <Link
                   to="/create"
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
                 >
-                  Create Post
+                  {t("nav.create")}
                 </Link>
                 <Link
                   to="/space"
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
                 >
-                  Space
+                  {t("nav.space")}
                 </Link>
                 <Link
                   to="/space/create"
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
                 >
-                  Create Space
+                  {t("space.create")}
                 </Link>
                 <Link
-                  to="/ranking"
+                  to="/user-ranking"
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
                 >
-                  Ranking
+                  {t("ranking.title")}
                 </Link>
               </div>
             </div>

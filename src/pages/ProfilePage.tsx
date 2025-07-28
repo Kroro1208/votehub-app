@@ -271,7 +271,7 @@ const ProfilePage = () => {
                   className="inline-flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
                 >
                   <Settings size={14} />
-                  <span>プロフィールを編集</span>
+                  <span>設定と編集</span>
                 </Link>
               )}
 
