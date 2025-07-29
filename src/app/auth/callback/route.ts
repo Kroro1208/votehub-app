@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
           `${requestUrl.origin}/auth/login?error=callback_failed`,
         );
       }
-      
+
       // 成功時はホームページにリダイレクト
       return NextResponse.redirect(`${requestUrl.origin}/`);
     } catch (error) {

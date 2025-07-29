@@ -9,11 +9,11 @@ export interface AuthContextType {
   signInWithGoogle: () => void;
   signInWithEmail: (
     email: string,
-    password: string
+    password: string,
   ) => Promise<{ error?: string }>;
   signUpWithEmail: (
     email: string,
-    password: string
+    password: string,
   ) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
 }
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state change:", event, session?.user?.email);
-      
+
       // 最初の初期化完了後はloadingをfalseに設定する必要はない
       if (loading) {
         setLoading(false);
@@ -61,13 +61,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
 
       // Handle cookie management based on auth events
-      if (event === 'SIGNED_IN' && session) {
+      if (event === "SIGNED_IN" && session) {
         // Set httpOnly cookies when user signs in
         try {
-          await fetch('/api/auth/set-cookies', {
-            method: 'POST',
+          await fetch("/api/auth/set-cookies", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
               access_token: session.access_token,
@@ -75,24 +75,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }),
           });
         } catch (error) {
-          console.error('Error setting cookies:', error);
+          console.error("Error setting cookies:", error);
         }
-      } else if (event === 'SIGNED_OUT') {
+      } else if (event === "SIGNED_OUT") {
         // Clear httpOnly cookies when user signs out
         try {
-          await fetch('/api/auth/clear-cookies', {
-            method: 'POST',
+          await fetch("/api/auth/clear-cookies", {
+            method: "POST",
           });
         } catch (error) {
-          console.error('Error clearing cookies:', error);
+          console.error("Error clearing cookies:", error);
         }
-      } else if (event === 'TOKEN_REFRESHED' && session) {
+      } else if (event === "TOKEN_REFRESHED" && session) {
         // Update cookies when tokens are refreshed
         try {
-          await fetch('/api/auth/set-cookies', {
-            method: 'POST',
+          await fetch("/api/auth/set-cookies", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
               access_token: session.access_token,
@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }),
           });
         } catch (error) {
-          console.error('Error updating cookies:', error);
+          console.error("Error updating cookies:", error);
         }
       }
     });
@@ -147,7 +147,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { error: "サインインエラーが発生しました" };
       }
     },
-    []
+    [],
   );
 
   const signUpWithEmail = useCallback(
@@ -170,7 +170,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { error: "サインアップエラーが発生しました" };
       }
     },
-    []
+    [],
   );
 
   const signOut = useCallback(async () => {
@@ -193,7 +193,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       signUpWithEmail,
       signOut,
     }),
-    [user, loading, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut]
+    [
+      user,
+      loading,
+      signInWithGoogle,
+      signInWithEmail,
+      signUpWithEmail,
+      signOut,
+    ],
   );
 
   return (
