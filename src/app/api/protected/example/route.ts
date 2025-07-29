@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
     // Get tokens from httpOnly cookies
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const accessToken = cookieStore.get("sb_access_token")?.value;
 
     if (!accessToken) {
@@ -17,8 +17,8 @@ export async function GET() {
 
     // Validate token with Supabase
     const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      process.env["NEXT_PUBLIC_SUPABASE_URL"]!,
+      process.env["NEXT_PUBLIC_SUPABASE_ANON_KEY"]!,
     );
 
     const {

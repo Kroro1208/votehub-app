@@ -1,7 +1,5 @@
-/**
- * セキュアなルート保護クラス（暗号化されたルートパターン付き）
- * 改ざんを防止し、一元的なルート管理を提供
- */
+//ルート保護する
+// 改ざんを防止し、一元的なルート管理を提供するクラス
 class RouteProtection {
   private static instance: RouteProtection;
 
@@ -50,9 +48,8 @@ class RouteProtection {
     return RouteProtection.instance;
   }
 
-  /**
-   * ルートが認証を必要とするかをチェック
-   */
+  // ルートが認証を必要とするかをチェック
+
   public isProtectedRoute(path: string): boolean {
     this._verifyIntegrity();
     return this._protectedPatterns.some((pattern) =>
@@ -60,9 +57,7 @@ class RouteProtection {
     );
   }
 
-  /**
-   * ルートが認証ルートかをチェック（ログイン済みの場合はリダイレクトすべき）
-   */
+  // ルートが認証ルートかをチェック（ログイン済みの場合はリダイレクトすべき）
   public isAuthRoute(path: string): boolean {
     this._verifyIntegrity();
     return this._authPatterns.some((pattern) =>
@@ -70,9 +65,7 @@ class RouteProtection {
     );
   }
 
-  /**
-   * ルートが公開アクセス可能かをチェック
-   */
+  // ルートが公開アクセス可能かをチェック
   public isPublicRoute(path: string): boolean {
     this._verifyIntegrity();
     return this._publicPatterns.some((pattern) =>
@@ -80,17 +73,13 @@ class RouteProtection {
     );
   }
 
-  /**
-   * 追加セキュリティのために保護されたAPIルートをすべて取得
-   */
+  // 追加セキュリティのために保護されたAPIルートをすべて取得
   public getProtectedApiRoutes(): ReadonlyArray<string> {
     this._verifyIntegrity();
     return this._protectedPatterns.filter((route) => route.startsWith("/api/"));
   }
 
-  /**
-   * ルートアクセスレベルを検証
-   */
+  // ルートアクセスレベルを検証
   public validateAccess(
     path: string,
     isAuthenticated: boolean,
@@ -131,9 +120,7 @@ class RouteProtection {
     return { allowed: false, action: "deny" };
   }
 
-  /**
-   * ワイルドカードと正規表現サポート付きの高度なパターンマッチング
-   */
+  // ワイルドカードと正規表現サポート付きの高度なパターンマッチング
   private _matchesPattern(path: string, pattern: string): boolean {
     // 完全一致
     if (path === pattern) return true;
@@ -152,9 +139,7 @@ class RouteProtection {
     return false;
   }
 
-  /**
-   * 整合性チェックサムを生成
-   */
+  // 整合性チェックサムを生成
   private _generateChecksum(): string {
     const data = [
       ...this._protectedPatterns,
@@ -172,33 +157,12 @@ class RouteProtection {
     return hash.toString(36);
   }
 
-  /**
-   * クラスの整合性が改ざんされていないかを検証
-   */
+  // クラスの整合性が改ざんされていないかを検証
   private _verifyIntegrity(): void {
     const currentChecksum = this._generateChecksum();
     if (currentChecksum !== this._checksum) {
       throw new Error("セキュリティ違反: ルート設定が改ざんされています");
     }
-  }
-
-  /**
-   * 実行時にルートパターンを追加（動的ルート登録用）
-   */
-  public addProtectedRoute(pattern: string): void {
-    // パターン形式を最初に検証
-    if (!pattern || typeof pattern !== "string") {
-      throw new Error(`無効なルートパターン: ${pattern}`);
-    }
-
-    // セキュリティ試行をログ記録（本番環境では監視すべき）
-    console.warn(`実行時ルート変更が試行されました: ${pattern}`);
-
-    // 注意: これにはチェックサムの再構築が必要
-    // 実装はセキュリティ要件に依存
-    throw new Error(
-      `セキュリティのため実行時ルート変更は許可されていません。パターン: ${pattern}`,
-    );
   }
 }
 

@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
 
     const response = NextResponse.json({ success: true });
 
-    // Set httpOnly cookies with proper security settings
+    // httpOnlyをクッキーに設定
     response.cookies.set("sb_access_token", access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
