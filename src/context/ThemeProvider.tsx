@@ -15,7 +15,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
 
   useEffect(() => {
     setMounted(true);
-    
+
     // クライアントサイドでのみ実行
     if (typeof window !== "undefined") {
       const savedTheme = localStorage.getItem("theme") as Theme;

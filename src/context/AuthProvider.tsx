@@ -7,8 +7,14 @@ export interface AuthContextType {
   user: User | null;
   loading: boolean;
   signInWithGoogle: () => void;
-  signInWithEmail: (email: string, password: string) => Promise<{ error?: string }>;
-  signUpWithEmail: (email: string, password: string) => Promise<{ error?: string }>;
+  signInWithEmail: (
+    email: string,
+    password: string,
+  ) => Promise<{ error?: string }>;
+  signUpWithEmail: (
+    email: string,
+    password: string,
+  ) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
 }
 
@@ -19,7 +25,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
         if (error) {
           console.error("Error getting session:", error);
           // Clear any corrupted session data
@@ -37,19 +46,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     initializeAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state change:", event, session?.user?.email);
-        
-        // 最初の初期化完了後はloadingをfalseに設定する必要はない
-        if (loading) {
-          setLoading(false);
-        }
-        
-        // すべてのイベントで同じ処理を実行するので統一
-        setUser(session?.user ?? null);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state change:", event, session?.user?.email);
+
+      // 最初の初期化完了後はloadingをfalseに設定する必要はない
+      if (loading) {
+        setLoading(false);
       }
-    );
+
+      // すべてのイベントで同じ処理を実行するので統一
+      setUser(session?.user ?? null);
+    });
 
     return () => {
       subscription.unsubscribe();
@@ -59,16 +68,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signInWithGoogle = useCallback(async () => {
     try {
       const redirectTo = `${window.location.origin}/auth/callback`;
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({ 
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectTo,
           // queryParamsを完全に削除してデフォルトの動作にする
           // これによりGoogleのアカウント選択画面がよりスムーズになる
-        }
+        },
       });
-      
+
       if (error) {
         console.error("Google sign in error:", error);
       }
@@ -77,42 +86,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  const signInWithEmail = useCallback(async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) {
-        console.error("Email sign in error:", error);
-        return { error: error.message };
-      }
-      return {};
-    } catch (error) {
-      console.error("Sign in error:", error);
-      return { error: "サインインエラーが発生しました" };
-    }
-  }, []);
-
-  const signUpWithEmail = useCallback(async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+  const signInWithEmail = useCallback(
+    async (email: string, password: string) => {
+      try {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) {
+          console.error("Email sign in error:", error);
+          return { error: error.message };
         }
-      });
-      if (error) {
-        console.error("Email sign up error:", error);
-        return { error: error.message };
+        return {};
+      } catch (error) {
+        console.error("Sign in error:", error);
+        return { error: "サインインエラーが発生しました" };
       }
-      return {};
-    } catch (error) {
-      console.error("Sign up error:", error);
-      return { error: "サインアップエラーが発生しました" };
-    }
-  }, []);
+    },
+    [],
+  );
+
+  const signUpWithEmail = useCallback(
+    async (email: string, password: string) => {
+      try {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        });
+        if (error) {
+          console.error("Email sign up error:", error);
+          return { error: error.message };
+        }
+        return {};
+      } catch (error) {
+        console.error("Sign up error:", error);
+        return { error: "サインアップエラーが発生しました" };
+      }
+    },
+    [],
+  );
 
   const signOut = useCallback(async () => {
     try {
@@ -125,18 +140,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  const contextValue = useMemo(() => ({
-    user,
-    loading,
-    signInWithGoogle,
-    signInWithEmail,
-    signUpWithEmail,
-    signOut
-  }), [user, loading, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut]);
+  const contextValue = useMemo(
+    () => ({
+      user,
+      loading,
+      signInWithGoogle,
+      signInWithEmail,
+      signUpWithEmail,
+      signOut,
+    }),
+    [
+      user,
+      loading,
+      signInWithGoogle,
+      signInWithEmail,
+      signUpWithEmail,
+      signOut,
+    ],
+  );
 
   return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 };

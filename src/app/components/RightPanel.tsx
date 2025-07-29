@@ -51,7 +51,7 @@ const RightPanel = () => {
       const deadline = new Date(post.vote_deadline);
       const now = new Date();
       const oneDayBeforeDeadline = new Date(
-        deadline.getTime() - 24 * 60 * 60 * 1000
+        deadline.getTime() - 24 * 60 * 60 * 1000,
       );
       return now >= oneDayBeforeDeadline && now < deadline;
     })

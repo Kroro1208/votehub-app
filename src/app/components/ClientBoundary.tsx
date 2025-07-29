@@ -11,9 +11,9 @@ interface ClientBoundaryProps {
  * VS Code拡張機能やブラウザ拡張機能による
  * DOM変更からReactコンポーネントを保護する
  */
-export default function ClientBoundary({ 
-  children, 
-  fallback = null 
+export default function ClientBoundary({
+  children,
+  fallback = null,
 }: ClientBoundaryProps) {
   const [isMounted, setIsMounted] = useState(false);
 

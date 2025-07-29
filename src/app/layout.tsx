@@ -21,11 +21,13 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body suppressHydrationWarning={true}>
-        <NoSSR fallback={
-          <div className="min-h-screen bg-slate-100 dark:bg-gray-900 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        }>
+        <NoSSR
+          fallback={
+            <div className="min-h-screen bg-slate-100 dark:bg-gray-900 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          }
+        >
           <ClientProviders>
             <div className="min-h-screen bg-background text-foreground transition-all duration-700 pt-20">
               <Navbar />

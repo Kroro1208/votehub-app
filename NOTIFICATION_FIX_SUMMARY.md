@@ -32,12 +32,10 @@ AND user_id::UUID != NEW.user_id::UUID
 #### 新規作成ファイル:
 
 1. **`supabase/functions/deadline-checker/index.ts`**
-
    - 期限切れ投稿を検出し通知を送信するEdge Function
    - 定期的にcronで実行される想定
 
 2. **`supabase/functions/deadline-checker/deno.json`**
-
    - Edge Functionの依存関係設定
 
 3. **`migration_fix_notification_bugs.sql`**

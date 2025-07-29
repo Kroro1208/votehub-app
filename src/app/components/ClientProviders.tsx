@@ -22,7 +22,7 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
             refetchOnWindowFocus: false,
           },
         },
-      })
+      }),
   );
 
   return (

@@ -11,7 +11,6 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
   const [language, setLanguageState] = useState<Language>("en");
 
   useEffect(() => {
-    
     // クライアントサイドでのみ実行
     if (typeof window !== "undefined") {
       // Check localStorage first, then browser language

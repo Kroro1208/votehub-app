@@ -189,7 +189,7 @@ export default function Navbar() {
                 >
                   {t("ranking.title")}
                 </Link>
-                
+
                 {/* モバイル用認証ボタン */}
                 {user ? (
                   <button

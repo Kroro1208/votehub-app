@@ -21,7 +21,7 @@ export interface CommunityItemType extends PostType {
 }
 
 const getCommunitityItem = async (
-  communityId: number
+  communityId: number,
 ): Promise<CommunityItemType[]> => {
   // get_posts_with_counts関数を使用して投票数とコメント数を取得
   const { data, error } = await supabase

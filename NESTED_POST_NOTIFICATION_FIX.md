@@ -53,12 +53,10 @@ When creating nested posts (派生質問), the system was incorrectly triggering
 ## Testing Recommendations
 
 1. **Create a nested post with a short deadline (6-10 minutes)**:
-
    - Verify only "nested post created" notification is sent to target voters
    - Verify no "deadline ended" notification is sent immediately
 
 2. **Wait for the deadline to actually pass**:
-
    - Verify "deadline ended" notification is sent after the actual deadline
    - Verify no duplicate notifications
 
