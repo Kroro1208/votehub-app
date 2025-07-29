@@ -1,6 +1,6 @@
+import { useRouter } from "next/navigation";
 import React from "react";
-import { Navigate } from "react-router";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../app/hooks/useAuth";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,10 +12,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiresAuth = false,
 }) => {
   const { user } = useAuth();
+  const router = useRouter();
 
   if (requiresAuth && !user) {
     // 未認証の場合はhomeにリダイレクト
-    return <Navigate to="/" replace />;
+    router.push("/");
+    return null;
   }
 
   return <>{children}</>;

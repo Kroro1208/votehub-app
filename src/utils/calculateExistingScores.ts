@@ -1,4 +1,4 @@
-import { supabase } from "../supabase-client.ts";
+import { supabase } from "../supabase-client";
 
 // 既存の全投稿に対して品質度スコアを計算
 export const calculateAllExistingQualityScores = async () => {
@@ -75,7 +75,7 @@ export const calculateAllExistingEmpathyPoints = async () => {
     }
 
     // 重複を除去
-    const uniqueUsers = [...new Set(users.map((u) => u.user_id))];
+    const uniqueUsers = Array.from(new Set(users.map((u) => u.user_id)));
     console.log(`${uniqueUsers.length}人のユーザーの共感ポイントを計算中...`);
 
     let successCount = 0;

@@ -1,19 +1,25 @@
-# Dockerfile.dev
+# Dockerfile.dev - Next.js開発用
 FROM node:20-alpine
 
 WORKDIR /app
+
+# Alpine Linuxの必要なパッケージをインストール
+RUN apk add --no-cache libc6-compat
 
 # package.jsonとpackage-lock.jsonをコピー
 COPY package*.json ./
 
 # 依存関係をインストール（開発依存関係も含む）
-RUN npm ci
+RUN npm ci --omit=optional && npm cache clean --force
 
 # ソースコードをコピー
 COPY . .
 
-# Viteの開発サーバー用ポートを公開
-EXPOSE 5173
+# Next.jsの開発サーバー用ポートを公開
+EXPOSE 3000
 
-# 開発サーバーを起動（ホットリロード有効）
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+# 環境変数設定
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Next.js開発サーバーを起動（ホットリロード有効）
+CMD ["npx", "next", "dev", "--hostname", "0.0.0.0"]

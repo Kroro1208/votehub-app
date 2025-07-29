@@ -1,5 +1,5 @@
-import { supabase } from "../supabase-client.ts";
-import type { TagStats } from "../hooks/useTagStats.ts";
+import { supabase } from "../supabase-client";
+import type { TagStats } from "../app/hooks/useTagStats";
 
 export interface CreateTagParams {
   name: string;
@@ -38,7 +38,7 @@ export const createTag = async (params: CreateTagParams) => {
   const { name, communityId } = params;
 
   try {
-    // 重複チェック（同じコミュニティ内で同じ名前のタグがないかチェック）
+    // TODO: 重複チェック（同じコミュニティ内で同じ名前のタグがないかチェック）
     const { data: existingTags, error: checkError } = await supabase
       .from("tags")
       .select("id, name")
@@ -64,7 +64,8 @@ export const createTag = async (params: CreateTagParams) => {
       throw new Error(`最大ID取得エラー: ${maxIdError.message}`);
     }
 
-    const newId = maxIdData && maxIdData.length > 0 ? maxIdData[0].id + 1 : 1;
+    const newId =
+      maxIdData && maxIdData.length > 0 ? (maxIdData[0]?.id ?? 0) + 1 : 1;
 
     // タグ作成
     const { data, error } = await supabase

@@ -20,12 +20,15 @@ export const createPostSchema = z.object({
       message: "投票期限は未来の日付を選択してください",
     }),
   image: z
-    .instanceof(FileList)
-    .refine((files) => files?.length === 1, "画像をアップロードしてください")
-    .refine(
-      (files) => ["image/jpeg", "image/png"].includes(files?.[0]?.type || ""),
-      "対応している画像形式はJPEG、PNGです",
-    ),
+    .any()
+    .refine((files) => {
+      if (typeof window === "undefined") return true; // サーバーサイドではスキップ
+      return files instanceof FileList && files?.length === 1;
+    }, "画像をアップロードしてください")
+    .refine((files) => {
+      if (typeof window === "undefined") return true; // サーバーサイドではスキップ
+      return ["image/jpeg", "image/png"].includes(files?.[0]?.type || "");
+    }, "対応している画像形式はJPEG、PNGです"),
   parent_post_id: z.number().int().nullable().optional(),
 });
 
@@ -69,17 +72,20 @@ export const createNestedPostSchema = z.object({
     }),
   }),
   image: z
-    .instanceof(FileList)
-    .refine(
-      (files) => files.length === 0 || files.length === 1,
-      "画像は1つまでアップロード可能です",
-    )
-    .refine(
-      (files) =>
+    .any()
+    .refine((files) => {
+      if (typeof window === "undefined") return true; // サーバーサイドではスキップ
+      return (
+        files instanceof FileList && (files.length === 0 || files.length === 1)
+      );
+    }, "画像は1つまでアップロード可能です")
+    .refine((files) => {
+      if (typeof window === "undefined") return true; // サーバーサイドではスキップ
+      return (
         files.length === 0 ||
-        ["image/jpeg", "image/png"].includes(files[0]?.type || ""),
-      "対応している画像形式はJPEG、PNGです",
-    ),
+        ["image/jpeg", "image/png"].includes(files[0]?.type || "")
+      );
+    }, "対応している画像形式はJPEG、PNGです"),
 });
 
 export const japaneseEmojiMap: Record<string, string[]> = {

@@ -115,7 +115,8 @@ class RateLimiter {
    */
   cleanup(): void {
     const now = Date.now();
-    for (const [key, entry] of this.storage.entries()) {
+    const entries = Array.from(this.storage.entries());
+    for (const [key, entry] of entries) {
       if (now >= entry.resetTime) {
         this.storage.delete(key);
       }

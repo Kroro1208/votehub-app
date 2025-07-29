@@ -378,7 +378,7 @@ class SecurityAuditor {
       }
     });
 
-    return [...new Set(recommendations)]; // 重複を除去
+    return Array.from(new Set(recommendations)); // 重複を除去
   }
 
   /**

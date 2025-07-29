@@ -1,30 +1,39 @@
-import { ReactNode, useState } from "react";
-import { LanguageContext, translations, Language } from "./LanguageContext.tsx";
+"use client";
+import { ReactNode, useState, useEffect } from "react";
+import { Language, LanguageContext, translations } from "./LanguageContext";
 
 interface LanguageProviderProps {
   children: ReactNode;
 }
 
 export const LanguageProvider = ({ children }: LanguageProviderProps) => {
-  const [language, setLanguageState] = useState<Language>(() => {
-    // Check localStorage first, then browser language
-    const savedLanguage = localStorage.getItem("language") as Language;
-    if (savedLanguage && (savedLanguage === "ja" || savedLanguage === "en")) {
-      return savedLanguage;
-    }
+  // SSR時はデフォルト値を使用してHydrationエラーを防ぐ
+  const [language, setLanguageState] = useState<Language>("en");
 
-    // Check browser language
-    const browserLanguage = navigator.language.toLowerCase();
-    if (browserLanguage.startsWith("ja")) {
-      return "ja";
-    }
+  useEffect(() => {
+    
+    // クライアントサイドでのみ実行
+    if (typeof window !== "undefined") {
+      // Check localStorage first, then browser language
+      const savedLanguage = localStorage.getItem("language") as Language;
+      if (savedLanguage && (savedLanguage === "ja" || savedLanguage === "en")) {
+        setLanguageState(savedLanguage);
+        return;
+      }
 
-    return "en";
-  });
+      // Check browser language
+      const browserLanguage = navigator.language.toLowerCase();
+      if (browserLanguage.startsWith("ja")) {
+        setLanguageState("ja");
+      }
+    }
+  }, []);
 
   const setLanguage = (newLanguage: Language) => {
     setLanguageState(newLanguage);
-    localStorage.setItem("language", newLanguage);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("language", newLanguage);
+    }
   };
 
   const t = (key: string): string => {

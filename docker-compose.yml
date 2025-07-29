@@ -4,13 +4,14 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     ports:
-      - "3000:5173"
+      - "3000:3000"
     volumes:
       # ホットリロード用
       - .:/app
       - /app/node_modules
     environment:
-      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
     networks:
       - app-network
 

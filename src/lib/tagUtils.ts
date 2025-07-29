@@ -1,4 +1,4 @@
-import type { TagStats } from "../hooks/useTagStats.ts";
+import type { TagStats } from "../app/hooks/useTagStats";
 
 // タグの人気度スコア計算方法の定義
 export enum PopularityCalculationType {
@@ -239,11 +239,11 @@ export const getPopularityCategory = (
   const top25Percent = Math.ceil(scores.length * 0.25);
   const top50Percent = Math.ceil(scores.length * 0.5);
 
-  if (popularityScore >= scores[top10Percent - 1]) {
+  if (popularityScore >= (scores[top10Percent - 1] ?? 0)) {
     return "very_high";
-  } else if (popularityScore >= scores[top25Percent - 1]) {
+  } else if (popularityScore >= (scores[top25Percent - 1] ?? 0)) {
     return "high";
-  } else if (popularityScore >= scores[top50Percent - 1]) {
+  } else if (popularityScore >= (scores[top50Percent - 1] ?? 0)) {
     return "medium";
   } else {
     return "low";

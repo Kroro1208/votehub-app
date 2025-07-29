@@ -1,31 +1,46 @@
-# Node.js 20 Alpine imageを使用
-FROM node:20-alpine AS builder
+# Next.js 15用のDockerfile
+FROM node:20-alpine AS base
 
+# 依存関係インストール用ステージ
+FROM base AS deps
 WORKDIR /app
 
 # package.jsonとpackage-lock.jsonをコピー
 COPY package*.json ./
-
 # 依存関係をインストール
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci
 
-# ソースコードをコピー
+# ビルド用ステージ
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# アプリケーションをビルド
+# 環境変数を設定
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+# Next.jsアプリケーションをビルド
 RUN npm run build
 
-# Production stage
-FROM nginx:alpine
+# 実行用ステージ  
+FROM base AS runner
+WORKDIR /app
 
-# ビルドされたファイルをnginxにコピー
-COPY --from=builder /app/dist /usr/share/nginx/html
+ENV NODE_ENV=production
 
-# カスタムnginx設定をコピー（SPA用）
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# 実行時に必要な最小限のファイルをコピー
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
-# ポート80を公開
-EXPOSE 80
+# ポート3000を公開
+EXPOSE 3000
 
-# nginxを起動
-CMD ["nginx", "-g", "daemon off;"]
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Next.jsサーバーを起動
+CMD ["node", "server.js"]
