@@ -50,8 +50,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state change:", event, session?.user?.email);
-
       // 最初の初期化完了後はloadingをfalseに設定する必要はない
       if (loading) {
         setLoading(false);
