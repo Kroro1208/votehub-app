@@ -6,10 +6,6 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get("code");
   const error = requestUrl.searchParams.get("error");
 
-  console.log("Auth callback - URL:", requestUrl.toString());
-  console.log("Auth callback - Code:", code ? "present" : "missing");
-  console.log("Auth callback - Error:", error);
-
   // エラーパラメータがある場合（OAuth認証が拒否された等）
   if (error) {
     console.error("Auth callback: OAuth error:", error);
@@ -18,17 +14,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (!code) {
-    console.error("Auth callback: No code parameter found");
-    console.error(
-      "Auth callback: All search params:",
-      Object.fromEntries(requestUrl.searchParams.entries()),
-    );
-    return NextResponse.redirect(
-      `${requestUrl.origin}/auth/login?error=no_code`,
-    );
-  }
-
+  // PKCEフローではcodeパラメータが必要
   if (code) {
     const supabase = createClient(
       process.env["NEXT_PUBLIC_SUPABASE_URL"]!,
@@ -44,6 +30,9 @@ export async function GET(request: NextRequest) {
           `${requestUrl.origin}/auth/login?error=callback_failed`,
         );
       }
+      
+      // 成功時はホームページにリダイレクト
+      return NextResponse.redirect(`${requestUrl.origin}/`);
     } catch (error) {
       console.error("Auth callback error:", error);
       return NextResponse.redirect(
@@ -52,6 +41,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // URL to redirect to after sign in process completes
+  // codeがない場合はSupabaseの自動検出に任せる
+  // detectSessionInUrl: true設定により自動的にフラグメントを処理
   return NextResponse.redirect(`${requestUrl.origin}/`);
 }

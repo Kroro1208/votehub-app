@@ -20,6 +20,8 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
           queries: {
             retry: 1,
             refetchOnWindowFocus: false,
+            staleTime: 5 * 60 * 1000, // 5分間キャッシュ
+            gcTime: 10 * 60 * 1000, // 10分間ガベージコレクション猶予
           },
         },
       }),
