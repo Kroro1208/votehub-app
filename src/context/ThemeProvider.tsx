@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useState } from "react";
 import { ThemeContext } from "./ThemeContext";
+import { useIsomorphicLayoutEffect } from "../app/hooks/useIsomorphicLayoutEffect";
 
 type Theme = "light" | "dark";
 
@@ -10,8 +11,10 @@ interface ThemeProviderProps {
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   // SSR時はデフォルト値を使用してHydrationエラーを防ぐ
   const [theme, setThemeState] = useState<Theme>("light");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     
     // クライアントサイドでのみ実行
     if (typeof window !== "undefined") {
@@ -28,8 +31,8 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     }
   }, []);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
+  useIsomorphicLayoutEffect(() => {
+    if (mounted && typeof window !== "undefined") {
       // Apply theme to document
       const root = document.documentElement;
 
@@ -42,7 +45,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
       // Save to localStorage
       localStorage.setItem("theme", theme);
     }
-  }, [theme]);
+  }, [theme, mounted]);
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);

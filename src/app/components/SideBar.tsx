@@ -24,7 +24,7 @@ const SideBar = () => {
     { icon: TrendingUp, label: t("nav.trending"), path: "/trending" },
     { icon: Trophy, label: t("nav.results"), path: "/vote-results" },
     { icon: Bookmark, label: t("nav.bookmarks"), path: "/bookmarks" },
-    { icon: Crown, label: "ユーザーランキング", path: "/user-ranking" },
+    { icon: Crown, label: t("nav.user-ranking"), path: "/user-ranking" },
     { icon: Users, label: t("nav.space"), path: "/space" },
     { icon: Settings, label: t("nav.settings"), path: "/settings" },
   ];

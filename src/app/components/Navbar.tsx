@@ -16,7 +16,7 @@ import { Button } from "./ui/button";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { signInWithGoogle, signOut, user } = useAuth();
+  const { signOut, user } = useAuth();
   const { t } = useLanguage();
   const { points, isLoading: pointsLoading } = useUserPoints();
 
@@ -111,13 +111,24 @@ export default function Navbar() {
                   </div>
                 </div>
               ) : (
-                <Button
-                  type="button"
-                  onClick={signInWithGoogle}
-                  className="cursor-pointer bg-blue-500 px-3 py-1 rounded"
-                >
-                  <span className="text-gray-300">{t("auth.sign.up")}</span>
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Link href="/auth/login?mode=login">
+                    <Button
+                      type="button"
+                      className="cursor-pointer bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm"
+                    >
+                      <span className="text-gray-300">{t("auth.login")}</span>
+                    </Button>
+                  </Link>
+                  <Link href="/auth/login?mode=signup">
+                    <Button
+                      type="button"
+                      className="cursor-pointer bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm"
+                    >
+                      <span className="text-gray-300">{t("auth.sign.up")}</span>
+                    </Button>
+                  </Link>
+                </div>
               )}
             </div>
 
@@ -178,6 +189,31 @@ export default function Navbar() {
                 >
                   {t("ranking.title")}
                 </Link>
+                
+                {/* モバイル用認証ボタン */}
+                {user ? (
+                  <button
+                    onClick={signOut}
+                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                  >
+                    {t("auth.sign.out")}
+                  </button>
+                ) : (
+                  <div className="space-y-2 mt-4 pt-4 border-t border-gray-600">
+                    <Link
+                      href="/auth/login?mode=login"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                    >
+                      {t("auth.login")}
+                    </Link>
+                    <Link
+                      href="/auth/login?mode=signup"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                    >
+                      {t("auth.sign.up")}
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>

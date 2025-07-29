@@ -11,7 +11,7 @@ interface LanguageContextType {
 }
 
 export const LanguageContext = createContext<LanguageContextType | undefined>(
-  undefined,
+  undefined
 );
 
 export const translations = {
@@ -26,6 +26,7 @@ export const translations = {
     "nav.settings": "設定",
     "nav.notifications": "通知",
     "nav.create": "投稿作成",
+    "nav.user-ranking": "ユーザーランキング",
 
     // Settings
     "settings.title": "設定",
@@ -213,6 +214,39 @@ export const translations = {
     "auth.login.required": "ログインが必要です",
     "auth.sign.out": "ログアウト",
     "auth.sign.up": "新規登録",
+    "auth.login": "ログイン",
+    "auth.login.title": "ログイン",
+    "auth.signup.title": "新規登録",
+    "auth.login.subtitle": "アカウントにログインしてください",
+    "auth.signup.subtitle": "新しいアカウントを作成してください",
+    "auth.email": "メールアドレス",
+    "auth.email.placeholder": "your-email@example.com",
+    "auth.password": "パスワード",
+    "auth.password.placeholder": "パスワードを入力してください",
+    "auth.password.confirm": "パスワード確認",
+    "auth.password.confirm.placeholder": "パスワードを再入力してください",
+    "auth.google.login": "Googleでログイン",
+    "auth.google.signup": "Googleで登録",
+    "auth.or": "または",
+    "auth.processing": "処理中...",
+    "auth.signup.success":
+      "確認メールを送信しました。メールを確認してアカウントをアクティベートしてください。",
+    "auth.switch.login": "ログイン",
+    "auth.switch.signup": "新規登録",
+    "auth.switch.login.text": "既にアカウントをお持ちの方は",
+    "auth.switch.signup.text": "アカウントをお持ちでない方は",
+    "auth.back.home": "← ホームページに戻る",
+    "auth.error.callback": "認証エラーが発生しました",
+    "auth.error.no_code": "認証コードが見つかりません",
+    "auth.error.unexpected": "予期しないエラーが発生しました",
+    "auth.validation.email.required": "メールアドレスを入力してください",
+    "auth.validation.email.invalid": "有効なメールアドレスを入力してください",
+    "auth.validation.password.required":
+      "パスワードは6文字以上で入力してください",
+    "auth.validation.password.max": "パスワードは100文字以内で入力してください",
+    "auth.validation.password.confirm.required":
+      "確認パスワードを入力してください",
+    "auth.validation.password.mismatch": "パスワードが一致しません",
 
     // Bookmarks
     "bookmarks.title": "ブックマーク",
@@ -701,6 +735,38 @@ export const translations = {
     "auth.login.required": "Login is required",
     "auth.sign.out": "Sign Out",
     "auth.sign.up": "Sign Up",
+    "auth.login": "Login",
+    "auth.login.title": "Login",
+    "auth.signup.title": "Sign Up",
+    "auth.login.subtitle": "Sign in to your account",
+    "auth.signup.subtitle": "Create a new account",
+    "auth.email": "Email Address",
+    "auth.email.placeholder": "your-email@example.com",
+    "auth.password": "Password",
+    "auth.password.placeholder": "Enter your password",
+    "auth.password.confirm": "Confirm Password",
+    "auth.password.confirm.placeholder": "Re-enter your password",
+    "auth.google.login": "Sign in with Google",
+    "auth.google.signup": "Sign up with Google",
+    "auth.or": "or",
+    "auth.processing": "Processing...",
+    "auth.signup.success":
+      "Confirmation email sent. Please check your email to activate your account.",
+    "auth.switch.login": "Login",
+    "auth.switch.signup": "Sign Up",
+    "auth.switch.login.text": "Already have an account?",
+    "auth.switch.signup.text": "Don't have an account?",
+    "auth.back.home": "← Back to Home",
+    "auth.error.callback": "Authentication error occurred",
+    "auth.error.no_code": "Authentication code not found",
+    "auth.error.unexpected": "An unexpected error occurred",
+    "auth.validation.email.required": "Please enter your email address",
+    "auth.validation.email.invalid": "Please enter a valid email address",
+    "auth.validation.password.required":
+      "Password must be at least 6 characters",
+    "auth.validation.password.max": "Password must be within 100 characters",
+    "auth.validation.password.confirm.required": "Please confirm your password",
+    "auth.validation.password.mismatch": "Passwords do not match",
 
     // Bookmarks
     "bookmarks.title": "Bookmarks",

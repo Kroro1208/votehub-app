@@ -1,5 +1,6 @@
-import { useAtomValue } from "jotai";
+"use client";
 
+import { useAtomValue } from "jotai";
 import { supabase } from "../../supabase-client";
 import { useQuery } from "@tanstack/react-query";
 import { Award, Crown, Medal, Trophy } from "lucide-react";
