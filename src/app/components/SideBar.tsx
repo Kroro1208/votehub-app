@@ -12,21 +12,23 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../hooks/useAuth";
 import { useLanguage } from "../hooks/useLanguage";
+import { routeProtection } from "../../config/RouteProtection";
 import { Button } from "./ui/button";
 
 const SideBar = () => {
   const pathname = usePathname();
   const { user } = useAuth();
   const { t } = useLanguage();
+  const routes = routeProtection.getRoutes();
 
   const menuItems = [
-    { icon: Vote, label: t("nav.home"), path: "/" },
-    { icon: TrendingUp, label: t("nav.trending"), path: "/trending" },
-    { icon: Trophy, label: t("nav.results"), path: "/vote-results" },
-    { icon: Bookmark, label: t("nav.bookmarks"), path: "/bookmarks" },
-    { icon: Crown, label: t("nav.user-ranking"), path: "/user-ranking" },
-    { icon: Users, label: t("nav.space"), path: "/space" },
-    { icon: Settings, label: t("nav.settings"), path: "/settings" },
+    { icon: Vote, label: t("nav.home"), path: routes.HOME },
+    { icon: TrendingUp, label: t("nav.trending"), path: routes.TRENDING },
+    { icon: Trophy, label: t("nav.results"), path: routes.VOTE_RESULTS },
+    { icon: Bookmark, label: t("nav.bookmarks"), path: routes.BOOKMARKS },
+    { icon: Crown, label: t("nav.user-ranking"), path: routes.USER_RANKING },
+    { icon: Users, label: t("nav.space"), path: routes.SPACE },
+    { icon: Settings, label: t("nav.settings"), path: routes.SETTINGS },
   ];
 
   return (
@@ -66,7 +68,7 @@ const SideBar = () => {
       </nav>
 
       {/* Create Vote Button */}
-      <Link href="/create" className="block mb-8">
+      <Link href={routes.CREATE} className="block mb-8">
         <Button className="w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center shadow-lg">
           <span>{t("nav.create")}</span>
         </Button>
@@ -74,7 +76,7 @@ const SideBar = () => {
 
       {/* User Profile */}
       {user && (
-        <Link href={`/profile/${user.id}`}>
+        <Link href={routes.profile(user.id)}>
           <div className="absolute bottom-4 left-4 right-4">
             <div className="flex items-center space-x-3 p-3 rounded-xl bg-slate-700/50 hover:bg-slate-700 transition-colors duration-200 cursor-pointer">
               {user.user_metadata?.["avatar_url"] ? (

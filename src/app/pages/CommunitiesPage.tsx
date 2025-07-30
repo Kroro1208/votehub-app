@@ -1,5 +1,6 @@
 "use client";
 
+import { routeProtection } from "@/config/RouteProtection";
 import { Plus, Users } from "lucide-react";
 import Link from "next/link";
 import CommunityList from "../components/Community/CommunityList";
@@ -7,6 +8,7 @@ import SideBar from "../components/SideBar";
 import { useLanguage } from "../hooks/useLanguage";
 const CommunitiesPage = () => {
   const { t } = useLanguage();
+  const routes = routeProtection.getRoutes();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 transition-colors">
@@ -27,7 +29,7 @@ const CommunitiesPage = () => {
 
               {/* Create Community Button */}
               <Link
-                href="/space/create"
+                href={routes.SPACE_CREATE}
                 className="inline-flex items-center space-x-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-violet-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 <Plus size={20} />

@@ -2,35 +2,36 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import type { PostType } from "../components/Post/PostList";
+import { routeProtection } from "@/config/RouteProtection";
 import {
-  Users,
-  Calendar,
-  TrendingUp,
-  MessageCircle,
-  Settings,
   Award,
+  Calendar,
+  MessageCircle,
   RefreshCw,
+  Settings,
+  TrendingUp,
+  Users,
 } from "lucide-react";
-import { supabase } from "../../supabase-client";
+import Link from "next/link";
 import { useParams } from "next/navigation";
+import { toast } from "react-toastify";
+import { supabase } from "../../supabase-client";
+import { calculateAllExistingScores } from "../../utils/calculateExistingScores";
+import ErrorMessage from "../components/ErrorMessage";
+import Loading from "../components/Loading";
+import PostItem from "../components/Post/PostItem";
+import type { PostType } from "../components/Post/PostList";
+import EmpathyPointsDisplay from "../components/Profile/EmpathyPointsDisplay";
+import QualityScoreDisplay from "../components/Profile/QualityScoreDisplay";
+import { Button } from "../components/ui/button";
 import { useAuth } from "../hooks/useAuth";
-import { useLanguage } from "../hooks/useLanguage";
 import { useUserEmpathyPoints } from "../hooks/useEmpathyPoints";
-import { useUserQualityScore } from "../hooks/useQualityScore";
 import {
   useEmpathyRanking,
   useUserEmpathyScore,
 } from "../hooks/useEmpathyScore";
-import { calculateAllExistingScores } from "../../utils/calculateExistingScores";
-import { toast } from "react-toastify";
-import Loading from "../components/Loading";
-import ErrorMessage from "../components/ErrorMessage";
-import Link from "next/link";
-import { Button } from "../components/ui/button";
-import QualityScoreDisplay from "../components/Profile/QualityScoreDisplay";
-import EmpathyPointsDisplay from "../components/Profile/EmpathyPointsDisplay";
-import PostItem from "../components/Post/PostItem";
+import { useLanguage } from "../hooks/useLanguage";
+import { useUserQualityScore } from "../hooks/useQualityScore";
 
 interface UserStats {
   postCount: number;
@@ -115,6 +116,7 @@ const ProfilePage = () => {
   const userId = params?.userId;
   const { user } = useAuth();
   const { t } = useLanguage();
+  const routes = routeProtection.getRoutes();
 
   const targetUserId = userId || user?.id;
   const isOwnProfile = !userId || userId === user?.id;
@@ -275,7 +277,7 @@ const ProfilePage = () => {
               {/* Settings Link for Own Profile */}
               {isOwnProfile && (
                 <Link
-                  href="/settings"
+                  href={routes.SETTINGS}
                   className="inline-flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
                 >
                   <Settings size={14} />

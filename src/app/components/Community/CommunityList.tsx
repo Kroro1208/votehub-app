@@ -1,5 +1,6 @@
 "use client";
 /* eslint-disable react-refresh/only-export-components */
+import { routeProtection } from "@/config/RouteProtection";
 import { supabase } from "@/supabase-client";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -61,6 +62,8 @@ const CommunityList = () => {
     queryKey: ["communities"],
     queryFn: getCommunitites,
   });
+
+  const routes = routeProtection.getRoutes();
 
   // 人気のスペースを取得（投稿数でソート）
   const popularSpaces = data
@@ -141,7 +144,7 @@ const CommunityList = () => {
                 {popularSpaces.map((space, index) => (
                   <Link
                     key={space.id}
-                    href={`/space/${space.id}`}
+                    href={routes.space(space.id.toString())}
                     className="group relative bg-white rounded-xl border border-orange-200/50 p-4 hover:border-orange-300 hover:shadow-lg transition-all duration-300"
                   >
                     {/* ランクバッジ */}
@@ -223,7 +226,7 @@ const CommunityList = () => {
           {filteredCommunities?.map((community) => (
             <Link
               key={community.id}
-              href={`/space/${community.id}`}
+              href={routes.space(community.id.toString())}
               className="group block relative"
             >
               {/* 投票ブース風カード */}

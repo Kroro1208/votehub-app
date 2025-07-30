@@ -11,6 +11,7 @@ import { Coins } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useLanguage } from "../hooks/useLanguage";
 import { useUserPoints } from "../hooks/useUserPoints";
+import { routeProtection } from "../../config/RouteProtection";
 import NotificationDropdown from "./Notification/NotificationDropdown";
 import { Button } from "./ui/button";
 
@@ -19,6 +20,7 @@ export default function Navbar() {
   const { signOut, user } = useAuth();
   const { t } = useLanguage();
   const { points, isLoading: pointsLoading } = useUserPoints();
+  const routes = routeProtection.getRoutes();
 
   const displayName = user?.user_metadata?.["user_name"] || user?.email;
 
@@ -31,31 +33,31 @@ export default function Navbar() {
             {/* Desktop Links - 左側に配置 */}
             <div className="hidden md:flex items-center space-x-8 pl-3">
               <Link
-                href="/"
+                href={routes.HOME}
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
                 {t("nav.home")}
               </Link>
               <Link
-                href="/post/create"
+                href={routes.POST_CREATE}
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
                 {t("nav.create")}
               </Link>
               <Link
-                href="/space"
+                href={routes.SPACE}
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
                 {t("nav.space")}
               </Link>
               <Link
-                href="/space/create"
+                href={routes.SPACE_CREATE}
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
                 {t("space.create")}
               </Link>
               <Link
-                href="/user-ranking"
+                href={routes.USER_RANKING}
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
                 {t("ranking.title")}
@@ -77,7 +79,7 @@ export default function Navbar() {
                     </span>
                   </div>
                   <Link
-                    href="/profile"
+                    href={user ? routes.profile(user.id) : routes.HOME}
                     className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
                   >
                     {user ? (
@@ -112,7 +114,7 @@ export default function Navbar() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Link href="/auth/login?mode=login">
+                  <Link href={`${routes.AUTH_LOGIN}?mode=login`}>
                     <Button
                       type="button"
                       className="cursor-pointer bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm"
@@ -120,7 +122,7 @@ export default function Navbar() {
                       <span className="text-gray-300">{t("auth.login")}</span>
                     </Button>
                   </Link>
-                  <Link href="/auth/login?mode=signup">
+                  <Link href={`${routes.AUTH_LOGIN}?mode=signup`}>
                     <Button
                       type="button"
                       className="cursor-pointer bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm"
@@ -160,31 +162,31 @@ export default function Navbar() {
             >
               <div className="px-4 py-3 space-y-2">
                 <Link
-                  href="/"
+                  href={routes.HOME}
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
                 >
                   {t("nav.home")}
                 </Link>
                 <Link
-                  href="/create"
+                  href={routes.CREATE}
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
                 >
                   {t("nav.create")}
                 </Link>
                 <Link
-                  href="/space"
+                  href={routes.SPACE}
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
                 >
                   {t("nav.space")}
                 </Link>
                 <Link
-                  href="/space/create"
+                  href={routes.SPACE_CREATE}
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
                 >
                   {t("space.create")}
                 </Link>
                 <Link
-                  href="/user-ranking"
+                  href={routes.USER_RANKING}
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
                 >
                   {t("ranking.title")}
@@ -201,13 +203,13 @@ export default function Navbar() {
                 ) : (
                   <div className="space-y-2 mt-4 pt-4 border-t border-gray-600">
                     <Link
-                      href="/auth/login?mode=login"
+                      href={`${routes.AUTH_LOGIN}?mode=login`}
                       className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
                     >
                       {t("auth.login")}
                     </Link>
                     <Link
-                      href="/auth/login?mode=signup"
+                      href={`${routes.AUTH_LOGIN}?mode=signup`}
                       className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
                     >
                       {t("auth.sign.up")}

@@ -1,3 +1,4 @@
+import { routeProtection } from "@/config/RouteProtection";
 import { getTimeRemaining, isPersuasionTime } from "@/utils/formatTime";
 import { AlertTriangle, CheckCircle, Clock, Users } from "lucide-react";
 import Link from "next/link";
@@ -11,6 +12,7 @@ interface IndexItemProps {
 }
 const IndexItem = ({ communityItemData, votedPostIds }: IndexItemProps) => {
   const { user } = useAuth();
+  const routes = routeProtection.getRoutes();
 
   // 投票期限をチェックする関数
   const isVotingExpired = (voteDeadline?: string | null) => {
@@ -43,7 +45,7 @@ const IndexItem = ({ communityItemData, votedPostIds }: IndexItemProps) => {
           return (
             <Link
               key={item.id}
-              href={`/post/${item.id}`}
+              href={routes.post(item.id.toString())}
               className="block group"
             >
               <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden hover:shadow-2xl transition-all duration-500 group-hover:scale-[1.03] group-hover:-translate-y-2 h-full flex flex-col relative">

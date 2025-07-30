@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import type { PostType } from "./PostList";
 
+import { routeProtection } from "@/config/RouteProtection";
 import { supabase } from "@/supabase-client";
 import { useEffect, useState } from "react";
 import {
@@ -38,6 +39,8 @@ const NestedPostSummary = ({
   const { totalVotes } = useHandleVotes(post.id);
   const { userVote, isPersuasionTime, isVotingExpired, getTimeRemaining } =
     useHandlePost(post);
+  const routes = routeProtection.getRoutes();
+
   const [nestedPosts, setNestedPosts] = useState<PostType[]>([]);
 
   const hasUserVoted = userVote !== null && userVote !== undefined;
@@ -178,7 +181,10 @@ const NestedPostSummary = ({
           </div>
 
           {/* Title and Content */}
-          <Link href={`/post/${post.id}`} className="block group/link">
+          <Link
+            href={routes.post(post.id.toString())}
+            className="block group/link"
+          >
             <div className="flex items-start gap-4">
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-slate-800 mb-3 group-hover/link:text-violet-600 transition-colors duration-200 leading-tight">

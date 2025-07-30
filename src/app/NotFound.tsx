@@ -1,9 +1,12 @@
 "use client";
 
+import { routeProtection } from "@/config/RouteProtection";
 import { ArrowLeft, Home } from "lucide-react";
 import Link from "next/link";
 
 export default function NotFound() {
+  const routes = routeProtection.getRoutes();
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100">
       <div className="text-center max-w-md mx-auto px-4">
@@ -19,7 +22,7 @@ export default function NotFound() {
 
         <div className="space-y-4">
           <Link
-            href="/"
+            href={routes.HOME}
             className="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
             <Home className="w-4 h-4 mr-2" />

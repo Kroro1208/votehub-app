@@ -1,16 +1,17 @@
 "use client";
+import { CheckCircle, Trash2 } from "lucide-react";
 import Link from "next/link";
 import type { PostType } from "./PostList";
-import { CheckCircle, Trash2 } from "lucide-react";
 
+import { routeProtection } from "@/config/RouteProtection";
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { useHandleVotes } from "../../hooks/useHandleVotes";
-import { useHandlePost } from "../../hooks/useHandlePost";
 import { useDeletePost } from "../../hooks/useDeletePost";
+import { useHandlePost } from "../../hooks/useHandlePost";
+import { useHandleVotes } from "../../hooks/useHandleVotes";
+import { Button } from "../ui/button";
 import VoteTickets from "../Vote/VoteTickets";
 import BookmarkButton from "./BookmarkButton";
-import { Button } from "../ui/button";
 
 interface PostItemType {
   post: PostType;
@@ -18,6 +19,7 @@ interface PostItemType {
 
 const PostItem = ({ post }: PostItemType) => {
   const { user } = useAuth();
+  const routes = routeProtection.getRoutes();
   const { totalVotes, upVotes, downVotes } = useHandleVotes(
     post.id,
     post.vote_deadline,
@@ -66,7 +68,7 @@ const PostItem = ({ post }: PostItemType) => {
   };
 
   return (
-    <Link href={`/post/${post.id}`} className="block group">
+    <Link href={routes.post(post.id.toString())} className="block group">
       <div className="bg-gradient-to-br from-white via-slate-50 to-indigo-50 dark:from-gray-800 dark:via-gray-900 dark:to-indigo-900 rounded-2xl shadow-xl border-2 border-slate-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 transform hover:shadow-2xl transition-all duration-300 overflow-hidden">
         {/* Urgent Vote Banner */}
         <div

@@ -1,10 +1,11 @@
 "use client";
 
-import { useAtomValue } from "jotai";
-import { supabase } from "../../supabase-client";
+import { routeProtection } from "@/config/RouteProtection";
 import { useQuery } from "@tanstack/react-query";
+import { useAtomValue } from "jotai";
 import { Award, Crown, Medal, Trophy } from "lucide-react";
 import Link from "next/link";
+import { supabase } from "../../supabase-client";
 import { useHandlePost } from "../hooks/useHandlePost";
 import { useLanguage } from "../hooks/useLanguage";
 import { useTagRanking } from "../hooks/useTagRanking";
@@ -28,6 +29,8 @@ const fetchTopUserRanking = async (): Promise<TopUserRankingData[]> => {
 };
 
 const RightPanel = () => {
+  const routes = routeProtection.getRoutes();
+
   const { t } = useLanguage();
   const posts = useAtomValue(postsAtom);
   const {
@@ -63,10 +66,12 @@ const RightPanel = () => {
     .slice(0, 5); // 最大5件
 
   const UrgentPostItem = ({ post }: { post: PostType }) => {
+    const routes = routeProtection.getRoutes();
+
     const { getTimeRemaining } = useHandlePost(post);
     const timeRemaining = getTimeRemaining();
     return (
-      <Link href={`/post/${post.id}`} className="block group">
+      <Link href={routes.post(post.id.toString())} className="block group">
         <div className="text-sm">
           <p className="text-slate-800 font-medium">{post.title}</p>
           <p className="text-orange-600 text-xs">
@@ -95,7 +100,7 @@ const RightPanel = () => {
             tagRanking.map((tag) => (
               <Link
                 key={tag.id}
-                href={`/tags/${tag.id}`}
+                href={routes.tags(tag.id.toString())}
                 className="flex items-center justify-between hover:bg-slate-50 p-2 rounded-lg transition-colors group"
               >
                 <span className="text-sm text-slate-600 group-hover:text-slate-800">
@@ -122,7 +127,7 @@ const RightPanel = () => {
             {t("right.panel.top.users")}
           </h3>
           <Link
-            href="/user-ranking"
+            href={routes.USER_RANKING}
             className="text-xs text-slate-600 hover:text-slate-800 transition-colors"
           >
             {t("right.panel.view.all")}
@@ -170,7 +175,7 @@ const RightPanel = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <Link
-                          href={`/profile/${user.user_id}`}
+                          href={routes.profile(user.user_id.toString())}
                           className="text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors truncate"
                         >
                           {user.user_metadata?.full_name ||

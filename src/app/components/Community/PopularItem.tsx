@@ -1,7 +1,8 @@
+import { routeProtection } from "@/config/RouteProtection";
+import { getTimeRemaining, isVotingExpired } from "@/utils/formatTime";
 import { CheckCircle, Flame, Trophy, Users } from "lucide-react";
 import Link from "next/link";
 import { CommunityItemType } from "./CommunityItem";
-import { isVotingExpired, getTimeRemaining } from "@/utils/formatTime";
 
 interface PopularItemProps {
   communityItemData: CommunityItemType[];
@@ -25,6 +26,8 @@ const getPopularityScore = (post: CommunityItemType) => {
 };
 
 const PopularItem = ({ communityItemData, votedPostIds }: PopularItemProps) => {
+  const routes = routeProtection.getRoutes();
+
   // 人気投稿を計算する関数
   const getPopularPosts = (posts: CommunityItemType[], limit = 5) => {
     if (!posts || posts.length === 0) return [];
@@ -73,7 +76,7 @@ const PopularItem = ({ communityItemData, votedPostIds }: PopularItemProps) => {
                   return (
                     <Link
                       key={post.id}
-                      href={`/post/${post.id}`}
+                      href={routes.post(post.id.toString())}
                       className="block group"
                     >
                       <div

@@ -14,10 +14,20 @@ class RouteProtection {
   private constructor() {
     // 保護されたルートパターンを定義
     this._protectedPatterns = Object.freeze([
-      "/dashboard",
-      "/profile",
+      "/bookmarks",
+      "/create",
+      "/post/create",
+      "/notifications",
+      "/post/*",
+      "/popular-votes",
+      "/user-ranking",
+      "/vote-results",
+      "/trending",
+      "/tags/*",
+      "/space/*",
+      "/space/create",
+      "/profile/*",
       "/settings",
-      "/admin",
       "/api/protected",
       "/api/user",
       "/api/admin",
@@ -49,7 +59,6 @@ class RouteProtection {
   }
 
   // ルートが認証を必要とするかをチェック
-
   public isProtectedRoute(path: string): boolean {
     this._verifyIntegrity();
     return this._protectedPatterns.some((pattern) =>
@@ -79,7 +88,44 @@ class RouteProtection {
     return this._protectedPatterns.filter((route) => route.startsWith("/api/"));
   }
 
-  // ルートアクセスレベルを検証
+  // ルート定数を取得するメソッド
+  public getRoutes() {
+    this._verifyIntegrity();
+    return {
+      // 認証が必要なルート
+      BOOKMARKS: "/bookmarks",
+      CREATE: "/create",
+      POST_CREATE: "/post/create",
+      NOTIFICATIONS: "/notifications",
+      POPULAR_VOTES: "/popular-votes",
+      USER_RANKING: "/user-ranking",
+      VOTE_RESULTS: "/vote-results",
+      TRENDING: "/trending",
+      SPACE: "/space",
+      SPACE_CREATE: "/space/create",
+      SETTINGS: "/settings",
+
+      // 認証ルート
+      AUTH_LOGIN: "/auth/login",
+      AUTH_SIGNUP: "/auth/signup",
+      AUTH_RESET: "/auth/reset",
+
+      // 公開ルート
+      HOME: "/",
+      ABOUT: "/about",
+      CONTACT: "/contact",
+      POST: "/post",
+      AUTH_CALLBACK: "/auth/callback",
+
+      // 動的ルート用のヘルパー
+      profile: (userId: string) => `/profile/${userId}`,
+      post: (postId: string) => `/post/${postId}`,
+      tags: (tagName: string) => `/tags/${tagName}`,
+      space: (spaceId: string) => `/space/${spaceId}`,
+    } as const;
+  }
+
+  // ルートアクセスレベルの検証
   public validateAccess(
     path: string,
     isAuthenticated: boolean,
@@ -169,7 +215,7 @@ class RouteProtection {
 // シングルトンインスタンスをエクスポート
 export const routeProtection = RouteProtection.getInstance();
 
-// TypeScriptサポート用の型をエクスポート
+// 専用の型
 export type RouteAccessResult = ReturnType<
   typeof routeProtection.validateAccess
 >;

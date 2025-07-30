@@ -1,4 +1,5 @@
 "use client";
+import { routeProtection } from "@/config/RouteProtection";
 import { supabase } from "@/supabase-client";
 import { useQuery } from "@tanstack/react-query";
 import { Award, Crown, Medal, Star, TrendingUp, Trophy } from "lucide-react";
@@ -38,6 +39,7 @@ const fetchUserRanking = async (): Promise<UserRankingData[]> => {
 const UserRankingPage = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const routes = routeProtection.getRoutes();
 
   const {
     data: rankings,
@@ -163,7 +165,7 @@ const UserRankingPage = () => {
                   isCurrentUser ? "ring-2 ring-blue-400 shadow-lg" : ""
                 }`}
               >
-                <Link href={`/profile/${ranking.user_id}`} className="block">
+                <Link href={routes.profile(ranking.user_id)} className="block">
                   <div className="flex items-center px-4">
                     {/* 順位バッジ */}
                     <div className="flex-shrink-0 mr-4">

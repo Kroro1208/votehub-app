@@ -532,6 +532,7 @@ export const translations = {
     "nav.settings": "Settings",
     "nav.notifications": "Notifications",
     "nav.create": "Create Vote",
+    "nav.user-ranking": "User Ranking",
 
     // Settings
     "settings.title": "Settings",

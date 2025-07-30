@@ -1,23 +1,23 @@
 "use client";
+import {
+  AlertTriangle,
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  MessageSquarePlus,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import type { PostType } from "./PostList";
-import {
-  Clock,
-  Users,
-  CheckCircle,
-  AlertTriangle,
-  MessageSquarePlus,
-  ChevronRight,
-} from "lucide-react";
 
-import { FaRegCalendarTimes } from "react-icons/fa";
 import { useState } from "react";
+import { FaRegCalendarTimes } from "react-icons/fa";
 
-import { FaArrowAltCircleUp } from "react-icons/fa";
-import { FaArrowAltCircleDown } from "react-icons/fa";
+import { routeProtection } from "@/config/RouteProtection";
+import { FaArrowAltCircleDown, FaArrowAltCircleUp } from "react-icons/fa";
 import { useAuth } from "../../hooks/useAuth";
-import { useHandleVotes } from "../../hooks/useHandleVotes";
 import { useHandlePost } from "../../hooks/useHandlePost";
+import { useHandleVotes } from "../../hooks/useHandleVotes";
 import { Button } from "../ui/button";
 import CreateNestedPost from "./CreateNestedPost";
 
@@ -37,6 +37,7 @@ const NestedPostItem = ({
   const { userVote, isPersuasionTime, isVotingExpired, getTimeRemaining } =
     useHandlePost(post);
   const [showCreateNested, setShowCreateNested] = useState(false);
+  const routes = routeProtection.getRoutes();
 
   const hasUserVoted = userVote !== null && userVote !== undefined;
   const isPostOwner = user?.id === post.user_id;
@@ -113,7 +114,7 @@ const NestedPostItem = ({
               )}
               <div>
                 <Link
-                  href={`/post/${post.id}`}
+                  href={routes.post(post.id.toString())}
                   className="hover:text-violet-600"
                 >
                   <h3 className="font-semibold text-slate-800 line-clamp-2">

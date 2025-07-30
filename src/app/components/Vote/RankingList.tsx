@@ -1,9 +1,10 @@
 import Link from "next/link";
 
-import { CheckCircle, TrendingUp, Trophy, Users } from "lucide-react";
+import { routeProtection } from "@/config/RouteProtection";
 import { BasePost } from "@/types/post";
-import { isVotingExpired, getTimeRemaining } from "@/utils/formatTime";
+import { getTimeRemaining, isVotingExpired } from "@/utils/formatTime";
 import { getRankStyling } from "@/utils/getStyle";
+import { CheckCircle, TrendingUp, Trophy, Users } from "lucide-react";
 
 type DisplayMode = "active" | "completed";
 
@@ -18,6 +19,8 @@ const RankingList = ({
   votedPostIds,
   mode = "active",
 }: RankingListProps) => {
+  const routes = routeProtection.getRoutes();
+
   return (
     <div className="space-y-4">
       {posts.map((post, index) => {
@@ -28,7 +31,11 @@ const RankingList = ({
         const styling = getRankStyling(index);
 
         return (
-          <Link key={post.id} href={`/post/${post.id}`} className="block group">
+          <Link
+            key={post.id}
+            href={routes.post(post.id.toString())}
+            className="block group"
+          >
             <div
               className={`relative rounded-xl border transition-all duration-300 hover:shadow-xl group-hover:scale-[1.005] overflow-hidden ${styling.container}`}
             >

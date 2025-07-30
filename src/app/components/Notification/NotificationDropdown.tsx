@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useNotifications } from "../../hooks/useNotifications";
 import { Button } from "../ui/button";
+import { routeProtection } from "@/config/RouteProtection";
 
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,6 +18,7 @@ export default function NotificationDropdown() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { notifications, unreadCount, markAsRead, markAllAsRead } =
     useNotifications();
+  const routes = routeProtection.getRoutes();
 
   const handleNotificationClick = async (notification: NotificationType) => {
     await markAsRead(notification.id);
@@ -174,7 +176,7 @@ export default function NotificationDropdown() {
           {/* フッター */}
           <div className="p-3 border-t border-gray-700 text-center">
             <Link
-              href="/notifications"
+              href={routes.NOTIFICATIONS}
               className="text-sm text-blue-400 hover:text-blue-300"
               onClick={() => setIsOpen(false)}
             >

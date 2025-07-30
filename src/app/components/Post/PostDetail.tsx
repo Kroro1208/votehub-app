@@ -4,6 +4,7 @@ import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import type { PostType } from "./PostList";
 
+import { routeProtection } from "@/config/RouteProtection";
 import { supabase } from "@/supabase-client";
 import { isPersuasionTime } from "@/utils/formatTime";
 import { Trash2 } from "lucide-react";
@@ -20,9 +21,9 @@ import VoteButton from "../Vote/VoteButton";
 import BookmarkButton from "./BookmarkButton";
 import CreateNestedPostDialog from "./CreateNestedPostDialog";
 import CreatePersuasionDialog from "./CreatePersuasionDialog";
+import NestedPostSection from "./NestedPostSection";
 import PostContentDisplay from "./PostContentDisplay";
 import VoteDeadline from "./VoteDeadline";
-import NestedPostSection from "./NestedPostSection";
 
 interface Props {
   postId: number;
@@ -156,6 +157,7 @@ const PostDetail = ({ postId }: Props) => {
   const [persuasionContent, setPersuasionContent] = useState("");
   const [showCreateNested, setShowCreateNested] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const routes = routeProtection.getRoutes();
 
   const { user } = useAuth();
   const { mutate: deletePost, isPending: isDeleting } = useDeletePost();
@@ -354,7 +356,7 @@ const PostDetail = ({ postId }: Props) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           {data?.avatar_url && (
-            <Link href={`/profile/${data.user_id}`}>
+            <Link href={routes.profile(data.user_id)}>
               <img
                 height={48}
                 width={48}

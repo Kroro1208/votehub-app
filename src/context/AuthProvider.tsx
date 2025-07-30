@@ -36,6 +36,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         setUser(session?.user ?? null);
+
+        // 初期化時にセッションが存在する場合はクッキーも設定
+        if (session?.access_token && session?.refresh_token) {
+          try {
+            await fetch("/api/auth/set-cookies", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                access_token: session.access_token,
+                refresh_token: session.refresh_token,
+              }),
+            });
+          } catch (error) {
+            console.error(
+              "Error setting cookies during initialization:",
+              error,
+            );
+          }
+        }
       } catch (error) {
         console.error("Auth initialization error:", error);
         setUser(null);

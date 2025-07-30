@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { routeProtection } from "@/config/RouteProtection";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { FaGoogle } from "react-icons/fa";
 import { z } from "zod";
-import { useAuth } from "../hooks/useAuth";
-import { useLanguage } from "../hooks/useLanguage";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { FaGoogle } from "react-icons/fa";
+import { useAuth } from "../hooks/useAuth";
+import { useLanguage } from "../hooks/useLanguage";
 
 // Zodスキーマ定義（多言語対応）
 const createLoginSchema = (t: (key: string) => string) =>
@@ -45,6 +46,7 @@ export default function LoginPage() {
   const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const routes = routeProtection.getRoutes();
 
   // URLパラメータからモードを取得して初期状態を設定
   const mode = searchParams.get("mode");
@@ -313,7 +315,7 @@ export default function LoginPage() {
         {/* ホームページへのリンク */}
         <div className="mt-4 text-center">
           <Link
-            href="/"
+            href={routes.HOME}
             className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
           >
             {t("auth.back.home")}
