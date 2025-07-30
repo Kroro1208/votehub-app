@@ -28,7 +28,7 @@ export default function RootLayout({
             <div className="container mx-auto px-4 py-6">
               <Suspense
                 fallback={
-                  <div className="flex items-center justify-center min-h-screen">
+                  <div className="flex items-center justify-center min-h-[20vh]">
                     <Loading />
                   </div>
                 }

@@ -100,7 +100,7 @@ const RightPanel = () => {
             tagRanking.map((tag) => (
               <Link
                 key={tag.id}
-                href={routes.tags(tag.id.toString())}
+                href={routes.tags(tag.name)}
                 className="flex items-center justify-between hover:bg-slate-50 p-2 rounded-lg transition-colors group"
               >
                 <span className="text-sm text-slate-600 group-hover:text-slate-800">

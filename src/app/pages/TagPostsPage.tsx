@@ -1,9 +1,9 @@
 "use client";
-import { supabase } from "../../supabase-client";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Tag } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { supabase } from "../../supabase-client";
 import PostItem from "../components/Post/PostItem";
 import { PostType } from "../components/Post/PostList";
 import { Button } from "../components/ui/button";
@@ -39,36 +39,34 @@ interface SupabasePostData {
   }>;
 }
 
-// タグの詳細情報を取得
-const getTagInfo = async (tagId: string): Promise<TagInfo> => {
-  const { data, error } = await supabase
-    .from("tags")
-    .select("id, name")
-    .eq("id", tagId)
-    .single();
+// タグの詳細情報を取得（タグ名からRPC関数使用）
+const getTagInfo = async (tagName: string): Promise<TagInfo> => {
+  const decodedTagName = decodeURIComponent(tagName);
+
+  const { data, error } = await supabase.rpc("search_tags_safe", {
+    p_search_term: decodedTagName,
+    p_limit: 1,
+  });
 
   if (error) throw new Error(`タグ情報の取得に失敗しました: ${error.message}`);
-  return data;
+  if (!data || data.length === 0) throw new Error("タグが見つかりません");
+
+  return {
+    id: data[0].id,
+    name: data[0].name,
+  };
 };
 
-// タグに関連する投稿を取得
-const getTagPosts = async (tagId: string): Promise<PostType[]> => {
-  const { data, error } = await supabase
-    .from("posts")
-    .select(
-      `
-      *,
-      communities(id, name),
-      votes(vote),
-      comments(id)
-    `,
-    )
-    .eq("tag_id", tagId)
-    .order("created_at", { ascending: false });
+// タグに関連する投稿を取得（RPC関数使用）
+const getTagPosts = async (tagName: string): Promise<PostType[]> => {
+  const tagInfo = await getTagInfo(tagName);
+
+  const { data, error } = await supabase.rpc("get_posts_by_tag", {
+    p_tag_id: tagInfo.id,
+  });
 
   if (error) throw new Error(`投稿の取得に失敗しました: ${error.message}`);
 
-  // PostType形式に変換
   return (
     data?.map(
       (post: SupabasePostData): PostType => ({

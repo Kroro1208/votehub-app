@@ -4,6 +4,17 @@ const nextConfig = {
   images: {
     domains: ["rvgsxdggkipvjevphjzb.supabase.co"],
   },
+  experimental: {
+    optimizePackageImports: [
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-select",
+      "lucide-react",
+      "react-icons",
+    ],
+  },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production",
+  },
   // Security headers from vite.config.ts
   async headers() {
     return [

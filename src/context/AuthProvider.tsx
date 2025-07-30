@@ -25,22 +25,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
+        // Try to get session from cookies first (faster than Supabase API call)
+        const cookieSession = document.cookie.includes("sb_access_token");
 
-        // リフレッシュトークンエラーは未ログインユーザーでは正常な状態
-        if (error && !error.message.includes("Refresh Token Not Found")) {
-          console.error("Error getting session:", error);
-        }
+        if (cookieSession) {
+          // If cookies exist, get session from Supabase
+          const {
+            data: { session },
+            error,
+          } = await supabase.auth.getSession();
 
-        setUser(session?.user ?? null);
+          if (error && !error.message.includes("Refresh Token Not Found")) {
+            console.error("Error getting session:", error);
+          }
 
-        // 初期化時にセッションが存在する場合はクッキーも設定
-        if (session?.access_token && session?.refresh_token) {
-          try {
-            await fetch("/api/auth/set-cookies", {
+          setUser(session?.user ?? null);
+
+          // Update cookies if session exists
+          if (session?.access_token && session?.refresh_token) {
+            fetch("/api/auth/set-cookies", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -49,13 +52,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 access_token: session.access_token,
                 refresh_token: session.refresh_token,
               }),
+            }).catch((error) => {
+              console.error(
+                "Error setting cookies during initialization:",
+                error,
+              );
             });
-          } catch (error) {
-            console.error(
-              "Error setting cookies during initialization:",
-              error,
-            );
           }
+        } else {
+          // No cookies, assume not authenticated
+          setUser(null);
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
@@ -65,7 +71,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    // セッション取得を即座に開始
+    // Non-blocking initialization
     initializeAuth();
 
     const {
@@ -83,7 +89,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (event === "SIGNED_IN" && session) {
         // Set httpOnly cookies when user signs in
         try {
-          await fetch("/api/auth/set-cookies", {
+          const response = await fetch("/api/auth/set-cookies", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -93,6 +99,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               refresh_token: session.refresh_token,
             }),
           });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
         } catch (error) {
           console.error("Error setting cookies:", error);
         }
@@ -108,7 +118,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else if (event === "TOKEN_REFRESHED" && session) {
         // Update cookies when tokens are refreshed
         try {
-          await fetch("/api/auth/set-cookies", {
+          const response = await fetch("/api/auth/set-cookies", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -118,6 +128,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               refresh_token: session.refresh_token,
             }),
           });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
         } catch (error) {
           console.error("Error updating cookies:", error);
         }

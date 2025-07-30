@@ -5,6 +5,7 @@ import { supabase } from "../../supabase-client";
 import { useAuth } from "./useAuth";
 import { useLanguage } from "./useLanguage";
 import { getRelatedTags } from "../../lib/tagUtils";
+import { createTagSchema, validateTagSimilarity } from "../../utils/schema";
 
 // タグを取得する関数
 const getTagsForCommunity = async (communityId: number) => {
@@ -130,6 +131,7 @@ export const useTagManagement = (
     Array<{ id: number; name: string }>
   >([]);
   const [isLoadingSimilarTags, setIsLoadingSimilarTags] = useState(false);
+  const [tagValidationError, setTagValidationError] = useState<string>("");
 
   // タグデータを取得
   const { data: tagsData, refetch: refetchTags } = useQuery({
@@ -172,7 +174,22 @@ export const useTagManagement = (
         newTagName.trim().length < 2
       ) {
         setSimilarTags([]);
+        setTagValidationError("");
         return;
+      }
+
+      // リアルタイムバリデーション（Zodスキーマ使用）
+      const validationResult = createTagSchema.safeParse({
+        name: newTagName,
+        community_id: watchCommunityId,
+        existing_tags: tagsData || [],
+      });
+
+      if (!validationResult.success) {
+        const errorMessage = validationResult.error.errors[0]?.message || "";
+        setTagValidationError(errorMessage);
+      } else {
+        setTagValidationError("");
       }
 
       setIsLoadingSimilarTags(true);
@@ -188,7 +205,12 @@ export const useTagManagement = (
         });
 
         if (error) {
-          console.error("類似タグ検索エラー:", error);
+          console.error("類似タグ検索エラー:", {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code,
+          });
           setSimilarTags([]);
         } else {
           // RPC関数の結果を適切な形式に変換
@@ -201,7 +223,10 @@ export const useTagManagement = (
           setSimilarTags(similarTagsData);
         }
       } catch (error) {
-        console.error("類似タグ検索エラー:", error);
+        console.error("類似タグ検索エラー:", {
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        });
         setSimilarTags([]);
       } finally {
         setIsLoadingSimilarTags(false);
@@ -210,7 +235,7 @@ export const useTagManagement = (
 
     const timeoutId = setTimeout(searchSimilarTags, 300); // デバウンス
     return () => clearTimeout(timeoutId);
-  }, [newTagName, watchCommunityId]);
+  }, [newTagName, watchCommunityId, tagsData]);
 
   // 新しいタグを作成
   const handleCreateTag = async (
@@ -226,13 +251,18 @@ export const useTagManagement = (
       return;
     }
 
-    // タグ名の重複チェック
-    if (
-      tagsData?.some(
-        (tag) => tag.name.toLowerCase() === newTagName.trim().toLowerCase(),
-      )
-    ) {
-      toast.error(t("create.post.error.tag.duplicate"));
+    // Zodスキーマによるバリデーション
+    const validationResult = createTagSchema.safeParse({
+      name: newTagName,
+      community_id: watchCommunityId,
+      existing_tags: tagsData || [],
+    });
+
+    if (!validationResult.success) {
+      const errorMessage =
+        validationResult.error.errors[0]?.message ||
+        "バリデーションエラーが発生しました";
+      setTagValidationError(errorMessage);
       return;
     }
 
@@ -242,6 +272,7 @@ export const useTagManagement = (
       await refetchTags();
       setValue("tag_id", newTag.id);
       setNewTagName("");
+      setTagValidationError("");
       toast.success(t("create.post.success.tag.created"));
     } catch (error) {
       const errorMessage =
@@ -263,6 +294,7 @@ export const useTagManagement = (
     setValue("tag_id", tag.id);
     setNewTagName("");
     setSimilarTags([]);
+    setTagValidationError("");
   };
 
   return {
@@ -274,6 +306,7 @@ export const useTagManagement = (
     isLoadingRelatedTags,
     similarTags,
     isLoadingSimilarTags,
+    tagValidationError,
     handleCreateTag,
     handleSelectSimilarTag,
   };

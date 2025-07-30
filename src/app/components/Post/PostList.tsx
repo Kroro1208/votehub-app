@@ -20,6 +20,7 @@ export interface PostType {
   parent_post_id: number | null;
   nest_level: number;
   target_vote_choice: number | null; // -1: 反対した人向け, 1: 賛成した人向け, null: 全員向け
+  post_tags?: number[]; // タグIDの配列
   communities?:
     | {
         id: number;

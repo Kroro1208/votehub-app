@@ -1,5 +1,78 @@
 import { z } from "zod";
 
+// タグ作成時の類似性チェック用バリデーション関数
+export const validateTagSimilarity = (
+  newTagName: string,
+  existingTags: Array<{ id: number; name: string; community_id: number }>,
+): {
+  isValid: boolean;
+  message?: string;
+  suggestedTag?: { id: number; name: string };
+} => {
+  const trimmedNewName = newTagName.trim().toLowerCase();
+
+  if (!trimmedNewName) {
+    return { isValid: false, message: "タグ名を入力してください" };
+  }
+
+  const duplicateTag = existingTags.find((tag) => {
+    const existingName = tag.name.toLowerCase();
+    // 完全一致
+    if (existingName === trimmedNewName) return true;
+    // 一方が他方を含む場合（類似性チェック）
+    if (
+      existingName.includes(trimmedNewName) ||
+      trimmedNewName.includes(existingName)
+    ) {
+      return true;
+    }
+    return false;
+  });
+
+  if (duplicateTag) {
+    return {
+      isValid: false,
+      message: `類似するタグ「${duplicateTag.name}」が既に存在します`,
+      suggestedTag: { id: duplicateTag.id, name: duplicateTag.name },
+    };
+  }
+
+  return { isValid: true };
+};
+
+// タグ作成用スキーマ
+export const createTagSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, "タグ名を入力してください")
+      .max(20, "タグ名は20文字以内で入力してください")
+      .refine((name) => name.trim().length > 0, "タグ名を入力してください"),
+    community_id: z.number().int().positive("コミュニティを選択してください"),
+    existing_tags: z
+      .array(
+        z.object({
+          id: z.number(),
+          name: z.string(),
+          community_id: z.number(),
+        }),
+      )
+      .optional()
+      .default([]),
+  })
+  .refine(
+    (data) => {
+      const validation = validateTagSimilarity(data.name, data.existing_tags);
+      return validation.isValid;
+    },
+    (data) => ({
+      message:
+        validateTagSimilarity(data.name, data.existing_tags).message ||
+        "無効なタグ名です",
+      path: ["name"],
+    }),
+  );
+
 export const createPostSchema = z.object({
   title: z
     .string()

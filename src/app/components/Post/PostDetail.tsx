@@ -297,9 +297,6 @@ const PostDetail = ({ postId }: Props) => {
             );
           } else {
             const result = await response.json();
-            console.log(
-              `[EDGE_FUNCTION] smooth-task processed ${result.processed} posts`,
-            );
           }
         } catch (error) {
           console.error(`[EDGE_FUNCTION] Failed to call smooth-task:`, error);
