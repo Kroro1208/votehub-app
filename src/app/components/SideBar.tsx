@@ -8,12 +8,12 @@ import {
   Users,
   Vote,
 } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../hooks/useAuth";
 import { useLanguage } from "../hooks/useLanguage";
 import { routeProtection } from "../../config/RouteProtection";
 import { Button } from "./ui/button";
+import { NavigationLink } from "./NavigationButton";
 
 const SideBar = () => {
   const pathname = usePathname();
@@ -51,7 +51,7 @@ const SideBar = () => {
         {menuItems.map((item) => {
           const isActive = pathname === item.path;
           return (
-            <Link
+            <NavigationLink
               key={item.path}
               href={item.path}
               className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
@@ -62,21 +62,21 @@ const SideBar = () => {
             >
               <item.icon size={20} />
               <span className="text-sm font-medium">{item.label}</span>
-            </Link>
+            </NavigationLink>
           );
         })}
       </nav>
 
       {/* Create Vote Button */}
-      <Link href={routes.CREATE} className="block mb-8">
+      <NavigationLink href={routes.CREATE} className="block mb-8">
         <Button className="w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center shadow-lg">
           <span>{t("nav.create")}</span>
         </Button>
-      </Link>
+      </NavigationLink>
 
       {/* User Profile */}
       {user && (
-        <Link href={routes.profile(user.id)}>
+        <NavigationLink href={routes.profile(user.id)}>
           <div className="absolute bottom-4 left-4 right-4">
             <div className="flex items-center space-x-3 p-3 rounded-xl bg-slate-700/50 hover:bg-slate-700 transition-colors duration-200 cursor-pointer">
               {user.user_metadata?.["avatar_url"] ? (
@@ -98,7 +98,7 @@ const SideBar = () => {
               </div>
             </div>
           </div>
-        </Link>
+        </NavigationLink>
       )}
     </div>
   );

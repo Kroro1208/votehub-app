@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { useState } from "react";
 import { CgMenuGridO } from "react-icons/cg";
 import { RiCloseLargeFill } from "react-icons/ri";
@@ -15,6 +14,7 @@ import { Suspense, memo } from "react";
 import { routeProtection } from "../../config/RouteProtection";
 import NotificationDropdown from "./Notification/NotificationDropdown";
 import { Button } from "./ui/button";
+import { NavigationLink } from "./NavigationButton";
 
 // Issue #73: ユーザーポイント表示を独立コンポーネント化（パフォーマンス向上）
 const UserPointsDisplay = memo(() => {
@@ -48,36 +48,36 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-16 pr-6">
             {/* Desktop Links - 左側に配置 */}
             <div className="hidden md:flex items-center space-x-8 pl-3">
-              <Link
+              <NavigationLink
                 href={routes.HOME}
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
                 {t("nav.home")}
-              </Link>
-              <Link
+              </NavigationLink>
+              <NavigationLink
                 href={routes.POST_CREATE}
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
                 {t("nav.create")}
-              </Link>
-              <Link
+              </NavigationLink>
+              <NavigationLink
                 href={routes.SPACE}
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
                 {t("nav.space")}
-              </Link>
-              <Link
+              </NavigationLink>
+              <NavigationLink
                 href={routes.SPACE_CREATE}
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
                 {t("space.create")}
-              </Link>
-              <Link
+              </NavigationLink>
+              <NavigationLink
                 href={routes.USER_RANKING}
                 className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
               >
                 {t("ranking.title")}
-              </Link>
+              </NavigationLink>
             </div>
 
             {/* 認証セクション - 右端に配置 */}
@@ -100,7 +100,7 @@ export default function Navbar() {
                   >
                     <UserPointsDisplay />
                   </Suspense>
-                  <Link
+                  <NavigationLink
                     href={user ? routes.profile(user.id) : routes.HOME}
                     className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
                   >
@@ -120,7 +120,7 @@ export default function Navbar() {
                     <span className="text-blue-300 truncate">
                       {displayName}
                     </span>
-                  </Link>
+                  </NavigationLink>
                   <div className="flex-shrink-0">
                     <Button
                       type="button"
@@ -136,22 +136,22 @@ export default function Navbar() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Link href={`${routes.AUTH_LOGIN}?mode=login`}>
+                  <NavigationLink href={`${routes.AUTH_LOGIN}?mode=login`}>
                     <Button
                       type="button"
                       className="cursor-pointer bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm"
                     >
                       <span className="text-gray-300">{t("auth.login")}</span>
                     </Button>
-                  </Link>
-                  <Link href={`${routes.AUTH_LOGIN}?mode=signup`}>
+                  </NavigationLink>
+                  <NavigationLink href={`${routes.AUTH_LOGIN}?mode=signup`}>
                     <Button
                       type="button"
                       className="cursor-pointer bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm"
                     >
                       <span className="text-gray-300">{t("auth.sign.up")}</span>
                     </Button>
-                  </Link>
+                  </NavigationLink>
                 </div>
               )}
             </div>
@@ -183,36 +183,41 @@ export default function Navbar() {
               }`}
             >
               <div className="px-4 py-3 space-y-2">
-                <Link
+                <NavigationLink
                   href={routes.HOME}
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                  onClick={() => setMenuOpen(false)}
                 >
                   {t("nav.home")}
-                </Link>
-                <Link
+                </NavigationLink>
+                <NavigationLink
                   href={routes.CREATE}
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                  onClick={() => setMenuOpen(false)}
                 >
                   {t("nav.create")}
-                </Link>
-                <Link
+                </NavigationLink>
+                <NavigationLink
                   href={routes.SPACE}
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                  onClick={() => setMenuOpen(false)}
                 >
                   {t("nav.space")}
-                </Link>
-                <Link
+                </NavigationLink>
+                <NavigationLink
                   href={routes.SPACE_CREATE}
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                  onClick={() => setMenuOpen(false)}
                 >
                   {t("space.create")}
-                </Link>
-                <Link
+                </NavigationLink>
+                <NavigationLink
                   href={routes.USER_RANKING}
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                  onClick={() => setMenuOpen(false)}
                 >
                   {t("ranking.title")}
-                </Link>
+                </NavigationLink>
 
                 {/* モバイル用認証ボタン */}
                 {user ? (
@@ -224,18 +229,20 @@ export default function Navbar() {
                   </button>
                 ) : (
                   <div className="space-y-2 mt-4 pt-4 border-t border-gray-600">
-                    <Link
+                    <NavigationLink
                       href={`${routes.AUTH_LOGIN}?mode=login`}
                       className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                      onClick={() => setMenuOpen(false)}
                     >
                       {t("auth.login")}
-                    </Link>
-                    <Link
+                    </NavigationLink>
+                    <NavigationLink
                       href={`${routes.AUTH_LOGIN}?mode=signup`}
                       className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                      onClick={() => setMenuOpen(false)}
                     >
                       {t("auth.sign.up")}
-                    </Link>
+                    </NavigationLink>
                   </div>
                 )}
               </div>
