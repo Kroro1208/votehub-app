@@ -295,8 +295,6 @@ const PostDetail = ({ postId }: Props) => {
             console.warn(
               `[EDGE_FUNCTION] smooth-task responded with status ${response.status}`,
             );
-          } else {
-            const result = await response.json();
           }
         } catch (error) {
           console.error(`[EDGE_FUNCTION] Failed to call smooth-task:`, error);

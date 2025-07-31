@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { getRelatedTags } from "../../lib/tagUtils";
 import { supabase } from "../../supabase-client";
+import { createTagSchema } from "../../utils/schema";
 import { useAuth } from "./useAuth";
 import { useLanguage } from "./useLanguage";
-import { getRelatedTags } from "../../lib/tagUtils";
-import { createTagSchema, validateTagSimilarity } from "../../utils/schema";
 
 // タグを取得する関数
 const getTagsForCommunity = async (communityId: number) => {
