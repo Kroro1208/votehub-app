@@ -4,11 +4,12 @@ import Link from "next/link";
 import type { PostType } from "./PostList";
 
 import { routeProtection } from "@/config/RouteProtection";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useDeletePost } from "../../hooks/useDeletePost";
 import { useHandlePost } from "../../hooks/useHandlePost";
 import { useHandleVotes } from "../../hooks/useHandleVotes";
+import Loading from "../Loading";
 import { Button } from "../ui/button";
 import VoteTickets from "../Vote/VoteTickets";
 import BookmarkButton from "./BookmarkButton";
@@ -29,6 +30,15 @@ const PostItem = ({ post }: PostItemType) => {
     useHandlePost(post);
   const { mutate: deletePost, isPending: isDeleting } = useDeletePost();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Hydration Mismatch防止 - 日付表示
+  const [mounted, setMounted] = useState(false);
+  const [formattedDate, setFormattedDate] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+    setFormattedDate(new Date(post.created_at).toLocaleDateString("ja-JP"));
+  }, [post.created_at]);
 
   const ownUserPost = user?.id === post.user_id; // 投稿者本人かどうか
 
@@ -209,9 +219,7 @@ const PostItem = ({ post }: PostItemType) => {
                 <span>{post.comment_count ?? 0} コメント</span>
               </span>
               <span>•</span>
-              <span>
-                {new Date(post.created_at).toLocaleDateString("ja-JP")}
-              </span>
+              <span>{mounted ? formattedDate : <Loading />}</span>
             </div>
 
             <div className="flex items-center space-x-2">

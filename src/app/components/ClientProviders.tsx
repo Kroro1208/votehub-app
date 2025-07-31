@@ -18,10 +18,15 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            retry: 1,
+            retry: 0, // Issue #73: リトライ無効化でパフォーマンス向上
             refetchOnWindowFocus: false,
-            staleTime: 5 * 60 * 1000, // 5分間キャッシュ
-            gcTime: 10 * 60 * 1000, // 10分間ガベージコレクション猶予
+            staleTime: 1 * 60 * 1000, // Issue #73: 1分に短縮（高速化）
+            gcTime: 5 * 60 * 1000, // Issue #73: 5分に短縮（メモリ最適化）
+            networkMode: "offlineFirst", // オフライン対応強化
+          },
+          mutations: {
+            retry: 0, // ミューテーションでもリトライ無効化
+            networkMode: "offlineFirst",
           },
         },
       }),

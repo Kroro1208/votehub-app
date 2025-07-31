@@ -32,12 +32,18 @@ const VoteDeadline = ({
   handlePersuasionModal,
   postId,
 }: VoteDeadlineProps) => {
-  const [timeRemaining, setTimeRemaining] = useState(
-    getTimeRemainingObject(data.vote_deadline),
-  );
-  const [votingExpired, setVotingExpired] = useState(
-    isVotingExpired(data.vote_deadline),
-  );
+  // Issue #73: Hydration Mismatch修正 - クライアントサイドでのみ時間計算
+  const [mounted, setMounted] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState<ReturnType<
+    typeof getTimeRemainingObject
+  > | null>(null);
+  const [votingExpired, setVotingExpired] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setTimeRemaining(getTimeRemainingObject(data.vote_deadline));
+    setVotingExpired(isVotingExpired(data.vote_deadline));
+  }, [data.vote_deadline]);
 
   // 説得コメントを取得
   const { data: persuasionComments } = useQuery<Comment[]>({
@@ -119,6 +125,26 @@ const VoteDeadline = ({
       }
     };
   }, [data.vote_deadline, votingExpired]);
+  // Issue #73: SSR時は時間表示をしない
+  if (!mounted || !timeRemaining) {
+    return (
+      <div>
+        {data.vote_deadline && (
+          <div className="relative p-6 rounded-xl shadow-lg bg-gradient-to-r from-blue-100 to-blue-200 border-l-4 border-blue-500">
+            <div className="flex items-center gap-4">
+              <Clock size={28} className="text-blue-500" />
+              <div>
+                <h3 className="text-xl font-bold text-blue-800">
+                  読み込み中...
+                </h3>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div>
       {data.vote_deadline && (

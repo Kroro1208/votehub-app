@@ -2,8 +2,9 @@
 import { supabase } from "@/supabase-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronsUp, ChevronsUpDown, MessageSquare, Send } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import Loading from "../Loading";
 import { Button } from "../ui/button";
 import type { Comment } from "./CommentSection";
 import CommentVotes from "./CommentVotes";
@@ -46,6 +47,13 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
   const [newReplytText, setNewReplyText] = useState<string>("");
   const queryClient = useQueryClient();
 
+  // Hydration Mismatch防止 - 日付表示
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // 投票期限が過ぎているかチェックする関数
   const isDeadlinePassed = () => {
     if (!voteDeadline) return false;
@@ -81,8 +89,10 @@ const CommentItem = ({ comment, postId, voteDeadline }: CommentItemProps) => {
     setNewReplyText("");
   };
 
-  // 日付フォーマット関数
+  // 日付フォーマット関数 - Issue #73: Hydration Mismatch修正
   const formatDate = (dateString: string) => {
+    if (!mounted) return <Loading />;
+
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("ja-JP", {
       year: "numeric",

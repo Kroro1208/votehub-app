@@ -11,15 +11,31 @@ import { Coins } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useLanguage } from "../hooks/useLanguage";
 import { useUserPoints } from "../hooks/useUserPoints";
+import { Suspense, memo } from "react";
 import { routeProtection } from "../../config/RouteProtection";
 import NotificationDropdown from "./Notification/NotificationDropdown";
 import { Button } from "./ui/button";
+
+// Issue #73: ユーザーポイント表示を独立コンポーネント化（パフォーマンス向上）
+const UserPointsDisplay = memo(() => {
+  const { points, isLoading: pointsLoading } = useUserPoints();
+
+  return (
+    <div className="flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full">
+      <Coins size={16} className="text-white" />
+      <span className="text-sm font-semibold text-white">
+        {pointsLoading ? "..." : points.toFixed(1)}
+      </span>
+    </div>
+  );
+});
+
+UserPointsDisplay.displayName = "UserPointsDisplay";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { signOut, user } = useAuth();
   const { t } = useLanguage();
-  const { points, isLoading: pointsLoading } = useUserPoints();
   const routes = routeProtection.getRoutes();
 
   const displayName = user?.user_metadata?.["user_name"] || user?.email;
@@ -71,13 +87,19 @@ export default function Navbar() {
                   {/* 通知ドロップダウン */}
                   <NotificationDropdown />
 
-                  {/* ユーザーポイント表示 */}
-                  <div className="flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full">
-                    <Coins size={16} className="text-white" />
-                    <span className="text-sm font-semibold text-white">
-                      {pointsLoading ? "..." : points.toFixed(1)}
-                    </span>
-                  </div>
+                  {/* ユーザーポイント表示 - Issue #73: Suspense化 */}
+                  <Suspense
+                    fallback={
+                      <div className="flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full">
+                        <Coins size={16} className="text-white" />
+                        <span className="text-sm font-semibold text-white">
+                          ...
+                        </span>
+                      </div>
+                    }
+                  >
+                    <UserPointsDisplay />
+                  </Suspense>
                   <Link
                     href={user ? routes.profile(user.id) : routes.HOME}
                     className="flex items-center space-x-2 hover:opacity-80 transition-opacity"

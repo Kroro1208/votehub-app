@@ -7,6 +7,7 @@ import "../index.css";
 import ClientProviders from "./components/ClientProviders";
 import Loading from "./components/Loading";
 import Navbar from "./components/Navbar";
+import { AuthGuard } from "./components/AuthGuard";
 
 export const metadata: Metadata = {
   title: "みんなで決めるVoteHub",
@@ -23,20 +24,39 @@ export default function RootLayout({
       <body suppressHydrationWarning={true}>
         <TokenCleanup />
         <ClientProviders>
-          <div className="min-h-screen bg-background text-foreground transition-all duration-700 pt-20">
-            <Navbar />
-            <div className="container mx-auto px-4 py-6">
+          <AuthGuard>
+            <div className="min-h-screen bg-background text-foreground transition-all duration-700 pt-20">
+              {/* Issue #73: Navbarを独立したSuspense境界に分離 */}
               <Suspense
                 fallback={
-                  <div className="flex items-center justify-center min-h-[20vh]">
-                    <Loading />
-                  </div>
+                  <nav className="fixed top-0 w-full z-40 bg-[rgba(10,10,10,0.8)] backdrop-blur-lg border-b border-white/10 shadow-lg">
+                    <div className="ml-64">
+                      <div className="max-w-7xl mx-auto">
+                        <div className="flex items-center justify-between h-16 pr-6">
+                          <div className="text-gray-300">Loading...</div>
+                        </div>
+                      </div>
+                    </div>
+                  </nav>
                 }
               >
-                {children}
+                <Navbar />
               </Suspense>
+
+              <div className="container mx-auto px-4 py-6">
+                {/* Issue #73: コンテンツ専用のSuspense境界 */}
+                <Suspense
+                  fallback={
+                    <div className="flex items-center justify-center min-h-[20vh]">
+                      <Loading />
+                    </div>
+                  }
+                >
+                  {children}
+                </Suspense>
+              </div>
             </div>
-          </div>
+          </AuthGuard>
         </ClientProviders>
       </body>
     </html>
