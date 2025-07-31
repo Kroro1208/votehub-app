@@ -1,5 +1,6 @@
 "use client";
 
+import { createPostSchema } from "@/utils/schema";
 import { Hash, Loader2 } from "lucide-react";
 import { Control, Controller, UseFormSetValue } from "react-hook-form";
 import { z } from "zod";
@@ -15,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { createPostSchema } from "@/utils/schema";
 
 interface Tag {
   id: number;
@@ -86,10 +86,19 @@ const TagSection = ({
             <SelectTrigger className="border-2 border-gray-200 dark:border-gray-600">
               <SelectValue placeholder={t("create.post.tag.select")} />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">{t("create.post.tag.none")}</SelectItem>
+            <SelectContent className="max-h-60 overflow-y-auto bg-white">
+              <SelectItem
+                className="hover:bg-green-200 dark:hover:bg-green-800/30"
+                value="none"
+              >
+                {t("create.post.tag.none")}
+              </SelectItem>
               {tagsData?.map((tag) => (
-                <SelectItem key={tag.id} value={tag.id.toString()}>
+                <SelectItem
+                  key={tag.id}
+                  value={tag.id.toString()}
+                  className="hover:bg-blue-100 dark:hover:bg-blue-800/30 hover:text-blue-700 dark:hover:text-blue-300 transition-colors cursor-pointer"
+                >
                   #{tag.name}
                 </SelectItem>
               ))}
